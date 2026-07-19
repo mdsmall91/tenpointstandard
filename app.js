@@ -174,9 +174,15 @@ function submitToMailchimp(email) {
   };
   params.push('c=' + cbName);
 
+  // f_id pins the request to a stored form version; Mailchimp then accepts only
+  // the fields defined on that form and silently drops the rest, so the contact
+  // subscribes but SCORE/BAND/P01-P10 come through empty. Strip it.
   var parts = CONFIG.MAILCHIMP_FORM_ACTION.split('?');
+  var query = (parts[1] || '').split('&').filter(function (kv) {
+    return kv && kv.indexOf('f_id=') !== 0;
+  });
   var script = document.createElement('script');
-  script.src = parts[0].replace(/\/post$/, '/post-json') + '?' + parts[1] + '&' + params.join('&');
+  script.src = parts[0].replace(/\/post$/, '/post-json') + '?' + query.concat(params).join('&');
   document.body.appendChild(script);
 }
 
