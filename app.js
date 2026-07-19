@@ -9,8 +9,8 @@ var CONFIG = {
   // Looks like: https://xxxx.usXX.list-manage.com/subscribe/post?u=XXXXXXXX&id=XXXXXXXX
   MAILCHIMP_FORM_ACTION: '',
 
-  // Google Analytics 4 measurement ID, e.g. 'G-XXXXXXXXXX'. Leave empty to disable.
-  GA_MEASUREMENT_ID: ''
+  // Google Analytics 4 measurement ID. Leave empty to disable.
+  GA_MEASUREMENT_ID: 'G-DK01ZN4VLE'
 };
 
 /* =============================================================
