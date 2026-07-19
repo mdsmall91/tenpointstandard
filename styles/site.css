@@ -68,7 +68,7 @@ a:hover { color: var(--accent-deep); }
   .fg-bar-label { grid-column: 1 / -1; }
   .fg-cover { padding: 48px 0 40px; }
   .fg-pstep { padding: 32px 0 24px; }
-  .fg-hide-m { display: none; }
+  .fg-hide-m, .tp-meta .dot.fg-hide-m { display: none; }
   .fg-step-item { padding: 12px 9px; }
   h2, .h2 { font-size: 1.9rem; }
   .fg-band { padding: var(--s-4); }
