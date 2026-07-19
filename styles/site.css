@@ -1,0 +1,75 @@
+/* =============================================================
+   TEN POINT — FIELD GUIDE (page-specific, stepper flow)
+   ============================================================= */
+
+body { margin: 0; background: var(--paper); }
+a { color: inherit; }
+a:hover { color: var(--accent-deep); }
+
+.fg-root { min-height: 100vh; background: var(--paper); display: flex; flex-direction: column; }
+.fg-main { flex: 1; display: flex; flex-direction: column; max-width: 860px; width: 100%; margin: 0 auto; padding: 0 var(--page-pad); }
+
+.fg-logo {
+  display: inline-block; height: 26px; aspect-ratio: 181 / 123;
+  background: var(--accent);
+  -webkit-mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
+  mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
+}
+
+.fg-yn {
+  font-family: var(--font-body); font-weight: 500; font-size: 13px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 9px 18px; cursor: pointer; border-radius: 1px;
+  background: transparent; color: var(--text-muted);
+  border: 1px solid var(--border);
+  transition: background .15s, color .15s, border-color .15s, transform .15s;
+}
+.fg-yn:hover { border-color: var(--stone-300); color: var(--text-strong); }
+.fg-yn:active { transform: translateY(1px); }
+.fg-yn.yes.on { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.fg-yn.no.on { background: var(--surface-2); border-color: var(--stone-300); color: var(--text-strong); }
+
+.fg-q {
+  display: grid; grid-template-columns: 1fr auto; gap: 12px 32px;
+  align-items: center; padding: 18px 0;
+  border-top: 1px solid var(--border-soft);
+}
+.fg-q:first-of-type { border-top: 0; }
+
+.fg-bar-row { display: grid; grid-template-columns: 200px 1fr 64px; gap: 16px; align-items: center; padding: 8px 0; }
+
+.fg-cover { padding: 96px 0 64px; }
+.fg-pstep { padding: 56px 0 32px; flex: 1; }
+
+.fg-step-nav { display: flex; gap: 2px; max-width: 860px; margin: 0 auto; padding: 0 var(--page-pad); overflow-x: auto; border-top: 1px solid var(--border-soft); scrollbar-width: none; }
+.fg-step-nav::-webkit-scrollbar { display: none; }
+.fg-step-item { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; padding: 9px 10px; background: none; border: 0; border-top: 2px solid transparent; color: var(--text-faint); cursor: pointer; white-space: nowrap; transition: color .15s, border-color .15s; }
+.fg-step-item:hover { color: var(--text-strong); }
+.fg-step-item.cur { color: var(--text-strong); border-top-color: var(--accent); }
+.fg-step-item.done { color: var(--stone-400); }
+.fg-step-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--surface-2); flex: none; }
+.fg-step-item.done .fg-step-dot { background: var(--accent); }
+.fg-step-item.cur .fg-step-dot { background: var(--ink-strong); }
+
+.fg-band { border: 1px solid var(--border); padding: var(--s-6); background: var(--paper); }
+.fg-band.active { border-color: var(--accent); background: var(--accent-soft); }
+
+.fg-link-btn {
+  background: none; border: 0; padding: 0; font-size: 12px;
+  color: var(--text-faint); text-decoration: underline;
+  text-underline-offset: 3px; cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .fg-q { grid-template-columns: 1fr; gap: 10px; padding: 16px 0; }
+  .fg-seg { width: 100%; }
+  .fg-seg .fg-yn { flex: 1; min-height: 44px; }
+  .fg-bar-row { grid-template-columns: 1fr 56px; gap: 8px 12px; padding: 10px 0; }
+  .fg-bar-label { grid-column: 1 / -1; }
+  .fg-cover { padding: 48px 0 40px; }
+  .fg-pstep { padding: 32px 0 24px; }
+  .fg-hide-m { display: none; }
+  .fg-step-item { padding: 12px 9px; }
+  h2, .h2 { font-size: 1.9rem; }
+  .fg-band { padding: var(--s-4); }
+}

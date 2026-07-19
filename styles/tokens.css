@@ -1,0 +1,164 @@
+/* =============================================================
+   TEN POINT — DESIGN TOKENS
+   Foundation values referenced by every page. No component CSS here.
+   ============================================================= */
+
+:root {
+  /* ---------- COLOR · NEUTRALS ---------- */
+  /* Warm-toned paper + ink, per codex "warm neutrals, stone" */
+  --paper:        oklch(0.985 0.004 80);   /* primary background      */
+  --paper-2:      oklch(0.965 0.006 80);   /* card / inset            */
+  --paper-3:      oklch(0.935 0.008 80);   /* hairlines, wells        */
+  --stone-100:    oklch(0.88  0.010 80);
+  --stone-200:    oklch(0.78  0.012 75);
+  --stone-300:    oklch(0.66  0.012 75);
+  --stone-400:    oklch(0.52  0.012 70);   /* muted body              */
+  --stone-500:    oklch(0.40  0.014 65);
+  --stone-600:    oklch(0.30  0.014 60);
+  --ink:          oklch(0.22  0.012 60);   /* body text               */
+  --ink-strong:   oklch(0.16  0.014 55);   /* headlines               */
+  --ink-deep:     oklch(0.11  0.012 50);   /* dark surfaces           */
+
+  /* ---------- COLOR · ACCENTS ---------- */
+  /* Three director-grade palettes. One is active at a time via --accent. */
+  --forest:       oklch(0.36  0.060 155);  /* deep evergreen          */
+  --forest-soft:  oklch(0.92  0.030 150);
+  --forest-deep:  oklch(0.26  0.055 155);
+
+  --bronze:       oklch(0.50  0.080 60);   /* aged brass              */
+  --bronze-soft:  oklch(0.93  0.035 75);
+  --bronze-deep:  oklch(0.36  0.070 55);
+
+  --stone-accent:      oklch(0.46  0.018 60);  /* stone / slate       */
+  --stone-accent-soft: oklch(0.92  0.012 75);
+  --stone-accent-deep: oklch(0.32  0.018 55);
+
+  /* Heritage Blue — the company's legacy mark color. First-class accent.
+     Refined toward a deeper, less saturated reading so it sits with the
+     warm neutrals instead of fighting them. */
+  --heritage:       oklch(0.42  0.075 235);  /* deepened from legacy mark   */
+  --heritage-soft:  oklch(0.92  0.030 235);
+  --heritage-deep:  oklch(0.30  0.070 235);
+
+  /* Active accent — overridden via [data-accent] below */
+  --accent:       var(--forest);
+  --accent-soft:  var(--forest-soft);
+  --accent-deep:  var(--forest-deep);
+
+  /* ---------- COLOR · SEMANTIC ---------- */
+  --bg:           var(--paper);
+  --surface:      var(--paper-2);
+  --surface-2:    var(--paper-3);
+  --border:       oklch(0.88 0.008 75 / 1);
+  --border-soft:  oklch(0.92 0.006 75 / 1);
+  --text:         var(--ink);
+  --text-strong:  var(--ink-strong);
+  --text-muted:   var(--stone-400);
+  --text-faint:   var(--stone-300);
+
+  /* ---------- TYPE · FAMILIES ---------- */
+  /* Three pairings. Default active = Editorial. Switched via [data-type]. */
+  --serif-editorial:   "Source Serif 4", "Source Serif Pro", Georgia, serif;
+  --sans-editorial:    "Inter Tight", "Inter", system-ui, sans-serif;
+
+  --serif-monograph:   "Newsreader", "Source Serif 4", Georgia, serif;
+  --sans-monograph:    "Manrope", "Inter", system-ui, sans-serif;
+
+  --serif-warm:        "Cormorant Garamond", "Source Serif 4", Georgia, serif;
+  --sans-warm:         "Inter", system-ui, sans-serif;
+
+  --mono:              "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Active families */
+  --font-display: var(--serif-editorial);
+  --font-body:    var(--sans-editorial);
+  --font-mono:    var(--mono);
+
+  /* ---------- TYPE · SCALE ---------- */
+  /* Editorial scale, modular ratio ~1.2 with deliberate jumps */
+  --fs-eyebrow:   0.75rem;   /* 12px  — labels, eyebrows         */
+  --fs-caption:   0.8125rem; /* 13px  — captions, footnotes      */
+  --fs-small:     0.875rem;  /* 14px  — secondary body           */
+  --fs-body:      1rem;      /* 16px  — body                     */
+  --fs-lead:      1.1875rem; /* 19px  — lede paragraph           */
+  --fs-h6:        1rem;      /* 16px                             */
+  --fs-h5:        1.125rem;  /* 18px                             */
+  --fs-h4:        1.375rem;  /* 22px                             */
+  --fs-h3:        1.75rem;   /* 28px                             */
+  --fs-h2:        2.375rem;  /* 38px                             */
+  --fs-h1:        3.25rem;   /* 52px                             */
+  --fs-display:   4.75rem;   /* 76px  — hero / cover only        */
+
+  --lh-tight:     1.05;
+  --lh-snug:      1.18;
+  --lh-normal:    1.45;
+  --lh-relaxed:   1.6;
+
+  --tr-tight:     -0.02em;
+  --tr-snug:      -0.012em;
+  --tr-wide:       0.08em;
+  --tr-eyebrow:    0.18em;
+
+  /* ---------- SPACING ---------- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-8:  32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
+  --s-24: 96px;
+  --s-32: 128px;
+
+  /* ---------- LAYOUT ---------- */
+  --measure:      66ch;      /* readable column                  */
+  --page-max:     1240px;
+  --page-pad:     clamp(20px, 4vw, 64px);
+
+  /* ---------- BORDERS / RADII ---------- */
+  --radius-0: 0px;
+  --radius-1: 2px;
+  --radius-2: 4px;
+  --radius-3: 8px;
+  --hairline: 1px solid var(--border);
+}
+
+/* ----- ACCENT VARIANTS (tweakable) ----- */
+[data-accent="forest"] {
+  --accent: var(--forest);
+  --accent-soft: var(--forest-soft);
+  --accent-deep: var(--forest-deep);
+}
+[data-accent="bronze"] {
+  --accent: var(--bronze);
+  --accent-soft: var(--bronze-soft);
+  --accent-deep: var(--bronze-deep);
+}
+[data-accent="stone"] {
+  --accent: var(--stone-accent);
+  --accent-soft: var(--stone-accent-soft);
+  --accent-deep: var(--stone-accent-deep);
+}
+[data-accent="heritage"] {
+  --accent: var(--heritage);
+  --accent-soft: var(--heritage-soft);
+  --accent-deep: var(--heritage-deep);
+}
+
+/* ----- TYPE PAIRING VARIANTS (tweakable) ----- */
+[data-type="editorial"] {
+  --font-display: var(--serif-editorial);
+  --font-body:    var(--sans-editorial);
+}
+[data-type="monograph"] {
+  --font-display: var(--serif-monograph);
+  --font-body:    var(--sans-monograph);
+}
+[data-type="warm"] {
+  --font-display: var(--serif-warm);
+  --font-body:    var(--sans-warm);
+}
