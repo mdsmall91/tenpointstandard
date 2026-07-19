@@ -6,8 +6,7 @@
 var CONFIG = {
   // Mailchimp embedded-form action URL for the audience signup form.
   // Mailchimp: Audience > Signup forms > Embedded forms > copy the <form action="..."> URL.
-  // Looks like: https://xxxx.usXX.list-manage.com/subscribe/post?u=XXXXXXXX&id=XXXXXXXX
-  MAILCHIMP_FORM_ACTION: '',
+  MAILCHIMP_FORM_ACTION: 'https://tenpointservicestx.us4.list-manage.com/subscribe/post?u=ca6a6d0df8860fb34744c0490&id=32ae7807af&f_id=0046d6e0f0',
 
   // Google Analytics 4 measurement ID. Leave empty to disable.
   GA_MEASUREMENT_ID: 'G-DK01ZN4VLE'
