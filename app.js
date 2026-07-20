@@ -200,6 +200,12 @@ function goStep(i) { state.step = i; save(); render(); goTop(); }
 
 function renderHeader() {
   document.getElementById('hdr-score').textContent = 'SCORE ' + totalScore() + ' / 100';
+
+  // Cover = 0, each point advances a tenth, ledger = complete.
+  var pct = state.step === 0 ? 0 : Math.min(100, Math.round((state.step / 10) * 100));
+  document.getElementById('hdr-progress-fill').style.width = pct + '%';
+  document.getElementById('hdr-progress').setAttribute('aria-valuenow', pct);
+
   var nav = document.getElementById('step-nav');
   var html = '';
   for (var i = 0; i < POINTS.length; i++) {
@@ -218,7 +224,7 @@ function renderCover() {
       '<p class="lede" style="margin-top: 24px; max-width: 52ch;">Most projects fail at the seams. Not the design. Not the dream. The seams between site and capital, design and procurement, schedule and operations. Forty questions. One hundred points. See where you are strong, where the risk is concentrated, and what to do next.</p>' +
       '<div style="display: flex; gap: 16px; align-items: center; margin-top: 40px;">' +
         '<button class="btn lg" data-action="begin">Begin the assessment</button>' +
-        '<span class="mono" style="font-size: 11px; color: var(--text-faint);">10 POINTS · ~5 MIN</span>' +
+        '<span class="mono" style="font-size: 11px; color: var(--text-faint);">~5 MIN</span>' +
       '</div>' +
     '</section>';
 }
@@ -231,7 +237,6 @@ function renderPoint(step) {
         '<div class="eyebrow dotted">Point ' + p.n + ' / 10</div>' +
         '<div class="mono" style="font-size: 11px; color: var(--text-faint);">EACH YES = ' + p.pts + ' PTS · ' + score + ' / ' + p.max + '</div>' +
       '</div>' +
-      '<div style="height: 2px; background: var(--surface-2); margin-top: 16px;"><div style="height: 2px; background: var(--accent); width: ' + Math.round((step / 10) * 100) + '%; transition: width .3s;"></div></div>' +
       '<h2 style="margin-top: 28px;">' + p.title + '.</h2>' +
       '<div style="margin-top: 24px;">';
   for (var qi = 0; qi < p.qs.length; qi++) {
