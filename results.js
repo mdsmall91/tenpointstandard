@@ -371,12 +371,27 @@ var TPResults = (function () {
       lockedCount: lockedRows.length,
       actions: actions,
       disclaimer: DISCLAIMER,
-      payload: {
-        VERDICT: verdictLabel,
-        GATES: openGates.length ? openGates.map(function (g) { return g.name; }).join(', ') : 'none',
-        FINDINGS: displayed.filter(function (f) { return f.id; }).map(function (f) { return f.id; }).join(',') +
-          (lockedRows.length ? ' +' + lockedRows.length + ' locked' : '')
-      }
+      payload: (function () {
+        /* Pre-rendered strings for the Mailchimp scorecard email. Each fits a
+           255-char Text merge field. */
+        var p = {
+          VERDICT: verdictLabel,
+          HEADLINE: headline,
+          GATES: openGates.length ? openGates.map(function (g) { return g.name; }).join(', ') : 'none',
+          FINDINGS: displayed.filter(function (f) { return f.id; }).map(function (f) { return f.id; }).join(',') +
+            (lockedRows.length ? ' +' + lockedRows.length + ' locked' : '')
+        };
+        for (var fi = 0; fi < 3; fi++) {
+          var f = displayed[fi];
+          var line = f ? ((f.lens ? f.lens + ' · ' : '') + f.title) : '';
+          if (fi === 2 && lockedRows.length) {
+            line += ' (+' + lockedRows.length + ' more finding' + (lockedRows.length === 1 ? '' : 's') + ' identified)';
+          }
+          p['F' + (fi + 1)] = line;
+        }
+        for (var ai = 0; ai < 3; ai++) p['A' + (ai + 1)] = actions[ai] || '';
+        return p;
+      })()
     };
   }
 

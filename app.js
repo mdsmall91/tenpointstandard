@@ -161,8 +161,13 @@ function submitToMailchimp(email, extra) {
     'BAND=' + encodeURIComponent(BANDS[bandIdx(total)].service),
     'ANSWERED=' + answeredCount()
   ];
+  /* Per-point values carry the ledger read: "12 / 12 · Resolved",
+     with the gate marker when that point's gate is open. */
+  var ledger = TPResults.evaluate(state.answers).ledger;
   for (var i = 0; i < POINTS.length; i++) {
-    params.push('P' + POINTS[i].n + '=' + pointScore(i) + ' / ' + POINTS[i].max);
+    var row = ledger[i];
+    params.push('P' + POINTS[i].n + '=' + encodeURIComponent(
+      row.score + ' / ' + row.max + ' · ' + row.label + (row.gateOpen ? ' · gate open' : '')));
   }
   if (extra) {
     for (var k in extra) {
