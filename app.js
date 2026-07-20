@@ -256,7 +256,7 @@ function renderCover() {
     '<section class="fg-cover">' +
       '<div class="eyebrow dotted">The Ten Point Standard</div>' +
       '<h1 class="display" style="margin-top: 16px; font-size: clamp(3rem, 7vw, var(--fs-display));">The Field Guide.</h1>' +
-      '<p class="lede" style="margin-top: 24px; max-width: 52ch;">Most projects fail at the seams. Not the design. Not the dream. The seams between site and capital, design and procurement, schedule and operations. Forty questions. One hundred points. See where you are strong, where the risk is concentrated, and what to do next.</p>' +
+      '<p class="lede" style="margin-top: 24px; max-width: 52ch;">The Field Guide is a readiness diagnostic for owners planning outdoor hospitality resorts. Most projects fail at the seams. Not the design. Not the dream. The seams between site and capital, design and procurement, schedule and operations. Forty questions. One hundred points. See where you are strong, where the risk is concentrated, and what to do next.</p>' +
       '<div style="display: flex; gap: 16px; align-items: center; margin-top: 40px;">' +
         '<button class="btn lg" data-action="begin">Begin the assessment</button>' +
         '<span class="mono" style="font-size: 11px; color: var(--text-faint);">~5 MIN</span>' +
