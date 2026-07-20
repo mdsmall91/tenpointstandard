@@ -274,9 +274,6 @@ function renderPoint(step) {
       '</div>';
   }
   html += '</div>' +
-      '<div style="border-top: 1px solid var(--border); margin-top: 8px; padding-top: 16px;">' +
-        '<span class="mono" style="font-size: 11px; color: var(--text-faint); letter-spacing: 0.06em;">DOCUMENT · ' + p.docs + '</span>' +
-      '</div>' +
     '</section>' +
     '<div style="display: flex; justify-content: space-between; padding: 24px 0 64px;">' +
       '<button class="btn ghost" data-action="prev">Back</button>' +
