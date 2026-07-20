@@ -39,5 +39,15 @@ Create a GA4 property for tenpointstandard.com, copy the `G-…` measurement ID 
   - `CNAME` record `www` → `<github-username>.github.io`
   - In the repo's Pages settings, set the custom domain and enable "Enforce HTTPS" once the certificate is issued.
 
+## Cache busting (important when deploying)
+GitHub Pages serves assets with `Cache-Control: max-age=600`, so a browser can hold a
+stale `app.js` for up to 10 minutes after a push. `index.html` references the assets as
+`app.js?v=N` and `styles/site.css?v=N` — **bump `N` in `index.html` on any deploy that
+changes those files.** Without it a visitor can end up with fresh HTML and stale JS,
+which breaks the page rather than merely showing old content.
+
+To confirm a deploy actually landed, check the server directly rather than the browser:
+`curl -s https://tenpointstandard.com/app.js | grep <some-new-string>`
+
 ## Local preview
 Any static server, e.g. `python -m http.server 4173` in this folder, then open http://localhost:4173.

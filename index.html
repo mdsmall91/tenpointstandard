@@ -16,7 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles/tokens.css">
 <link rel="stylesheet" href="styles/base.css">
-<link rel="stylesheet" href="styles/site.css">
+<link rel="stylesheet" href="styles/site.css?v=2">
 </head>
 <body>
 <div class="fg-root">
@@ -42,6 +42,9 @@
     </div>
   </footer>
 </div>
-<script src="app.js"></script>
+<!-- Bump ?v= on every deploy that touches app.js or site.css. GitHub Pages
+     caches assets for 10 min; without this a visitor can get fresh HTML
+     paired with stale JS, which breaks the page rather than just aging it. -->
+<script src="app.js?v=2"></script>
 </body>
 </html>
