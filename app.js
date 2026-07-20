@@ -82,7 +82,8 @@ var STORE_KEY = 'tp-fieldguide-v1';
 /* =============================================================
    STATE
    ============================================================= */
-var state = { answers: {}, revealed: false, sentTo: '', email: '', emailError: false, step: 0 };
+var state = { answers: {}, revealed: false, sentTo: '', email: '', emailError: false, step: 0,
+  phone: '', fullReq: false, ctaMode: '', ctaError: false };
 
 function load() {
   try {
@@ -93,12 +94,13 @@ function load() {
       state.revealed = !!d.r;
       state.sentTo = d.e || '';
       state.step = d.s || 0;
+      state.fullReq = !!d.f;
     }
   } catch (e) {}
 }
 function save() {
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify({ a: state.answers, r: state.revealed, e: state.sentTo, s: state.step }));
+    localStorage.setItem(STORE_KEY, JSON.stringify({ a: state.answers, r: state.revealed, e: state.sentTo, s: state.step, f: state.fullReq }));
   } catch (e) {}
 }
 
@@ -147,7 +149,7 @@ function track(name, params) {
 /* =============================================================
    MAILCHIMP (JSONP subscribe, no server needed)
    ============================================================= */
-function submitToMailchimp(email) {
+function submitToMailchimp(email, extra) {
   if (!CONFIG.MAILCHIMP_FORM_ACTION) {
     console.warn('Mailchimp not configured: set CONFIG.MAILCHIMP_FORM_ACTION in app.js');
     return;
@@ -161,6 +163,11 @@ function submitToMailchimp(email) {
   ];
   for (var i = 0; i < POINTS.length; i++) {
     params.push('P' + POINTS[i].n + '=' + pointScore(i) + ' / ' + POINTS[i].max);
+  }
+  if (extra) {
+    for (var k in extra) {
+      if (extra[k]) params.push(k + '=' + encodeURIComponent(extra[k]));
+    }
   }
   // Honeypot field name is b_<u>_<id>, derived from the form action URL.
   var u = /[?&]u=([^&]+)/.exec(CONFIG.MAILCHIMP_FORM_ACTION);
@@ -284,15 +291,32 @@ function renderPoint(step) {
 
 function renderLedger() {
   var total = totalScore();
-  var html = '<section style="padding: 56px 0 64px;">' +
-    '<div class="eyebrow dotted">The ledger</div>' +
+  var R = state.revealed ? TPResults.evaluate(state.answers) : null;
+  var html = '<section style="padding: 56px 0 64px;">';
+  if (R) {
+    if (state.sentTo) {
+      html += '<p class="muted" style="font-size: 13px; margin-bottom: 24px;">A copy of your scorecard is on its way to <span class="mono">' + esc(state.sentTo) + '</span>.</p>';
+    }
+    html += renderVerdict(R);
+  }
+  html += '<div class="eyebrow dotted">The ledger</div>' +
     '<h2 style="margin-top: 12px;">Add up your score.</h2>' +
     '<p class="muted" style="margin-top: 12px;">Every answer is a have or have-not. Capital weighs heaviest. One hundred points possible.</p>' +
-    '<div style="margin-top: 32px; max-width: 560px;">';
+    '<div style="margin-top: 32px; max-width: 640px;">';
   for (var i = 0; i < POINTS.length; i++) {
+    var right;
+    if (R) {
+      var row = R.ledger[i];
+      right = '<span style="display: inline-flex; gap: 14px; align-items: baseline;">' +
+        (row.gateOpen ? '<span class="fg-gate-tag">GATE OPEN</span>' : '') +
+        '<span class="mono" style="font-size: 10px; letter-spacing: 0.08em; color: var(--text-faint); text-transform: uppercase;">' + row.label + '</span>' +
+        '<span class="mono" style="font-size: 13px; color: var(--text-strong);">' + row.score + ' / ' + row.max + '</span></span>';
+    } else {
+      right = '<span class="mono" style="font-size: 13px; color: var(--text-strong);">' + pointScore(i) + ' / ' + POINTS[i].max + '</span>';
+    }
     html += '<div style="display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--border-soft);">' +
       '<div style="display: flex; gap: 14px; align-items: baseline;"><span class="mono" style="font-size: 12px; color: var(--text-faint);">' + POINTS[i].n + '</span><span style="font-size: 15px;">' + POINTS[i].title + '</span></div>' +
-      '<span class="mono" style="font-size: 13px; color: var(--text-strong);">' + pointScore(i) + ' / ' + POINTS[i].max + '</span>' +
+      right +
     '</div>';
   }
   html += '<div style="display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0; border-top: 2px solid var(--ink-strong);">' +
@@ -314,47 +338,95 @@ function renderLedger() {
   }
   html += '</section>';
 
-  if (state.revealed) html += renderResults(total);
+  if (R) html += renderFindings(R) + renderActions(R) + renderCTA() + renderFooterNote(R);
   return html;
 }
 
-function renderResults(total) {
-  var bi = bandIdx(total);
-  var html = '<section style="padding: 0 0 64px;">';
-  if (state.sentTo) {
-    html += '<p class="muted" style="font-size: 13px; margin-bottom: 24px;">A copy of your scorecard is on its way to <span class="mono">' + esc(state.sentTo) + '</span>.</p>';
-  }
-  html += '<div style="display: flex; align-items: baseline; gap: 20px;">' +
-      '<span class="display" style="font-size: clamp(3rem, 6vw, 4.75rem); color: var(--accent-deep);">' + total + '</span>' +
-      '<span class="mono" style="font-size: 13px; color: var(--text-faint);">/ 100 · ' + answeredCount() + ' OF 40 ANSWERED</span>' +
+function renderVerdict(R) {
+  var gatesLine = R.openGates.length
+    ? 'OPEN GATES: ' + R.openGates.map(function (g) { return g.name.toUpperCase(); }).join(' · ')
+    : 'NO OPEN CRITICAL GATES';
+  return '<div class="fg-verdict">' +
+    '<div class="eyebrow dotted">The verdict</div>' +
+    '<h2 style="margin-top: 12px;">' + R.headline + (/\.$/.test(R.headline) ? '' : '.') + '</h2>' +
+    '<p class="mono" style="font-size: 13px; color: var(--text-muted); margin-top: 10px;">' + R.subhead + '</p>' +
+    (R.verdict.framing ? '<p style="font-size: 15px; font-weight: 500; margin-top: 16px; color: var(--text-strong);">' + R.verdict.framing + '</p>' : '') +
+    '<p class="muted" style="font-size: 14px; margin-top: 12px;">' + R.verdict.body + '</p>' +
+    '<div style="display: flex; gap: 14px; align-items: center; margin-top: 20px; flex-wrap: wrap;">' +
+      '<span class="badge accent">' + R.verdict.service + '</span>' +
+      '<span class="mono" style="font-size: 11px; color: var(--text-faint); letter-spacing: 0.06em;">' + gatesLine + '</span>' +
     '</div>' +
-    '<div class="grid-3" style="margin-top: 32px;">';
-  for (var i = 0; i < BANDS.length; i++) {
-    html += '<div class="fg-band' + (i === bi ? ' active' : '') + '">' +
-      '<div class="mono" style="font-size: 11px; color: var(--text-faint); letter-spacing: 0.06em;">SCORE ' + BANDS[i].range + '</div>' +
-      '<h4 style="margin-top: 10px;">' + BANDS[i].title + '</h4>' +
-      '<p class="muted" style="font-size: 14px; margin-top: 8px;">' + BANDS[i].body + '</p>' +
-      '<div class="badge accent" style="margin-top: 16px;">' + BANDS[i].service + '</div>' +
+  '</div>';
+}
+
+function renderFindings(R) {
+  var html = '<section style="padding: 0 0 24px;">' +
+    '<h3>The findings.</h3><div style="margin-top: 8px; max-width: 640px;">';
+  R.findings.forEach(function (f) {
+    html += '<div class="fg-finding">' +
+      (f.lens ? '<div class="mono" style="font-size: 10px; letter-spacing: 0.08em; color: var(--text-faint); text-transform: uppercase;">' + f.lens + '</div>' : '') +
+      '<h4 style="margin-top: 6px;">' + f.title + '</h4>' +
+      '<p class="muted" style="font-size: 14px; margin-top: 8px;">' + f.body + '</p>' +
     '</div>';
+  });
+  html += '</div>';
+  if (R.lockedCount) {
+    html += '<div style="margin-top: 28px; max-width: 640px;">' +
+      '<p class="muted" style="font-size: 13px;">' + R.lockedCount + ' more finding' + (R.lockedCount === 1 ? '' : 's') + ' identified in your answers.</p>';
+    R.lockedRows.forEach(function (r) {
+      html += '<div class="fg-locked-row"><span style="font-size: 13px;">' + (r.lens ? r.lens + ' · ' : '') + r.pointsLabel + '</span><span class="mono" style="font-size: 10px; letter-spacing: 0.08em;">LOCKED</span></div>';
+    });
+    html += '</div>';
   }
-  html += '</div>' +
-    '<h3 style="margin-top: 56px;">Where the risk is concentrated.</h3>' +
-    '<div style="margin-top: 24px; max-width: 640px;">';
-  for (var j = 0; j < POINTS.length; j++) {
-    var score = pointScore(j), pct = Math.round((score / POINTS[j].max) * 100);
-    html += '<div class="fg-bar-row">' +
-      '<span class="fg-bar-label" style="font-size: 13px; color: var(--text-muted);">' + POINTS[j].n + ' · ' + POINTS[j].title + '</span>' +
-      '<div style="height: 6px; background: var(--surface-2);"><div style="height: 6px; background: var(--accent); width: ' + pct + '%; transition: width .3s;"></div></div>' +
-      '<span class="mono" style="font-size: 12px; color: var(--text-strong); text-align: right;">' + score + ' / ' + POINTS[j].max + '</span>' +
-    '</div>';
-  }
-  html += '</div>' +
-    '<div style="display: flex; gap: 16px; align-items: center; margin-top: 48px;">' +
-      '<a class="btn lg" href="mailto:letstalk@tenpointstandard.com?subject=Field%20Guide%20score">Contact us</a>' +
-      '<button class="fg-link-btn" data-action="reset">Start over</button>' +
-    '</div>' +
-  '</section>';
+  html += '</section>';
   return html;
+}
+
+function renderActions(R) {
+  var html = '<section style="padding: 0 0 24px;"><h3>Three priority actions.</h3><ol class="fg-actions">';
+  R.actions.forEach(function (a) { html += '<li>' + a + '</li>'; });
+  html += '</ol></section>';
+  return html;
+}
+
+function renderCTA() {
+  var html = '<section style="padding: 0 0 40px;"><div class="card" style="max-width: 640px; padding: var(--s-8);">' +
+    '<h4>Was this useful?</h4>' +
+    '<p class="muted" style="font-size: 14px; margin-top: 8px;">These findings came from forty yes/no answers. A full assessment reviews the evidence behind every answer: your documents, your site, your numbers. If you want that second set of eyes, tell us and Kenny will reach out.</p>';
+  if (state.fullReq) {
+    html += '<p style="font-size: 14px; margin-top: 16px; font-weight: 500;">Thank you. Kenny will reach out.</p>';
+  }
+  if (state.ctaMode === 'full') {
+    html += '<div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;">' +
+      '<input class="input" type="email" id="cta-email-input" placeholder="you@yourproject.com" value="' + esc(state.email || state.sentTo) + '" style="flex: 1; min-width: 200px;">' +
+      '<input class="input" type="tel" id="cta-phone-input" placeholder="Phone (optional)" value="' + esc(state.phone) + '" style="flex: 1; min-width: 160px;">' +
+      '<button class="btn accent" data-action="submit-full">Request the full assessment</button>' +
+    '</div>' +
+    (state.ctaError ? '<div style="font-size: 12px; color: var(--bronze-deep); margin-top: 8px;">Enter a valid email address.</div>' : '');
+  } else if (state.ctaMode === 'email') {
+    html += '<div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;">' +
+      '<input class="input" type="email" id="cta-email-input" placeholder="you@yourproject.com" value="' + esc(state.email || state.sentTo) + '" style="flex: 1; min-width: 220px;">' +
+      '<button class="btn accent" data-action="submit-results">Email my results</button>' +
+    '</div>' +
+    (state.ctaError ? '<div style="font-size: 12px; color: var(--bronze-deep); margin-top: 8px;">Enter a valid email address.</div>' : '');
+  } else {
+    html += '<div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">' +
+      (state.fullReq ? '' : '<button class="btn accent" data-action="cta-full">I want the full assessment</button>') +
+      (state.sentTo ? '' : '<button class="btn ghost" data-action="cta-email">Email me these results</button>') +
+    '</div>';
+    if (state.sentTo) {
+      html += '<p class="muted" style="font-size: 13px; margin-top: 12px;">A copy of your scorecard is on its way to <span class="mono">' + esc(state.sentTo) + '</span>.</p>';
+    }
+  }
+  html += '</div></section>';
+  return html;
+}
+
+function renderFooterNote(R) {
+  return '<section style="padding: 0 0 64px;">' +
+    '<p class="muted" style="font-size: 12px; max-width: 640px;">' + R.disclaimer + '</p>' +
+    '<button class="fg-link-btn" style="margin-top: 16px;" data-action="reset">Start over</button>' +
+  '</section>';
 }
 
 function render() {
@@ -407,8 +479,58 @@ document.addEventListener('click', function (e) {
       state.revealed = true;
       state.sentTo = em;
       save();
-      submitToMailchimp(em);
+      submitToMailchimp(em, TPResults.evaluate(state.answers).payload);
       track('fg_email_captured', { score: totalScore() });
+      render();
+      break;
+    }
+    case 'cta-full':
+      state.ctaMode = 'full';
+      state.ctaError = false;
+      render();
+      break;
+    case 'cta-email':
+      state.ctaMode = 'email';
+      state.ctaError = false;
+      render();
+      break;
+    case 'submit-results': {
+      var rem = (document.getElementById('cta-email-input').value || '').trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rem)) {
+        state.email = rem;
+        state.ctaError = true;
+        render();
+        return;
+      }
+      state.email = rem;
+      state.ctaError = false;
+      state.sentTo = rem;
+      state.ctaMode = '';
+      save();
+      submitToMailchimp(rem, TPResults.evaluate(state.answers).payload);
+      track('fg_email_captured', { score: totalScore() });
+      render();
+      break;
+    }
+    case 'submit-full': {
+      var fem = (document.getElementById('cta-email-input').value || '').trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fem)) {
+        state.email = fem;
+        state.ctaError = true;
+        render();
+        return;
+      }
+      state.email = fem;
+      state.ctaError = false;
+      state.fullReq = true;
+      if (!state.sentTo) state.sentTo = fem;
+      state.ctaMode = '';
+      save();
+      var fullPayload = TPResults.evaluate(state.answers).payload;
+      fullPayload.REQFULL = 'YES';
+      if (state.phone) fullPayload.PHONE = state.phone;
+      submitToMailchimp(fem, fullPayload);
+      track('fg_full_assessment_request', { score: totalScore() });
       render();
       break;
     }
@@ -425,6 +547,10 @@ document.addEventListener('click', function (e) {
       state.email = '';
       state.emailError = false;
       state.step = 0;
+      state.phone = '';
+      state.fullReq = false;
+      state.ctaMode = '';
+      state.ctaError = false;
       save();
       track('fg_reset');
       render();
@@ -434,12 +560,17 @@ document.addEventListener('click', function (e) {
 });
 
 document.addEventListener('input', function (e) {
-  if (e.target.id === 'gate-email') state.email = e.target.value;
+  if (e.target.id === 'gate-email' || e.target.id === 'cta-email-input') state.email = e.target.value;
+  if (e.target.id === 'cta-phone-input') state.phone = e.target.value;
 });
 
 /* =============================================================
    BOOT
    ============================================================= */
-load();
-initGA();
-render();
+/* Boot only on the real page; the test harness loads this file for its
+   data without a DOM to render into. */
+if (document.getElementById('app')) {
+  load();
+  initGA();
+  render();
+}
