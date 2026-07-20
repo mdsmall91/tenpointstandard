@@ -9,8 +9,11 @@ a:hover { color: var(--accent-deep); }
 .fg-root { min-height: 100vh; background: var(--paper); display: flex; flex-direction: column; }
 .fg-main { flex: 1; display: flex; flex-direction: column; max-width: 860px; width: 100%; margin: 0 auto; padding: 0 var(--page-pad); }
 
+.fg-logo-link { display: inline-flex; align-items: center; }
+.fg-logo-link:hover .fg-logo { background: var(--accent-deep); }
 .fg-logo {
-  display: inline-block; height: 26px; aspect-ratio: 181 / 123;
+  display: inline-block; height: 52px; aspect-ratio: 181 / 123;
+  transition: background .15s;
   background: var(--accent);
   -webkit-mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
   mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
