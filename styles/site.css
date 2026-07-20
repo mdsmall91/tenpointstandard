@@ -7,7 +7,11 @@ a { color: inherit; }
 a:hover { color: var(--accent-deep); }
 
 .fg-root { min-height: 100vh; background: var(--paper); display: flex; flex-direction: column; }
-.fg-main { flex: 1; display: flex; flex-direction: column; max-width: 860px; width: 100%; margin: 0 auto; padding: 0 var(--page-pad); }
+.fg-body {
+  flex: 1; display: flex; align-items: flex-start; gap: 56px;
+  width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 var(--page-pad);
+}
+.fg-main { flex: 1; min-width: 0; max-width: 860px; display: flex; flex-direction: column; }
 
 .fg-logo-link { display: inline-flex; align-items: center; }
 .fg-logo-link:hover .fg-logo { background: var(--accent-deep); }
@@ -19,9 +23,41 @@ a:hover { color: var(--accent-deep); }
   mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
 }
 
-/* Header progress bar — sits between the logo and the live score. */
-.fg-progress { flex: 1; min-width: 40px; height: 2px; background: var(--surface-2); }
-.fg-progress-fill { height: 2px; width: 0; background: var(--accent); transition: width .3s; }
+/* =============================================================
+   VERTICAL PROGRESS RAIL — persistent left-hand navigation.
+   Sticks below the header; the track fills as you advance.
+   Replaced by the horizontal .fg-step-nav under 1100px.
+   ============================================================= */
+.fg-rail {
+  position: sticky; top: 108px; align-self: flex-start;
+  width: 196px; flex: none; padding: 40px 0;
+}
+.fg-rail-items { position: relative; display: flex; flex-direction: column; }
+.fg-rail-track {
+  position: absolute; left: 2px; top: 6px; bottom: 6px;
+  width: 2px; background: var(--surface-2);
+}
+.fg-rail-fill { width: 2px; height: 0; background: var(--accent); transition: height .3s; }
+.fg-rail-item {
+  position: relative; display: flex; align-items: baseline; gap: 10px;
+  padding: 8px 0 8px 20px; background: none; border: 0; cursor: pointer;
+  text-align: left; color: var(--text-faint);
+  transition: color .15s;
+}
+.fg-rail-item:hover { color: var(--text-strong); }
+.fg-rail-item.done { color: var(--stone-400); }
+.fg-rail-item.cur { color: var(--text-strong); }
+.fg-rail-num { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; flex: none; }
+.fg-rail-label { font-size: 13px; line-height: 1.3; }
+.fg-rail-dot {
+  position: absolute; left: 0; top: 12px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--surface-2);
+  box-shadow: 0 0 0 4px var(--paper);
+  transition: background .15s;
+}
+.fg-rail-item.done .fg-rail-dot { background: var(--accent); }
+.fg-rail-item.cur .fg-rail-dot { background: var(--ink-strong); }
 
 .fg-yn {
   font-family: var(--font-body); font-weight: 500; font-size: 13px;
@@ -60,6 +96,16 @@ a:hover { color: var(--accent-deep); }
 
 .fg-band { border: 1px solid var(--border); padding: var(--s-6); background: var(--paper); }
 .fg-band.active { border-color: var(--accent); background: var(--accent-soft); }
+
+/* Wide screens get the vertical rail; narrow screens keep the horizontal strip. */
+@media (min-width: 1101px) {
+  .fg-step-nav { display: none; }
+}
+@media (max-width: 1100px) {
+  .fg-rail { display: none; }
+  .fg-body { max-width: 860px; gap: 0; }
+  .fg-main { margin: 0 auto; }
+}
 
 .fg-link-btn {
   background: none; border: 0; padding: 0; font-size: 12px;

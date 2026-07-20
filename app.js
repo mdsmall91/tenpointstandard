@@ -198,13 +198,36 @@ function esc(s) {
 function goTop() { document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }
 function goStep(i) { state.step = i; save(); render(); goTop(); }
 
+// Cover = 0, each point advances a tenth, ledger = complete.
+function progressPct() {
+  return state.step === 0 ? 0 : Math.min(100, Math.round((state.step / 10) * 100));
+}
+
+function renderRail() {
+  var pct = progressPct();
+  var html = '<div class="fg-rail-items" role="progressbar" aria-label="Assessment progress"' +
+    ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '">' +
+    '<div class="fg-rail-track"><div class="fg-rail-fill" style="height: ' + pct + '%;"></div></div>';
+  for (var i = 0; i < POINTS.length; i++) {
+    var cls = state.step === i + 1 ? 'cur' : pointDone(i) ? 'done' : '';
+    html += '<button class="fg-rail-item ' + cls + '" data-go="' + (i + 1) + '"' +
+      (state.step === i + 1 ? ' aria-current="step"' : '') + '>' +
+      '<span class="fg-rail-dot"></span>' +
+      '<span class="fg-rail-num">' + POINTS[i].n + '</span>' +
+      '<span class="fg-rail-label">' + POINTS[i].title + '</span>' +
+    '</button>';
+  }
+  html += '<button class="fg-rail-item ' + (state.step === 11 ? 'cur' : '') + '" data-go="11"' +
+    (state.step === 11 ? ' aria-current="step"' : '') + '>' +
+    '<span class="fg-rail-dot"></span>' +
+    '<span class="fg-rail-num">—</span>' +
+    '<span class="fg-rail-label">The ledger</span>' +
+  '</button></div>';
+  document.getElementById('rail').innerHTML = html;
+}
+
 function renderHeader() {
   document.getElementById('hdr-score').textContent = 'SCORE ' + totalScore() + ' / 100';
-
-  // Cover = 0, each point advances a tenth, ledger = complete.
-  var pct = state.step === 0 ? 0 : Math.min(100, Math.round((state.step / 10) * 100));
-  document.getElementById('hdr-progress-fill').style.width = pct + '%';
-  document.getElementById('hdr-progress').setAttribute('aria-valuenow', pct);
 
   var nav = document.getElementById('step-nav');
   var html = '';
@@ -339,6 +362,7 @@ function renderResults(total) {
 
 function render() {
   renderHeader();
+  renderRail();
   var app = document.getElementById('app');
   if (state.step === 0) app.innerHTML = renderCover();
   else if (state.step >= 1 && state.step <= 10) app.innerHTML = renderPoint(state.step);
