@@ -84,26 +84,31 @@
   check('T0un headline', R.headline === 'Start at the Beginning', R.headline);
   check('T0un verdict Align', R.verdict.stage === 0, R.verdict.label);
 
+  /* v2 point order: 0 Property, 1 Capital, 2 Regulatory, 3 Guests, 4 Design,
+     5 Procurement, 6 Schedule, 7 Cost, 8 QA, 9 Opening.
+     Gate cells: (1,1) land, (3,0) guest, (2,0) rights, (0,2) ground,
+     (1,0) money, (7,1) number. */
+
   /* The core catch: all non-gate yes, all six gates no. Score 81, verdict Align. */
   var g81 = uniform(Y);
-  g81[2][1] = N; g81[0][0] = N; g81[5][0] = N; g81[1][2] = N; g81[2][0] = N; g81[8][1] = N;
+  g81[1][1] = N; g81[3][0] = N; g81[2][0] = N; g81[0][2] = N; g81[1][0] = N; g81[7][1] = N;
   R = checkInvariants('T81', answersFrom(g81));
   check('T81 score', R.score === 81, R.score);
   check('T81 verdict forced Align', R.verdict.stage === 0 && R.verdict.label === 'Align', R.verdict.label);
   check('T81 headline rule 3', R.headline === 'The Paper Is Ahead of the Ground', R.headline);
   check('T81 six open gates', R.openGates.length === 6, R.openGates.length);
 
-  /* Rule 1: 90+, no gates (non-perfect). */
+  /* Rule 1: 90+, no gates (non-perfect). QA down two, Procurement q1 no: 96. */
   var g92 = uniform(Y);
-  g92[9][0] = N; g92[9][1] = N; /* QA down 2: score 98 -> drop two more */
-  g92[7][0] = N; /* wait: Q8.1 no fires C1? Q5.4 yes and Q8.1 no -> C1 fires; fine for rule 1 check (score 96, 0 gates). */
+  g92[8][0] = N; g92[8][1] = N;
+  g92[5][0] = N;
   R = checkInvariants('T92', answersFrom(g92));
   check('T92 rule 1 headline', R.score >= 90 && R.openGates.length === 0 && R.headline === 'Protect the Plan',
     R.score + '/' + R.openGates.length + '/' + R.headline);
 
   /* Rule 2: 70+, one gate. Gate finding first, gate action first. */
   var g98 = uniform(Y);
-  g98[8][1] = N; /* Q9.2 no */
+  g98[7][1] = N; /* Q8.2 no */
   R = checkInvariants('T98', answersFrom(g98));
   check('T98 score', R.score === 98, R.score);
   check('T98 headline rule 2', R.headline === 'Strong Plan. Open Gates.', R.headline);
@@ -112,31 +117,28 @@
     R.findings[0].title);
   check('T98 gate action first', R.actions[0].indexOf('Have a third party validate') === 0, R.actions[0]);
 
-  /* Rule 4: Vision and Delivery high, Deal low (score below 55 so rule 3 cannot mask it). */
-  var g4 = [[Y,Y,Y,Y],[N,N,N,N],[N,N,N,N],[Y,Y,Y,Y],[Y,Y,Y,Y],[N,N,N,N],[Y,Y,Y,Y],[Y,Y,Y,Y],[N,N,N,N],[Y,Y,Y,Y]];
+  /* Rule 4: Vision and Delivery high, Deal low (score 52, below 55 so rule 3 cannot mask it). */
+  var g4 = [[N,N,N,N],[N,N,N,N],[N,N,N,N],[Y,Y,Y,Y],[Y,Y,Y,Y],[Y,Y,Y,Y],[Y,Y,Y,Y],[N,N,N,N],[Y,Y,Y,Y],[Y,Y,Y,Y]];
   R = checkInvariants('T-rule4', answersFrom(g4));
   check('rule4 headline', R.headline === 'The Paper Is Ahead of the Ground', R.headline + ' score=' + R.score);
 
   /* Rule 5: Deal high, Vision low. */
-  var g5 = [[N,N,N,N],[Y,Y,Y,Y],[Y,Y,Y,Y],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,Y,Y],[N,N,N,N],[Y,Y,N,N],[Y,Y,Y,Y],[Y,Y,N,N]];
+  var g5 = [[Y,Y,Y,Y],[Y,Y,Y,Y],[Y,Y,Y,Y],[N,N,N,N],[N,N,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,Y,Y],[Y,Y,N,N],[Y,Y,N,N]];
   R = checkInvariants('T-rule5', answersFrom(g5));
   check('rule5 headline', R.headline === 'The Deal Is Ahead of the Guest', R.headline + ' score=' + R.score);
 
   /* Rule 6: Vision and Deal high, Delivery low. */
-  var g6 = [[Y,Y,Y,Y],[Y,Y,Y,Y],[Y,Y,Y,Y],[N,N,N,N],[N,N,N,N],[Y,Y,Y,Y],[Y,Y,Y,Y],[N,N,N,N],[Y,Y,Y,Y],[N,N,N,N]];
+  var g6 = [[Y,Y,Y,Y],[Y,Y,Y,Y],[Y,Y,Y,Y],[Y,Y,Y,Y],[Y,Y,Y,Y],[N,N,N,N],[N,N,N,N],[Y,Y,Y,Y],[N,N,N,N],[N,N,N,N]];
   R = checkInvariants('T-rule6', answersFrom(g6));
   check('rule6 headline', R.headline === 'The Plan Stops at the Property Line', R.headline + ' score=' + R.score);
 
   /* Rule 7: Vision high, Deal and Delivery low. */
-  var g7 = [[Y,Y,Y,Y],[N,N,N,N],[N,N,N,N],[N,N,N,N],[N,N,N,N],[N,N,N,N],[Y,Y,Y,Y],[N,N,N,N],[N,N,N,N],[N,N,N,N]];
+  var g7 = [[N,N,N,N],[N,N,N,N],[N,N,N,N],[Y,Y,Y,Y],[Y,Y,Y,Y],[N,N,N,N],[N,N,N,N],[N,N,N,N],[N,N,N,N],[N,N,N,N]];
   R = checkInvariants('T-rule7', answersFrom(g7));
   check('rule7 headline', R.headline === 'The Idea Is Ahead of the Project', R.headline + ' score=' + R.score);
 
-  /* Rule 8: 3 open gates, mid clusters. */
-  var g8 = [[Y,Y,N,N],[Y,N,N,N],[Y,N,Y,N],[Y,Y,N,N],[Y,Y,N,N],[N,Y,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,N,Y,N],[Y,Y,N,N]];
-  /* open gates: Q3.2 (2,1)=N, Q6.1 (5,0)=N, Q2.3 (1,2)=N; closed: Q1.1, Q3.1, Q9.2? (8,1)=N -> that is 4. Fix Q9.2 yes. */
-  g8[8] = [Y,Y,N,N] ? [Y,Y,N,N] : g8[8];
-  g8[8] = [Y,Y,N,N];
+  /* Rule 8: exactly 3 open gates (land, rights, ground), mid clusters. */
+  var g8 = [[Y,Y,N,N],[Y,N,N,N],[N,Y,Y,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,N,Y,N],[Y,Y,N,N]];
   R = checkInvariants('T-rule8', answersFrom(g8));
   check('rule8 open gates = 3', R.openGates.length === 3, JSON.stringify(R.openGates));
   check('rule8 headline', R.headline === 'The Fundamentals Come First', R.headline + ' score=' + R.score);
@@ -144,29 +146,29 @@
 
   /* Rule 9: score below 15, two open gates. */
   var g9 = uniform(N);
-  g9[2][1] = Y; g9[0][0] = Y; g9[5][0] = Y; g9[1][2] = Y; /* 4+3+3+3 = 13 */
+  g9[1][1] = Y; g9[3][0] = Y; g9[2][0] = Y; g9[0][2] = Y; /* 4+3+3+3 = 13 */
   R = checkInvariants('T-rule9', answersFrom(g9));
   check('rule9 score', R.score === 13, R.score);
   check('rule9 headline', R.headline === 'Start at the Beginning', R.headline);
 
-  /* Rule 10: no gates, mid clusters, seams fire; headline = top seam title. */
-  var g10 = [[Y,Y,N,N],[Y,N,Y,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,Y,Y],[Y,N,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N]];
+  /* Rule 10: no gates, mid clusters, seams fire; headline = top seam title (CE2). */
+  var g10 = [[Y,N,Y,N],[Y,Y,N,N],[Y,N,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,Y,Y],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N]];
   R = checkInvariants('T-rule10', answersFrom(g10));
   check('rule10 no gates', R.openGates.length === 0, JSON.stringify(R.openGates));
   check('rule10 headline is top seam', R.headline === 'Cost Confidence Without Ground Truth', R.headline);
 
   /* Rule 11 fallback: no seams, no gates, mid clusters. */
-  var g11 = [[Y,Y,N,N],[Y,Y,Y,N],[Y,Y,N,N],[Y,N,Y,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N],[N,Y,Y,N],[Y,Y,N,N],[Y,Y,N,N]];
+  var g11 = [[Y,Y,Y,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N],[N,Y,N,Y],[Y,Y,N,N],[Y,Y,N,N],[Y,Y,N,N],[Y,N,Y,N]];
   R = checkInvariants('T-rule11', answersFrom(g11));
   check('rule11 fallback headline', R.headline === 'Close the Gaps on Paper', R.headline + ' score=' + R.score);
   check('rule11 protect backfill', R.findings.length === 3 && R.findings.every(function (f) { return f.kind === 'protect'; }),
     JSON.stringify(R.findings.map(function (f) { return f.kind; })));
 
-  /* Ledger cap: capital 3 yes with Q3.1 no would read Nearly Resolved; must cap. */
+  /* Ledger cap: capital 3 yes with Q2.1 no would read Nearly Resolved; must cap. */
   var gcap = uniform(Y);
-  gcap[2][0] = N; /* Q3.1 no: capital y=3, gate open */
+  gcap[1][0] = N; /* Q2.1 no: capital y=3, gate open */
   R = checkInvariants('T-cap', answersFrom(gcap));
-  check('cap label', R.ledger[2].label === 'In Progress' && R.ledger[2].gateOpen, JSON.stringify(R.ledger[2]));
+  check('cap label', R.ledger[1].label === 'In Progress' && R.ledger[1].gateOpen, JSON.stringify(R.ledger[1]));
 
   /* ---------- QUESTIONS.md consistency (spec check 6) ---------- */
   fetch('../QUESTIONS.md').then(function (r) { return r.text(); }).then(function (md) {
