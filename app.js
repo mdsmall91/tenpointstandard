@@ -149,6 +149,22 @@ function track(name, params) {
   if (window.gtag) window.gtag('event', name, params || {});
 }
 
+/* Slugs for the GA4 score_band param. Index matches R.verdict.stage, which is
+   the stage the user is actually shown: gates can pull it below the raw band. */
+var BAND_SLUGS = ['align', 'design', 'build'];
+
+/* GA4 key event. Fires once, on the transition into the revealed scorecard,
+   not on later re-renders or on reloads of a saved result. */
+function trackComplete() {
+  var R = TPResults.evaluate(state.answers);
+  track('assessment_complete', {
+    method: 'ten_point_standard',
+    score_band: BAND_SLUGS[R.verdict.stage],
+    score: R.score,
+    gated: R.verdict.gated ? 'yes' : 'no'
+  });
+}
+
 /* =============================================================
    MAILCHIMP (JSONP subscribe, no server needed)
    ============================================================= */
@@ -438,6 +454,9 @@ function renderFooterNote(R) {
 }
 
 function render() {
+  /* Drives the static #fg-about block, which is crawlable copy that belongs
+     with the cover and would be noise once the assessment is underway. */
+  document.body.setAttribute('data-step', state.step);
   renderHeader();
   renderRail();
   var app = document.getElementById('app');
@@ -456,8 +475,12 @@ document.addEventListener('click', function (e) {
   if (el.dataset.go !== undefined) { goStep(parseInt(el.dataset.go, 10)); return; }
 
   if (el.dataset.key !== undefined) {
+    /* The saved answers are the "have they started" flag: a returning visitor
+       with answers on file does not re-fire the event. */
+    var isFirstAnswer = answeredCount() === 0;
     state.answers[el.dataset.key] = el.dataset.val === '1';
     save();
+    if (isFirstAnswer) track('assessment_start', { method: 'ten_point_standard' });
     render();
     return;
   }
@@ -489,17 +512,20 @@ document.addEventListener('click', function (e) {
       save();
       submitToMailchimp(em, TPResults.evaluate(state.answers).payload);
       track('fg_email_captured', { score: totalScore() });
+      trackComplete();
       render();
       break;
     }
     case 'cta-full':
       state.ctaMode = 'full';
       state.ctaError = false;
+      track('cta_click', { cta: 'full_assessment' });
       render();
       break;
     case 'cta-email':
       state.ctaMode = 'email';
       state.ctaError = false;
+      track('cta_click', { cta: 'email_results' });
       render();
       break;
     case 'submit-results': {
@@ -546,6 +572,7 @@ document.addEventListener('click', function (e) {
       state.revealed = true;
       save();
       track('fg_skip', { score: totalScore() });
+      trackComplete();
       render();
       break;
     case 'reset':
