@@ -8,6 +8,8 @@ Single-page static site: the Ten Point Standard self-assessment (40 yes/no quest
 - `app.js` — all data (POINTS/BANDS), state, rendering, Mailchimp + GA4 wiring.
 - `styles/tokens.css`, `styles/base.css` — design system (portable, from the design handoff, do not hand-edit casually).
 - `styles/site.css` — page-specific styles (stepper flow).
+- `journal.html`, `journal/<slug>.html`, `posts.js`, `journal-core.js`, `journal.js`,
+  `journal-article.js`, `styles/journal.css` — the Journal (see below).
 - `CNAME` — custom domain for GitHub Pages.
 
 ## Configuration (top of `app.js`)
@@ -47,12 +49,82 @@ result they already have. "Start over" clears the answers and both can fire agai
 `score_band` is the **verdict stage**, not the raw score band: an open critical gate can pull
 the shown stage below the score, and `gated: yes` marks that case.
 
+**Journal events** (fired by `journal-core.js`, per the design handoff):
+
+| Event | Fires when | Params |
+| --- | --- | --- |
+| `journal_view` | an article page loads | `slug` |
+| `journal_filter` | a filter chip is clicked (not on load or back/forward) | `tag` |
+| `journal_share` | a share link or copy-link is used | `slug`, `channel` (`linkedin`/`x`/`email`/`copy`) |
+| `journal_subscribe` | a Journal newsletter signup succeeds | — |
+
 **Legacy events**, still firing so historical reports keep working: `fg_begin`,
 `fg_view_ledger`, `fg_email_captured`, `fg_skip`, `fg_reset`, `fg_full_assessment_request`.
 
 To see `score_band`, `score`, and `cta` in reports, register them as **custom dimensions**
 (Admin > Custom definitions), scope Event. Without that they only appear in DebugView and
 Realtime.
+
+## The Journal
+
+Editorial section at `/journal.html`, built from the Claude Design handoff
+(*Field Guide Journal v2*). Credibility, lead gen, and SEO: every article page
+ends in the assessment CTA.
+
+**Everything is static.** `journal.html` carries the full markup for every tile,
+and each article is a hand-written page under `journal/`. No tile and no
+paragraph is injected at runtime — that is deliberate, and it is the same
+lesson `index.html` learned (see *SEO / indexing* below). The JS only filters,
+shares, and subscribes.
+
+- `posts.js` — canonical content model (`TAGS`, `POSTS`). **No page loads it at
+  runtime.** It is the source of truth that the static HTML must agree with, the
+  way `QUESTIONS.md` is for the assessment.
+- `tests/journal-tests.html` — 335 checks that the HTML and `posts.js` still
+  agree: titles, deks, bylines, dates, read times, tags, canonicals, aspect
+  ratios, body copy, and the noindex rule below. **Serve over HTTP** (it fetches
+  the pages) and run it after editing either side.
+
+### Adding or editing an entry
+
+1. Add the entry to `POSTS` in `posts.js`, newest first. Exactly one entry may
+   carry `featured: true`, and it must be `POSTS[0]`.
+2. Add a tile to `journal.html` and a page under `journal/<slug>.html`. Copy the
+   nearest existing one — the header, share row, author card, CTA, and
+   newsletter block are identical on every article.
+3. Run `tests/journal-tests.html` until it is 0 failures.
+4. Bump `?v=N` on `styles/journal.css` and the journal scripts if either changed.
+
+### The noindex rule
+
+Seven of the eight entries have no body copy yet. Those pages are built,
+styled, and reachable, but they carry `<meta name="robots" content="noindex,
+follow">`, have no `Article` JSON-LD, show the "Entry in preparation" block
+instead of a body, and are **absent from `sitemap.xml`**. A thin page in the
+index costs more than it earns.
+
+When the copy lands for an entry, do all four in one commit: add the `body`
+array to `posts.js`, write the paragraphs into the page, flip robots to
+`index, follow` and add the `Article` JSON-LD, and add the URL to `sitemap.xml`.
+The drift tests enforce that these move together.
+
+### Imagery
+
+No photography has been supplied. Every media box renders the captioned
+placeholder from the design (a mono note describing the shot and its ratio) —
+never a color fill or an icon. To add a photo: drop it at
+`assets/journal/<slug>/hero.jpg` (2400px long edge) or `author.jpg` (square,
+400px), set `hero` / `author.photo` in `posts.js`, and replace the
+`.jr-media-note` span with an `<img>`. Keep the `aspect-ratio` on `.jr-media` —
+it is what stops the masonry columns reflowing as images load.
+
+### Config duplication (known)
+
+`journal-core.js` mirrors `MAILCHIMP_FORM_ACTION` and `GA_MEASUREMENT_ID` from
+the top of `app.js`, because `app.js` runs the whole assessment on load and the
+Journal cannot include it. **Rotate either value in both files.** The clean fix
+is extracting a shared `config.js`; that touches the live assessment page, so it
+was left out of the Journal branch.
 
 ## SEO / indexing
 - `robots.txt` — allows everything except `/tests/`, points at the sitemap.
