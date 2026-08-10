@@ -122,6 +122,10 @@
       eq('index: tile dek ' + p.slug, norm(tile.querySelector('.jr-tile-dek').textContent), p.dek);
       eq('index: tile author ' + p.slug, norm(tile.querySelector('.jr-byline-name').textContent), p.author.name);
       eq('index: tile credential ' + p.slug, norm(tile.querySelector('.jr-byline-cred').textContent), p.author.credential);
+      eq('index: tile company ' + p.slug,
+        tile.querySelector('.jr-byline-org') ? norm(tile.querySelector('.jr-byline-org').textContent) : null,
+        p.author.company || null);
+      check('index: tile has no author photo ' + p.slug, !tile.querySelector('.jr-avatar'));
       eq('index: tile readTime ' + p.slug, norm(tile.querySelector('.jr-byline-meta').textContent), p.readTime);
 
       /* The media box carries the post's aspect ratio inline so the
@@ -129,6 +133,23 @@
       var media = tile.querySelector('.jr-media');
       var ratio = (media.getAttribute('style') || '').replace(/\s|;$/g, '');
       eq('index: tile aspect ' + p.slug, ratio, 'aspect-ratio:' + p.heroAspect);
+
+      /* An entry with a hero shows the photo; one without keeps the
+         captioned placeholder. Never a bare box. */
+      var im = media.querySelector('img');
+      if (p.hero) {
+        check('index: tile shows the photo ' + p.slug, !!im);
+        if (im) {
+          eq('index: tile img src ' + p.slug, im.getAttribute('src'), p.hero);
+          eq('index: tile img alt ' + p.slug, im.getAttribute('alt'), p.heroAlt);
+          /* Explicit dimensions are what stop the columns reflowing
+             as images decode. */
+          check('index: tile img has dimensions ' + p.slug,
+            !!im.getAttribute('width') && !!im.getAttribute('height'));
+        }
+      } else {
+        check('index: tile keeps its placeholder ' + p.slug, !!media.querySelector('.jr-media-note'));
+      }
 
       eq('index: featured flag ' + p.slug, tile.hasAttribute('data-featured'), !!p.featured);
     });
@@ -153,10 +174,14 @@
     check('index: declares the RSS feed',
       !!doc.querySelector('link[rel="alternate"][type="application/rss+xml"]'));
     check('index: header carries no wordmark', !doc.querySelector('.jr-wordmark'));
-    check('index: no Field Guide nav link',
-      [].slice.call(doc.querySelectorAll('.tp-nav a')).every(function (a) {
-        return norm(a.textContent) !== 'Field Guide';
-      }));
+
+    /* The header nav is one link — Field Journal — sitting directly
+       beside the CTA. No Field Guide link, no Ten Point Services
+       link. */
+    var navLinks = [].slice.call(doc.querySelectorAll('.tp-nav a')).map(function (a) { return norm(a.textContent); });
+    eq('index: nav is Field Journal only', JSON.stringify(navLinks), JSON.stringify(['Field Journal']));
+    check('index: nav sits with the CTA',
+      !!doc.querySelector('.jr-header-right .tp-nav') && !!doc.querySelector('.jr-header-right .jr-header-cta'));
   }
 
   /* ---------- feed ----------
@@ -200,6 +225,25 @@
     eq(s + 'tag', text(doc, '.jr-article-header .jr-tag-label'), p.tag);
     eq(s + 'author', text(doc, '.jr-article-byline .jr-byline-name'), p.author.name);
     eq(s + 'credential', text(doc, '.jr-article-byline .jr-byline-cred'), p.author.credential);
+    eq(s + 'company', text(doc, '.jr-article-byline .jr-byline-org'), p.author.company || null);
+    check(s + 'no author photo anywhere', !doc.querySelector('.jr-avatar'));
+
+    var figImg = doc.querySelector('.jr-figure img');
+    if (p.hero) {
+      check(s + 'hero photo present', !!figImg);
+      if (figImg) {
+        eq(s + 'hero src', figImg.getAttribute('src'), '../' + p.hero);
+        eq(s + 'hero alt', figImg.getAttribute('alt'), p.heroAlt);
+        check(s + 'hero has dimensions',
+          !!figImg.getAttribute('width') && !!figImg.getAttribute('height'));
+        /* The hero is the largest thing above the fold — lazy-loading
+           it would delay the one image that should load first. */
+        check(s + 'hero is not lazy', figImg.getAttribute('loading') !== 'lazy');
+      }
+    } else {
+      check(s + 'hero keeps its placeholder', !!doc.querySelector('.jr-figure .jr-media-note'));
+    }
+    eq(s + 'caption', text(doc, '.jr-figure figcaption'), p.heroCaption);
     /* Bio is optional — an author card without one renders no bio
        paragraph rather than an invented sentence. */
     eq(s + 'bio', text(doc, '.jr-author-bio'), p.author.bio || null);

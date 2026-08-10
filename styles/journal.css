@@ -43,8 +43,10 @@ a:hover { color: var(--accent-deep); }
   line-height: 1.5;
 }
 
-/* "Score your project" sits outside .tp-nav so it survives the
+/* Nav and CTA travel together on the right-hand end of the header.
+   "Score your project" stays outside .tp-nav so it survives the
    720px breakpoint, where base.css hides .tp-nav entirely. */
+.jr-header-right { display: flex; align-items: center; gap: var(--s-6); }
 .jr-header-cta { display: inline-flex; }
 
 /* The page hero has no right-hand meta column, so it does not need
@@ -78,17 +80,20 @@ a:hover { color: var(--accent-deep); }
   background: var(--surface-2);
   border: var(--hairline);
   display: flex; align-items: center; justify-content: center;
-  padding: var(--s-6);
   overflow: hidden;
 }
-.jr-media img { width: 100%; height: 100%; object-fit: cover; }
+/* A real photo fills the box edge to edge. The inset padding belongs
+   to the placeholder note, not to the frame — on the media box it
+   would matte every image with a border of dead space. */
+.jr-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .jr-media-note {
   font-family: var(--font-mono); font-size: 11px;
   letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--text-faint); text-align: center; line-height: 1.6;
+  padding: var(--s-6);
 }
-.jr-tile .jr-media { border: 0; border-bottom: var(--hairline); padding: var(--s-4); }
-.jr-tile .jr-media-note { font-size: 10px; }
+.jr-tile .jr-media { border: 0; border-bottom: var(--hairline); }
+.jr-tile .jr-media-note { font-size: 10px; padding: var(--s-4); }
 
 /* =============================================================
    TAG + BYLINE — shared by featured, tile, and article header
@@ -101,21 +106,16 @@ a:hover { color: var(--accent-deep); }
   color: var(--accent-deep);
 }
 
+/* No author photograph anywhere — the byline is type only. */
 .jr-byline {
   display: flex; align-items: center; gap: var(--s-3);
   padding-top: var(--s-4);
   border-top: 1px solid var(--border-soft);
 }
-.jr-avatar {
-  width: 40px; height: 40px; flex: none;
-  border: var(--hairline); background: var(--surface-2);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em;
-  color: var(--text-faint); overflow: hidden;
-}
-.jr-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .jr-byline-name { font-size: var(--fs-small); font-weight: 500; color: var(--text-strong); }
 .jr-byline-cred { font-size: 12px; color: var(--text-faint); line-height: 1.4; margin-top: 2px; }
+/* Company sits on its own line under the job title. */
+.jr-byline-org { font-size: 12px; color: var(--text-faint); line-height: 1.4; }
 .jr-byline-meta {
   margin-left: auto;
   font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em;
@@ -183,7 +183,6 @@ a:hover { color: var(--accent-deep); }
 .jr-tile-title { font-size: var(--fs-h4); font-family: var(--font-display); font-weight: 400; line-height: var(--lh-snug); letter-spacing: var(--tr-snug); color: var(--text-strong); margin: 0 0 var(--s-3); text-wrap: pretty; }
 .jr-tile-dek { font-size: var(--fs-small); line-height: var(--lh-relaxed); color: var(--text-muted); margin: 0 0 var(--s-5); text-wrap: pretty; }
 .jr-tile .jr-byline { gap: 10px; }
-.jr-tile .jr-avatar { width: 32px; height: 32px; font-size: 8px; }
 .jr-tile .jr-byline-name { font-size: 13px; }
 .jr-tile .jr-byline-cred { font-size: 11px; margin-top: 1px; }
 .jr-tile .jr-byline-meta { font-size: 10px; }
@@ -241,12 +240,37 @@ a:hover { color: var(--accent-deep); }
   border-top: var(--hairline);
   display: flex; align-items: center; gap: var(--s-4); flex-wrap: wrap;
 }
-.jr-article-byline .jr-avatar { width: 44px; height: 44px; font-size: 9px; }
 .jr-article-byline .jr-byline-meta { display: flex; gap: var(--s-4); align-items: center; }
 .jr-rule { width: 1px; height: 14px; background: var(--border); display: block; }
 
-.jr-figure { max-width: var(--page-max); margin: 0 auto var(--s-16); padding: 0 var(--page-pad); }
-.jr-figure .jr-media { aspect-ratio: 16 / 9; max-height: 560px; }
+/* The hero figure matches the body measure exactly rather than
+   running to the page width — a full-bleed image above a narrow
+   text column reads as two layouts stacked.
+
+   The body caps paragraphs at 66ch, so matching 760px is not
+   enough: it would still overhang the text by ~14px. `ch` resolves
+   against the element's own font, so the figure carries the body's
+   display font and size purely to make this 66ch the same 66ch.
+   Children (.jr-media-note, figcaption) set their own type, so
+   nothing inherits it visually. */
+.jr-figure {
+  /* Same box as .jr-article-col, so the left edge lands in exactly
+     the same place as the body rather than centering on its own
+     narrower width. */
+  max-width: 760px;
+  margin: 0 auto var(--s-16);
+  padding: 0 var(--page-pad);
+  /* Body type, purely so the 66ch below is the body's 66ch. .jr-media
+     declares no font of its own, so it inherits this and resolves the
+     same measure; .jr-media-note and figcaption set their own type and
+     are unaffected. */
+  font-family: var(--font-display);
+  font-size: 19px;
+}
+.jr-figure .jr-media {
+  aspect-ratio: 16 / 9;
+  max-width: 66ch;
+}
 .jr-figure figcaption {
   font-family: var(--font-mono); font-size: 10px;
   letter-spacing: 0.06em; color: var(--text-faint);
@@ -348,7 +372,6 @@ a:hover { color: var(--accent-deep); }
   padding: var(--s-8);
   display: flex; gap: var(--s-6); align-items: flex-start;
 }
-.jr-author-card .jr-avatar { width: 72px; height: 72px; font-size: 9px; }
 .jr-author-eyebrow {
   font-family: var(--font-mono); font-size: 10px;
   letter-spacing: var(--tr-eyebrow); text-transform: uppercase;
@@ -421,6 +444,8 @@ a:hover { color: var(--accent-deep); }
   :root { --page-pad: 20px; }
   .jr-article-title { font-size: 34px; }
   .jr-body p { font-size: 17px; }
+  /* Body drops to 17px here, so the figure's 66ch must follow it. */
+  .jr-figure { font-size: 17px; }
   /* 44px minimum touch target on chips and buttons. */
   .jr-chip { min-height: 44px; padding: 10px 16px; }
   .jr-header-cta.btn { min-height: 44px; }

@@ -44,9 +44,13 @@ function tagSlug(tag) {
    entirely rather than published thin. Its metadata stays here so
    the entry is ready the moment the copy lands.
 
-   hero / author.photo are null until the photography lands. The
-   renderer keeps the captioned placeholder block in that case —
-   never a color fill or an icon (handoff, "Imagery").
+   hero is null until the photography lands. The renderer keeps the
+   captioned placeholder block in that case — never a color fill or
+   an icon (handoff, "Imagery"). There are no author photographs
+   anywhere: the byline is type only.
+
+   author.credential is the job title. author.company, when set,
+   renders on its own line beneath it.
 
    heroAspect drives the tile height, which is what produces the
    masonry rhythm. It is never randomized at runtime.
@@ -62,14 +66,14 @@ var POSTS = [
     title: 'Entitlements',
     dek: 'Outdoor hospitality owners should have a strategy.',
     metaDescription: 'Entitlements are what you are allowed to do on a parcel. The gray-zone years are ending — how to build an entitlement strategy for a campground, RV resort, or glamping project.',
-    hero: null,                                    // assets/journal/entitlements/hero.jpg
+    hero: 'assets/journal/entitlements/hero.jpg',  // 2400x1350, cropped 16:9 from AdobeStock_804965078
+    heroAlt: 'A lit safari tent glowing under the Milky Way in a eucalyptus clearing at night',
     heroAspect: '16/9',
-    heroNote: 'Hero photo — lit safari tent under a night sky, 16:9, 2400px min',
-    heroCaption: 'Photograph: client-supplied field documentation.',
+    heroCaption: 'Photograph: Adobe Stock.',
     author: {
       name: 'Matt Small',
-      credential: 'Director of Outdoor Hospitality, RVi Planning & Landscape Architecture',
-      photo: null,                                 // assets/journal/entitlements/author.jpg
+      credential: 'Director of Outdoor Hospitality',
+      company: 'RVi Planning & Landscape Architecture',
       bio: null                                    // not supplied — author card renders without it
     },
     publishedAt: '2026-08-09',
