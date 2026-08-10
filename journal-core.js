@@ -6,39 +6,13 @@
    Analytics, the Mailchimp subscribe call, and small helpers.
    ============================================================= */
 
-/* MIRRORED from CONFIG at the top of app.js. app.js runs the whole
-   assessment on load, so the Journal cannot just include it.
-   These two values must be kept in step with app.js by hand —
-   if you rotate either one, change it in both places. */
-var JR_CONFIG = {
-  MAILCHIMP_FORM_ACTION: 'https://tenpointservicestx.us4.list-manage.com/subscribe/post?u=ca6a6d0df8860fb34744c0490&id=32ae7807af&f_id=0046d6e0f0',
-  GA_MEASUREMENT_ID: 'G-DK01ZN4VLE',
-
-  /* Marks Field Notes subscribers so they are distinguishable from
-     scorecard leads inside the one audience. The "Share blog updates
-     via RSS" automation targets this group.
-
-     CRITICAL: this is a GROUP (interest), not a tag. `tags=<id>` on
-     the post-json endpoint is accepted and then SILENTLY DISCARDED —
-     the contact subscribes, the response says success, and the tag
-     never lands. Verified by live test on Aug 9 2026. Same class of
-     trap as the f_id parameter documented in app.js.
-
-     The field name is Mailchimp's own: group[<categoryId>][<bit>].
-     Read it off the hosted signup form
-     (tenpointservicestx.us4.list-manage.com/subscribe?u=..&id=..) —
-     70477 is the "Subscriptions" category and 1 is the bit for the
-     "Field Notes" option. It is NOT the 270437 interest id shown in
-     the admin URL; that value does not work here.
-
-     A group rather than a second audience on purpose: Essentials
-     allows three audiences, but a contact in two counts twice
-     against the 500-contact plan and splits unsubscribes across two
-     lists. A group is also the primitive Mailchimp intends for
-     "which mailings do you want", so it shows up in the subscriber
-     preferences centre for free. */
-  MAILCHIMP_GROUP_PARAM: 'group[70477][1]=1'
-};
+/* Config comes from config.js, which every Journal page loads
+   before this one — the same file index.html loads for the
+   assessment, so the Mailchimp and GA values exist in one place.
+   Failing loudly here beats silently not subscribing anyone. */
+if (typeof CONFIG === 'undefined') {
+  throw new Error('journal-core.js: config.js must be loaded first');
+}
 
 /* =============================================================
    ANALYTICS
@@ -46,15 +20,15 @@ var JR_CONFIG = {
    journal_share, journal_subscribe.
    ============================================================= */
 function jrInitGA() {
-  if (!JR_CONFIG.GA_MEASUREMENT_ID) return;
+  if (!CONFIG.GA_MEASUREMENT_ID) return;
   var s = document.createElement('script');
   s.async = true;
-  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + JR_CONFIG.GA_MEASUREMENT_ID;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + CONFIG.GA_MEASUREMENT_ID;
   document.head.appendChild(s);
   window.dataLayer = window.dataLayer || [];
   window.gtag = function () { window.dataLayer.push(arguments); };
   window.gtag('js', new Date());
-  window.gtag('config', JR_CONFIG.GA_MEASUREMENT_ID);
+  window.gtag('config', CONFIG.GA_MEASUREMENT_ID);
 }
 
 function jrTrack(name, params) {
@@ -77,22 +51,22 @@ function jrSubscribe(email, statusEl) {
     say('Enter a valid email address.', true);
     return false;
   }
-  if (!JR_CONFIG.MAILCHIMP_FORM_ACTION) {
-    console.warn('Mailchimp not configured: set JR_CONFIG.MAILCHIMP_FORM_ACTION');
+  if (!CONFIG.MAILCHIMP_FORM_ACTION) {
+    console.warn('Mailchimp not configured: set CONFIG.MAILCHIMP_FORM_ACTION');
     say('Subscription is not configured yet.', true);
     return false;
   }
 
   var params = ['EMAIL=' + encodeURIComponent(email)];
-  if (JR_CONFIG.MAILCHIMP_GROUP_PARAM) {
+  if (CONFIG.MAILCHIMP_GROUP_FIELD_NOTES) {
     /* Encode the brackets but not the = separating name from value. */
-    var g = JR_CONFIG.MAILCHIMP_GROUP_PARAM.split('=');
+    var g = CONFIG.MAILCHIMP_GROUP_FIELD_NOTES.split('=');
     params.push(encodeURIComponent(g[0]) + '=' + encodeURIComponent(g[1]));
   }
 
   // Honeypot field name is b_<u>_<id>, derived from the action URL.
-  var u = /[?&]u=([^&]+)/.exec(JR_CONFIG.MAILCHIMP_FORM_ACTION);
-  var id = /[?&]id=([^&]+)/.exec(JR_CONFIG.MAILCHIMP_FORM_ACTION);
+  var u = /[?&]u=([^&]+)/.exec(CONFIG.MAILCHIMP_FORM_ACTION);
+  var id = /[?&]id=([^&]+)/.exec(CONFIG.MAILCHIMP_FORM_ACTION);
   if (u && id) params.push('b_' + u[1] + '_' + id[1] + '=');
 
   var cbName = 'jrMc' + Date.now();
@@ -113,7 +87,7 @@ function jrSubscribe(email, statusEl) {
   /* f_id pins the request to a stored form version, and Mailchimp
      then silently drops any field not on that form. Strip it — the
      same reason app.js does. */
-  var parts = JR_CONFIG.MAILCHIMP_FORM_ACTION.split('?');
+  var parts = CONFIG.MAILCHIMP_FORM_ACTION.split('?');
   var query = (parts[1] || '').split('&').filter(function (kv) {
     return kv && kv.indexOf('f_id=') !== 0;
   });

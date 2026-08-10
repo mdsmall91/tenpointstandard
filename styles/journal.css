@@ -337,9 +337,18 @@ a:hover { color: var(--accent-deep); }
 @media (max-width: 1100px) {
   .jr-grid { columns: 2; }
 }
+/* The featured entry stacks earlier than the 800px the rest of the
+   page uses. At 900px its 5fr text column is only ~300px, and a
+   38px serif headline in 300px breaks to about seven characters a
+   line. The handoff pinned this to base.css's 800px breakpoint;
+   that reads badly in the 800-960 band, so it stacks sooner. */
+@media (max-width: 960px) {
+  .jr-featured { grid-template-columns: 1fr; gap: var(--s-8); }
+  .jr-featured-title { font-size: var(--fs-h3); }
+}
+
 @media (max-width: 800px) {
   /* Matches base.css @media (max-width: 800px) on .tp-hero. */
-  .jr-featured { grid-template-columns: 1fr; gap: var(--s-8); }
   .jr-dispatch-inner { grid-template-columns: 1fr; gap: var(--s-8); }
   .jr-article-dispatch { grid-template-columns: 1fr; gap: var(--s-6); }
 }

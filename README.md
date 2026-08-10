@@ -171,21 +171,35 @@ no RSS option under Create > Email, and the legacy `wizard/neapolitan?type=rss`
 URL 404s. The "Share blog updates via RSS" flow template also exists under
 Automations > Flow templates.)
 
-**2. The Welcome journey fires for Field Notes subscribers, and should not.**
-"Welcome new contacts" triggers on any signup, so a Field Notes subscriber
-currently receives the **scorecard email with every merge field empty** — no
-score, no band, no ledger. Confirmed on the live test contacts. Before the
-Journal goes live, add a condition so that journey only runs for contacts *not*
-in the Field Notes group (or only those with a `SCORE`).
+**2. ~~The Welcome journey fires for Field Notes subscribers.~~ Fixed Aug 9
+2026.** "Welcome new contacts" triggered on any signup, so a Field Notes
+subscriber received the scorecard email with every merge field empty. The
+trigger now carries a filter:
 
-Editing it is deliberately left undone because it is a live automation on the
-main lead-gen funnel, and **pausing and reactivating a journey can leave the
-trigger silently stale** (see the Mailchimp gotcha above). Whoever makes the
-change must re-save the trigger and run a live signup test afterwards.
+> `Group category: Subscriptions > none of > Group interest: Field Notes`
 
-**Test contacts to clean up:** `coloradojeeper.small+fntest1@gmail.com`
-(no group — the failed tag attempt), `+fntest2` (no group — stale-cache run),
-`+fntest3` (correct, in the Field Notes group).
+It is a **trigger filter, not a step**, so it does not count against the
+4-step Essentials limit (still "2 of 4 steps left").
+
+Verified live, both directions, because the failure mode here is silent:
+
+| Test signup | Group | Welcome email |
+| --- | --- | --- |
+| `+fntest4` via the Journal form | Field Notes | **not sent** — correct |
+| `+sctest1`, scorecard-style | none | **sent**, with SCORE/BAND/ANSWERED — correct |
+
+Journey counter went 9 → 10 across two signups, confirming exactly one entered
+and that **the trigger did not go stale** on reactivation.
+
+If you edit this journey again, follow the same order: Pause & Edit → change →
+open the trigger's ⋮ > Edit > **Save Trigger** → Turn back on → run a live
+signup of each kind and check the contact's Activity. A stale trigger shows
+"Active" while silently admitting nobody.
+
+**Test contacts to clean up** (all mine, safe to delete):
+`coloradojeeper.small+` `fntest1` (no group — the failed tag attempt),
+`fntest2` (no group — stale-cache run), `fntest3` and `fntest4` (in the Field
+Notes group), `sctest1` (scorecard control, carries a fake Score of 55).
 
 ### Imagery
 
@@ -197,13 +211,15 @@ never a color fill or an icon. To add a photo: drop it at
 `.jr-media-note` span with an `<img>`. Keep the `aspect-ratio` on `.jr-media` —
 it is what stops the masonry columns reflowing as images load.
 
-### Config duplication (known)
+### Config
 
-`journal-core.js` mirrors `MAILCHIMP_FORM_ACTION` and `GA_MEASUREMENT_ID` from
-the top of `app.js`, because `app.js` runs the whole assessment on load and the
-Journal cannot include it. **Rotate either value in both files.** The clean fix
-is extracting a shared `config.js`; that touches the live assessment page, so it
-was left out of the Journal branch.
+All shared settings live in **`config.js`** — `MAILCHIMP_FORM_ACTION`,
+`GA_MEASUREMENT_ID`, and `MAILCHIMP_GROUP_FIELD_NOTES`. Both `index.html` and
+every Journal page load it **first**, before any other script, so these values
+exist in exactly one place. `journal-core.js` throws if it is missing rather
+than silently failing to subscribe anyone.
+
+`tests/tests.html` loads it too, since `app.js` no longer defines `CONFIG`.
 
 ## SEO / indexing
 - `robots.txt` — allows everything except `/tests/`, points at the sitemap.
