@@ -12,7 +12,32 @@
    if you rotate either one, change it in both places. */
 var JR_CONFIG = {
   MAILCHIMP_FORM_ACTION: 'https://tenpointservicestx.us4.list-manage.com/subscribe/post?u=ca6a6d0df8860fb34744c0490&id=32ae7807af&f_id=0046d6e0f0',
-  GA_MEASUREMENT_ID: 'G-DK01ZN4VLE'
+  GA_MEASUREMENT_ID: 'G-DK01ZN4VLE',
+
+  /* Marks Field Notes subscribers so they are distinguishable from
+     scorecard leads inside the one audience. The "Share blog updates
+     via RSS" automation targets this group.
+
+     CRITICAL: this is a GROUP (interest), not a tag. `tags=<id>` on
+     the post-json endpoint is accepted and then SILENTLY DISCARDED —
+     the contact subscribes, the response says success, and the tag
+     never lands. Verified by live test on Aug 9 2026. Same class of
+     trap as the f_id parameter documented in app.js.
+
+     The field name is Mailchimp's own: group[<categoryId>][<bit>].
+     Read it off the hosted signup form
+     (tenpointservicestx.us4.list-manage.com/subscribe?u=..&id=..) —
+     70477 is the "Subscriptions" category and 1 is the bit for the
+     "Field Notes" option. It is NOT the 270437 interest id shown in
+     the admin URL; that value does not work here.
+
+     A group rather than a second audience on purpose: Essentials
+     allows three audiences, but a contact in two counts twice
+     against the 500-contact plan and splits unsubscribes across two
+     lists. A group is also the primitive Mailchimp intends for
+     "which mailings do you want", so it shows up in the subscriber
+     preferences centre for free. */
+  MAILCHIMP_GROUP_PARAM: 'group[70477][1]=1'
 };
 
 /* =============================================================
@@ -59,6 +84,11 @@ function jrSubscribe(email, statusEl) {
   }
 
   var params = ['EMAIL=' + encodeURIComponent(email)];
+  if (JR_CONFIG.MAILCHIMP_GROUP_PARAM) {
+    /* Encode the brackets but not the = separating name from value. */
+    var g = JR_CONFIG.MAILCHIMP_GROUP_PARAM.split('=');
+    params.push(encodeURIComponent(g[0]) + '=' + encodeURIComponent(g[1]));
+  }
 
   // Honeypot field name is b_<u>_<id>, derived from the action URL.
   var u = /[?&]u=([^&]+)/.exec(JR_CONFIG.MAILCHIMP_FORM_ACTION);

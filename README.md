@@ -118,40 +118,74 @@ Do all of this in one commit; the drift tests fail if any step is missed.
 
 ### Field Notes subscription
 
-The form at the bottom of `/journal.html` and every article posts to whatever
-`JR_CONFIG.MAILCHIMP_FORM_ACTION` points at in `journal-core.js`. It currently
-points at the **existing, verified Mailchimp audience** — the same one the
-scorecard uses — because that pipeline is already proven end to end.
+Built and verified end to end on Aug 9 2026, on the existing Mailchimp
+audience (Essentials plan, 500 contacts).
 
-**Two things here cannot be done from the repo, and are not done:**
+**Done and tested:**
 
-1. **The list itself.** Creating a subscriber list is an account action inside
-   the ESP's dashboard, behind a login. Nothing in this repo can do it.
-2. **The send automation.** Same — it is built in the ESP, not in code.
+- Hidden group **Subscriptions > Field Notes** on the one audience.
+- The subscribe form on `/journal.html` and every article sends that group, so
+  Field Notes subscribers are distinguishable from scorecard leads.
+- Saved segment **"Field Notes subscribers"** (`Subscriptions one of Field
+  Notes`) — this is what an RSS campaign targets.
+- Verified by live signup through the real form: the contact lands with
+  `Groups > Subscriptions > Field Notes`, and the segment resolves to it.
 
-**"Email people when a new article publishes" is an RSS campaign, not a signup
-trigger.** A signup trigger fires once, when someone joins, and sends whatever
-was authored at that moment. It will not send them the *next* article. The
-mechanism that does is an RSS-driven campaign pointed at
-`https://tenpointstandard.com/feed.xml`: publishing an entry changes the feed,
-and the campaign sends on its next check. That is why `feed.xml` exists, and why
-step 3 above is not optional.
+**CRITICAL — it must be a group, not a tag.** `tags=<id>` on the
+`post-json` endpoint is accepted and then **silently discarded**: the contact
+subscribes, the response says `success`, and the tag never lands. This was
+confirmed by live test, not assumed — a first attempt using a tag produced a
+subscribed contact with an empty Tags column. Groups pass through correctly.
+This is the same class of trap as the `f_id` parameter in `app.js`.
 
-In Mailchimp the path is **Campaigns > Email > Automated > Share your blog**,
-feed URL `https://tenpointstandard.com/feed.xml`. Use a **separate audience or a
-`journal` tag** so Field Notes subscribers are not mixed with scorecard
-recipients — note the audience is already at the 30-merge-field cap, so add no
-new fields. And re-read the two Mailchimp gotchas above: strip `f_id`, and
-re-save the trigger after any pause/edit/reactivate cycle.
+The field name is Mailchimp's own, `group[<categoryId>][<bit>]`, held in
+`JR_CONFIG.MAILCHIMP_GROUP_PARAM`. Read it off the hosted signup form
+(`tenpointservicestx.us4.list-manage.com/subscribe?u=..&id=..`) — **not** from
+the interest id in the admin URL, which does not work here.
+
+**Why a group and not a second audience:** Essentials allows three audiences,
+but a contact in two counts twice against the 500-contact plan and splits
+unsubscribes across two lists. A group is also the primitive Mailchimp intends
+for "which mailings do you want", so it appears in the preferences centre free.
 
 **On GoDaddy:** GoDaddy sells mailbox hosting (the Microsoft 365 mail on this
 domain) and, separately, email marketing bundled with a Websites + Marketing
-plan. Those are different products, and the mailbox plan does not include a
-subscriber list. Whether that plan exists on this account can only be checked by
-signing in. Before moving off Mailchimp, weigh that a working, verified pipeline
-with an active journey would be replaced by one that has to be rebuilt and
-re-tested — and confirm GoDaddy's form can accept a cross-origin post from a
-static page, which Mailchimp's JSONP endpoint is what makes possible here.
+plan — different products, and the mailbox plan includes no subscriber list.
+Mailchimp was used because it is already wired, paid for, and verified.
+
+#### Still to do — two blockers
+
+**1. The RSS campaign cannot be created until the Journal is deployed.**
+"Email people when a new article publishes" is an RSS campaign, not a signup
+trigger: a signup trigger fires once on join and sends whatever existed then, so
+it will never send the *next* article. An RSS campaign watches the feed and
+sends when it changes — which is why `feed.xml` exists. Mailchimp validates the
+feed URL on creation, and `https://tenpointstandard.com/feed.xml` currently
+404s because this work is unmerged. Once it is live:
+
+> Audience > Segments > **Field Notes subscribers** > Actions > **Send RSS
+> email**, feed `https://tenpointstandard.com/feed.xml`.
+
+(That Actions menu is the only entry point left in this account's UI. There is
+no RSS option under Create > Email, and the legacy `wizard/neapolitan?type=rss`
+URL 404s. The "Share blog updates via RSS" flow template also exists under
+Automations > Flow templates.)
+
+**2. The Welcome journey fires for Field Notes subscribers, and should not.**
+"Welcome new contacts" triggers on any signup, so a Field Notes subscriber
+currently receives the **scorecard email with every merge field empty** — no
+score, no band, no ledger. Confirmed on the live test contacts. Before the
+Journal goes live, add a condition so that journey only runs for contacts *not*
+in the Field Notes group (or only those with a `SCORE`).
+
+Editing it is deliberately left undone because it is a live automation on the
+main lead-gen funnel, and **pausing and reactivating a journey can leave the
+trigger silently stale** (see the Mailchimp gotcha above). Whoever makes the
+change must re-save the trigger and run a live signup test afterwards.
+
+**Test contacts to clean up:** `coloradojeeper.small+fntest1@gmail.com`
+(no group — the failed tag attempt), `+fntest2` (no group — stale-cache run),
+`+fntest3` (correct, in the Field Notes group).
 
 ### Imagery
 
