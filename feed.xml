@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  RSS feed for the Field Journal.
+
+  This is what makes "email people when a new article publishes" work
+  without a server: point an RSS-driven campaign at this URL and the
+  send is triggered by the feed changing, not by anyone remembering to
+  press a button. See the README, "Field Notes subscription".
+
+  Hand-maintained, like the rest of the site. Add an <item> in the same
+  commit that publishes an entry, and update <lastBuildDate>. Only
+  published entries belong here — never a draft.
+
+  pubDate must be RFC-822, not ISO. Getting that wrong is the usual
+  reason an RSS campaign silently never fires.
+-->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ten Point Field Journal</title>
+    <link>https://tenpointstandard.com/journal.html</link>
+    <atom:link href="https://tenpointstandard.com/feed.xml" rel="self" type="application/rss+xml" />
+    <description>Insights from real world experience to help owners build, expand, and operate their resorts.</description>
+    <language>en-us</language>
+    <copyright>Copyright 2026 Ten Point Services</copyright>
+    <lastBuildDate>Sun, 09 Aug 2026 00:00:00 -0500</lastBuildDate>
+
+    <item>
+      <title>The absorption curve nobody underwrites</title>
+      <link>https://tenpointstandard.com/journal/absorption-curve.html</link>
+      <guid isPermaLink="true">https://tenpointstandard.com/journal/absorption-curve.html</guid>
+      <description>Most outdoor-resort models assume stabilization in year two. The projects that get there share three things, and none of them are in the pro forma.</description>
+      <category>Feasibility</category>
+      <pubDate>Tue, 28 Jul 2026 00:00:00 -0500</pubDate>
+    </item>
+
+  </channel>
+</rss>

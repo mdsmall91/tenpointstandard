@@ -9,7 +9,7 @@ Single-page static site: the Ten Point Standard self-assessment (40 yes/no quest
 - `styles/tokens.css`, `styles/base.css` — design system (portable, from the design handoff, do not hand-edit casually).
 - `styles/site.css` — page-specific styles (stepper flow).
 - `journal.html`, `journal/<slug>.html`, `posts.js`, `journal-core.js`, `journal.js`,
-  `journal-article.js`, `styles/journal.css` — the Journal (see below).
+  `journal-article.js`, `styles/journal.css`, `feed.xml` — the Field Journal (see below).
 - `CNAME` — custom domain for GitHub Pages.
 
 ## Configuration (top of `app.js`)
@@ -65,7 +65,7 @@ To see `score_band`, `score`, and `cta` in reports, register them as **custom di
 (Admin > Custom definitions), scope Event. Without that they only appear in DebugView and
 Realtime.
 
-## The Journal
+## The Field Journal
 
 Editorial section at `/journal.html`, built from the Claude Design handoff
 (*Field Guide Journal v2*). Credibility, lead gen, and SEO: every article page
@@ -80,33 +80,78 @@ shares, and subscribes.
 - `posts.js` — canonical content model (`TAGS`, `POSTS`). **No page loads it at
   runtime.** It is the source of truth that the static HTML must agree with, the
   way `QUESTIONS.md` is for the assessment.
-- `tests/journal-tests.html` — 335 checks that the HTML and `posts.js` still
-  agree: titles, deks, bylines, dates, read times, tags, canonicals, aspect
-  ratios, body copy, and the noindex rule below. **Serve over HTTP** (it fetches
-  the pages) and run it after editing either side.
+- `feed.xml` — RSS. This is what makes the subscription work; see below.
+- `tests/journal-tests.html` — 168 checks that the HTML, `posts.js`, and
+  `feed.xml` still agree: titles, deks, bylines, dates, read times, tags,
+  canonicals, aspect ratios, body copy, and the draft rule. **Serve over HTTP**
+  (it fetches the pages) and run it after editing any of the three.
 
-### Adding or editing an entry
+### Drafts — one article, and the rest held back
 
-1. Add the entry to `POSTS` in `posts.js`, newest first. Exactly one entry may
-   carry `featured: true`, and it must be `POSTS[0]`.
-2. Add a tile to `journal.html` and a page under `journal/<slug>.html`. Copy the
-   nearest existing one — the header, share row, author card, CTA, and
+An entry with `draft: true` in `posts.js` has **no tile, no page, no sitemap
+entry, and no feed item.** It is held back completely rather than published
+thin. Only its metadata lives in `posts.js`, ready for the copy.
+
+Right now one entry is published and seven are drafts, so:
+
+- The **filter bar and the grid ship with `hidden`** and are revealed by
+  `journal.js` only when a second tile exists. A seven-chip filter over a single
+  article reads as broken. Nothing has to be flipped by hand — add a second tile
+  and both come back on their own.
+- The page shows the featured entry alone.
+
+### Publishing an entry
+
+Do all of this in one commit; the drift tests fail if any step is missed.
+
+1. In `posts.js`: add the `body` array and **remove `draft: true`**. Entries stay
+   newest-first, and exactly one carries `featured: true` as `POSTS[0]`.
+2. Add the tile to `journal.html` and the page at `journal/<slug>.html`. Copy
+   `absorption-curve.html` — the header, share row, author card, CTA, and
    newsletter block are identical on every article.
-3. Run `tests/journal-tests.html` until it is 0 failures.
-4. Bump `?v=N` on `styles/journal.css` and the journal scripts if either changed.
+3. Add the URL to `sitemap.xml`, and an `<item>` to `feed.xml` with an
+   **RFC-822** `pubDate` (`Tue, 28 Jul 2026 00:00:00 -0500`, not ISO). Update
+   `<lastBuildDate>`. An ISO date here is the usual reason an RSS campaign
+   silently never sends.
+4. Run `tests/journal-tests.html` until it reports 0 failures.
+5. Bump `?v=N` on `styles/journal.css` and the journal scripts if either changed.
 
-### The noindex rule
+### Field Notes subscription
 
-Seven of the eight entries have no body copy yet. Those pages are built,
-styled, and reachable, but they carry `<meta name="robots" content="noindex,
-follow">`, have no `Article` JSON-LD, show the "Entry in preparation" block
-instead of a body, and are **absent from `sitemap.xml`**. A thin page in the
-index costs more than it earns.
+The form at the bottom of `/journal.html` and every article posts to whatever
+`JR_CONFIG.MAILCHIMP_FORM_ACTION` points at in `journal-core.js`. It currently
+points at the **existing, verified Mailchimp audience** — the same one the
+scorecard uses — because that pipeline is already proven end to end.
 
-When the copy lands for an entry, do all four in one commit: add the `body`
-array to `posts.js`, write the paragraphs into the page, flip robots to
-`index, follow` and add the `Article` JSON-LD, and add the URL to `sitemap.xml`.
-The drift tests enforce that these move together.
+**Two things here cannot be done from the repo, and are not done:**
+
+1. **The list itself.** Creating a subscriber list is an account action inside
+   the ESP's dashboard, behind a login. Nothing in this repo can do it.
+2. **The send automation.** Same — it is built in the ESP, not in code.
+
+**"Email people when a new article publishes" is an RSS campaign, not a signup
+trigger.** A signup trigger fires once, when someone joins, and sends whatever
+was authored at that moment. It will not send them the *next* article. The
+mechanism that does is an RSS-driven campaign pointed at
+`https://tenpointstandard.com/feed.xml`: publishing an entry changes the feed,
+and the campaign sends on its next check. That is why `feed.xml` exists, and why
+step 3 above is not optional.
+
+In Mailchimp the path is **Campaigns > Email > Automated > Share your blog**,
+feed URL `https://tenpointstandard.com/feed.xml`. Use a **separate audience or a
+`journal` tag** so Field Notes subscribers are not mixed with scorecard
+recipients — note the audience is already at the 30-merge-field cap, so add no
+new fields. And re-read the two Mailchimp gotchas above: strip `f_id`, and
+re-save the trigger after any pause/edit/reactivate cycle.
+
+**On GoDaddy:** GoDaddy sells mailbox hosting (the Microsoft 365 mail on this
+domain) and, separately, email marketing bundled with a Websites + Marketing
+plan. Those are different products, and the mailbox plan does not include a
+subscriber list. Whether that plan exists on this account can only be checked by
+signing in. Before moving off Mailchimp, weigh that a working, verified pipeline
+with an active journey would be replaced by one that has to be rebuilt and
+re-tested — and confirm GoDaddy's form can accept a cross-origin post from a
+static page, which Mailchimp's JSONP endpoint is what makes possible here.
 
 ### Imagery
 

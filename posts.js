@@ -41,8 +41,13 @@ function tagSlug(tag) {
    heroAspect drives the tile height, which is what produces the
    masonry rhythm. It is never randomized at runtime.
 
-   body is present only where the copy is written. An entry with
-   no body renders the pending block and carries noindex.
+   draft: true means the copy is not written. A draft has NO tile on
+   the index and NO page under journal/ — it is held back entirely
+   rather than published thin. Its metadata stays here so the entry
+   is ready to go the moment the copy lands: add the body array,
+   drop the draft flag, add the tile and the page, and add the URL
+   to sitemap.xml and feed.xml. The drift tests enforce that these
+   move together in both directions.
    ------------------------------------------------------------- */
 var POSTS = [
   {
@@ -95,6 +100,7 @@ var POSTS = [
     publishedAt: '2026-07-14',
     readTime: '7 min read',
     featured: false,
+    draft: true,
     body: null
   },
   {
@@ -115,6 +121,7 @@ var POSTS = [
     publishedAt: '2026-06-30',
     readTime: '11 min read',
     featured: false,
+    draft: true,
     body: null
   },
   {
@@ -135,6 +142,7 @@ var POSTS = [
     publishedAt: '2026-06-18',
     readTime: '6 min read',
     featured: false,
+    draft: true,
     body: null
   },
   {
@@ -155,6 +163,7 @@ var POSTS = [
     publishedAt: '2026-06-02',
     readTime: '8 min read',
     featured: false,
+    draft: true,
     body: null
   },
   {
@@ -175,6 +184,7 @@ var POSTS = [
     publishedAt: '2026-05-21',
     readTime: '5 min read',
     featured: false,
+    draft: true,
     body: null
   },
   {
@@ -195,6 +205,7 @@ var POSTS = [
     publishedAt: '2026-05-09',
     readTime: '7 min read',
     featured: false,
+    draft: true,
     body: null
   },
   {
@@ -215,6 +226,7 @@ var POSTS = [
     publishedAt: '2026-04-24',
     readTime: '6 min read',
     featured: false,
+    draft: true,
     body: null
   }
 ];

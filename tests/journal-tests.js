@@ -49,11 +49,25 @@
     return MONTHS[parseInt(p[1], 10) - 1] + ' ' + parseInt(p[2], 10) + ', ' + p[0];
   }
 
+  /* A draft is an entry whose copy is not written. It is held back
+     entirely: no tile, no page, no sitemap or feed entry. Only
+     published entries exist as far as the site is concerned. */
+  function published() { return POSTS.filter(function (p) { return !p.draft; }); }
+
   /* ---------- model-only checks ---------- */
   function checkModel() {
     var featured = POSTS.filter(function (p) { return p.featured; });
     eq('exactly one featured entry', featured.length, 1);
     check('featured entry is first', POSTS[0] && POSTS[0].featured === true);
+    check('featured entry is published', POSTS[0] && !POSTS[0].draft);
+    check('at least one published entry', published().length >= 1, published().length);
+
+    /* draft and body must agree, or the site publishes an empty page
+       or holds back a finished one. */
+    POSTS.forEach(function (p) {
+      if (p.draft) check('draft has no body: ' + p.slug, p.body === null);
+      else check('published has body: ' + p.slug, !!(p.body && p.body.length));
+    });
 
     var slugs = {};
     POSTS.forEach(function (p) {
@@ -78,9 +92,24 @@
   /* ---------- index page ---------- */
   function checkIndex(doc) {
     var tiles = [].slice.call(doc.querySelectorAll('.jr-tile'));
-    eq('index: one tile per post', tiles.length, POSTS.length);
+    eq('index: one tile per published post', tiles.length, published().length);
 
-    POSTS.forEach(function (p) {
+    /* A draft must leave no trace on the index. */
+    POSTS.filter(function (p) { return p.draft; }).forEach(function (p) {
+      check('index: no tile for draft ' + p.slug,
+        !doc.querySelector('a[href="journal/' + p.slug + '.html"]'));
+    });
+
+    /* With only the featured entry published there is nothing to put
+       in the grid, so both it and the filter ship hidden; journal.js
+       reveals them once a second tile exists. */
+    var gridWrap = doc.getElementById('jr-grid-wrap');
+    var filterBar = doc.getElementById('jr-filter');
+    var expectHidden = published().length <= 1;
+    eq('index: grid hidden while single entry', gridWrap.hasAttribute('hidden'), expectHidden);
+    eq('index: filter hidden while single entry', filterBar.hasAttribute('hidden'), expectHidden);
+
+    published().forEach(function (p) {
       var link = doc.querySelector('.jr-tile a[href="journal/' + p.slug + '.html"]');
       check('index: tile exists for ' + p.slug, !!link);
       if (!link) return;
@@ -113,10 +142,50 @@
 
     check('index: is indexable',
       /index/.test(doc.querySelector('meta[name="robots"]').content));
-    eq('index: entry count label',
-      text(doc, '.tp-hero-meta span'), POSTS.length + ' entries');
+    eq('index: h1', text(doc, 'h1'), 'Field Journal');
+    eq('index: no hero meta column', doc.querySelector('.tp-hero-meta'), null);
     eq('index: newsletter posts to the shared handler',
       !!doc.getElementById('jr-dispatch-form'), true);
+    check('index: subscribe eyebrow matches the assessment treatment',
+      !!doc.querySelector('.jr-dispatch .eyebrow.dotted'));
+    check('index: declares the RSS feed',
+      !!doc.querySelector('link[rel="alternate"][type="application/rss+xml"]'));
+    check('index: header carries no wordmark', !doc.querySelector('.jr-wordmark'));
+    check('index: no Field Guide nav link',
+      [].slice.call(doc.querySelectorAll('.tp-nav a')).every(function (a) {
+        return norm(a.textContent) !== 'Field Guide';
+      }));
+  }
+
+  /* ---------- feed ----------
+     An RSS-driven campaign is what turns "notify me" into an actual
+     send, so the feed drifting from the site breaks the subscription
+     silently rather than visibly. */
+  function checkFeed(doc) {
+    var items = [].slice.call(doc.querySelectorAll('item'));
+    eq('feed: one item per published post', items.length, published().length);
+
+    published().forEach(function (p) {
+      var url = 'https://tenpointstandard.com/journal/' + p.slug + '.html';
+      var item = items.filter(function (i) {
+        return norm(i.querySelector('link').textContent) === url;
+      })[0];
+      check('feed: item for ' + p.slug, !!item);
+      if (!item) return;
+      eq('feed: title ' + p.slug, norm(item.querySelector('title').textContent), p.title);
+      eq('feed: description ' + p.slug, norm(item.querySelector('description').textContent), p.dek);
+      /* RFC-822, not ISO. An ISO date here is the usual reason an RSS
+         campaign silently never fires. */
+      check('feed: pubDate is RFC-822 ' + p.slug,
+        /^[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} [+-]\d{4}$/
+          .test(norm(item.querySelector('pubDate').textContent)),
+        norm(item.querySelector('pubDate').textContent));
+    });
+
+    POSTS.filter(function (p) { return p.draft; }).forEach(function (p) {
+      check('feed: draft absent ' + p.slug,
+        items.every(function (i) { return i.querySelector('link').textContent.indexOf(p.slug) === -1; }));
+    });
   }
 
   /* ---------- article pages ---------- */
@@ -151,37 +220,27 @@
     check(s + 'back link present',
       doc.querySelector('.jr-back').getAttribute('href') === '../journal.html');
 
-    /* Written entries are indexable and carry their body; unwritten
-       ones carry noindex and the pending block instead. Getting this
-       backwards puts a thin page in the index. */
+    /* Only published entries have pages at all, so every page that
+       exists must be indexable and carry its copy. */
     var robots = doc.querySelector('meta[name="robots"]').content;
-    var hasBody = !!p.body;
-    var pending = !!doc.querySelector('.jr-body-pending');
+    check(s + 'indexable', /^index/.test(robots), robots);
+    check(s + 'has Article JSON-LD', !!doc.querySelector('script[type="application/ld+json"]'));
+    check(s + 'header carries no wordmark', !doc.querySelector('.jr-wordmark'));
 
-    if (hasBody) {
-      check(s + 'indexable', /^index/.test(robots), robots);
-      check(s + 'no pending block', !pending);
-      check(s + 'has Article JSON-LD', !!doc.querySelector('script[type="application/ld+json"]'));
+    var paras = [].slice.call(doc.querySelectorAll('.jr-body p')).map(function (el) { return norm(el.textContent); });
+    var heads = [].slice.call(doc.querySelectorAll('.jr-body h2')).map(function (el) { return norm(el.textContent); });
+    var quotes = [].slice.call(doc.querySelectorAll('.jr-body blockquote')).map(function (el) {
+      return norm(el.childNodes[0].textContent);
+    });
 
-      var paras = [].slice.call(doc.querySelectorAll('.jr-body p')).map(function (el) { return norm(el.textContent); });
-      var heads = [].slice.call(doc.querySelectorAll('.jr-body h2')).map(function (el) { return norm(el.textContent); });
-      var quotes = [].slice.call(doc.querySelectorAll('.jr-body blockquote')).map(function (el) {
-        return norm(el.childNodes[0].textContent);
-      });
+    var wantParas = p.body.filter(function (b) { return b.type === 'para'; }).map(function (b) { return norm(b.text); });
+    var wantHeads = p.body.filter(function (b) { return b.type === 'head'; }).map(function (b) { return norm(b.text); });
+    var wantQuotes = p.body.filter(function (b) { return b.type === 'quote'; }).map(function (b) { return norm(b.text); });
 
-      var wantParas = p.body.filter(function (b) { return b.type === 'para'; }).map(function (b) { return norm(b.text); });
-      var wantHeads = p.body.filter(function (b) { return b.type === 'head'; }).map(function (b) { return norm(b.text); });
-      var wantQuotes = p.body.filter(function (b) { return b.type === 'quote'; }).map(function (b) { return norm(b.text); });
-
-      eq(s + 'body paragraphs', JSON.stringify(paras), JSON.stringify(wantParas));
-      eq(s + 'body headings', JSON.stringify(heads), JSON.stringify(wantHeads));
-      eq(s + 'body quotes', JSON.stringify(quotes), JSON.stringify(wantQuotes));
-      check(s + 'pull quote uses .pull', wantQuotes.length === 0 || !!doc.querySelector('.jr-body blockquote.pull'));
-    } else {
-      check(s + 'noindex while unwritten', /noindex/.test(robots), robots);
-      check(s + 'pending block shown', pending);
-      check(s + 'no body paragraphs', doc.querySelectorAll('.jr-body p').length === 0);
-    }
+    eq(s + 'body paragraphs', JSON.stringify(paras), JSON.stringify(wantParas));
+    eq(s + 'body headings', JSON.stringify(heads), JSON.stringify(wantHeads));
+    eq(s + 'body quotes', JSON.stringify(quotes), JSON.stringify(wantQuotes));
+    check(s + 'pull quote uses .pull', wantQuotes.length === 0 || !!doc.querySelector('.jr-body blockquote.pull'));
   }
 
   /* ---------- run ---------- */
@@ -199,15 +258,28 @@
 
   checkModel();
 
-  get('../journal.html')
-    .then(function (doc) {
-      checkIndex(doc);
-      return Promise.all(POSTS.map(function (p) {
-        return get('../journal/' + p.slug + '.html')
-          .then(function (d) { checkArticle(p, d); })
-          .catch(function (e) { check('article ' + p.slug + ': page loads', false, e.message); });
-      }));
-    })
+  Promise.all([
+    get('../journal.html').then(checkIndex),
+
+    fetch('../feed.xml').then(function (r) { return r.text(); }).then(function (t) {
+      checkFeed(new DOMParser().parseFromString(t, 'text/xml'));
+    }),
+
+    Promise.all(published().map(function (p) {
+      return get('../journal/' + p.slug + '.html')
+        .then(function (d) { checkArticle(p, d); })
+        .catch(function (e) { check('article ' + p.slug + ': page loads', false, e.message); });
+    })),
+
+    /* A draft must have no page. If one is still on disk it will be
+       orphaned — reachable by URL, absent from the index, and
+       invisible to anyone reviewing the site. */
+    Promise.all(POSTS.filter(function (p) { return p.draft; }).map(function (p) {
+      return fetch('../journal/' + p.slug + '.html').then(function (r) {
+        check('draft ' + p.slug + ': has no page', r.status === 404, 'HTTP ' + r.status);
+      });
+    }))
+  ])
     .then(function () { report(); })
     .catch(function (e) { report(e); });
 })();

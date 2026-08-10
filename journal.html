@@ -3,19 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Journal | The Ten Point Standard</title>
-<meta name="description" content="Field notes from the practice: working knowledge from the operators, lenders, builders, and land planners who have taken outdoor resorts from raw dirt through a stabilized year.">
+<title>Field Journal | The Ten Point Standard</title>
+<meta name="description" content="Insights from real world experience to help owners build, expand, and operate their resorts.">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 <link rel="canonical" href="https://tenpointstandard.com/journal.html">
+<link rel="alternate" type="application/rss+xml" title="Ten Point Field Journal" href="https://tenpointstandard.com/feed.xml">
 <meta property="og:site_name" content="The Ten Point Standard">
-<meta property="og:title" content="The Journal | The Ten Point Standard">
-<meta property="og:description" content="Working knowledge from the operators, lenders, builders, and land planners who have taken outdoor resorts from raw dirt through a stabilized year.">
+<meta property="og:title" content="Field Journal | The Ten Point Standard">
+<meta property="og:description" content="Insights from real world experience to help owners build, expand, and operate their resorts.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tenpointstandard.com/journal.html">
 <meta property="og:image" content="https://tenpointstandard.com/assets/tenpoint-logo-current.png">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="The Journal | The Ten Point Standard">
-<meta name="twitter:description" content="Working knowledge from the people who have taken outdoor resorts from raw dirt through a stabilized year.">
+<meta name="twitter:title" content="Field Journal | The Ten Point Standard">
+<meta name="twitter:description" content="Insights from real world experience to help owners build, expand, and operate their resorts.">
 <link rel="icon" type="image/png" href="assets/tenpoint-logo-current.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,8 +31,8 @@
   "@type": "Blog",
   "@id": "https://tenpointstandard.com/journal.html#blog",
   "url": "https://tenpointstandard.com/journal.html",
-  "name": "The Journal",
-  "description": "Field notes from the practice of outdoor hospitality development.",
+  "name": "Field Journal",
+  "description": "Insights from real world experience to help owners build, expand, and operate their resorts.",
   "publisher": {
     "@type": "Organization",
     "@id": "https://tenpointservicestx.com/#organization",
@@ -48,11 +49,9 @@
     <div class="tp-header-inner">
       <a class="jr-brand" href="/" aria-label="The Ten Point Standard">
         <span role="img" aria-hidden="true" class="jr-logo"></span>
-        <span class="jr-wordmark">The Ten Point<br>Standard</span>
       </a>
       <nav class="tp-nav" aria-label="Primary">
-        <a href="/">Field Guide</a>
-        <a href="/journal.html" class="active" aria-current="page">The Journal</a>
+        <a href="/journal.html" class="active" aria-current="page">Field Journal</a>
         <a href="https://tenpointservicestx.com" target="_blank" rel="noopener">Ten Point Services</a>
       </nav>
       <a class="btn accent sm jr-header-cta" href="/">Score your project</a>
@@ -63,15 +62,10 @@
 
     <!-- ---------- page hero ---------- -->
     <section class="page">
-      <div class="tp-hero">
+      <div class="tp-hero jr-hero-solo">
         <div>
-          <div class="eyebrow" style="color: var(--accent-deep);">Field notes from the practice</div>
-          <h1 style="margin-top: var(--s-5);">The Journal</h1>
-          <p class="lede muted">Working knowledge from the operators, lenders, builders, and land planners who have taken outdoor resorts from raw dirt through a stabilized year. Written by the people who did the work.</p>
-        </div>
-        <div class="tp-hero-meta">
-          <span>8 entries</span>
-          <span>Published as written</span>
+          <h1>Field Journal</h1>
+          <p class="lede muted">Insights from real world experience to help owners build, expand, and operate their resorts.</p>
         </div>
       </div>
     </section>
@@ -104,8 +98,13 @@
       </article>
     </section>
 
-    <!-- ---------- filter ---------- -->
-    <div class="jr-filter">
+    <!-- ---------- filter ----------
+         Hidden until there is more than one published entry: a
+         seven-chip filter over a single article reads as broken.
+         journal.js counts the tiles and reveals this, so it comes
+         back on its own as soon as a second entry is added — no
+         flag to remember to flip. -->
+    <div class="jr-filter" id="jr-filter" hidden>
       <div class="jr-filter-inner">
         <span class="jr-filter-label">Filter</span>
         <button class="jr-chip" data-tag="all" aria-pressed="true">All entries</button>
@@ -119,12 +118,16 @@
     </div>
 
     <!-- ---------- grid ----------
-         Every entry is in the markup, including the featured one:
-         it is hidden under "All entries" (where it already shows
-         above) and reappears when its own tag is selected. The
-         aspect ratio on each media box is the post's heroAspect,
-         set explicitly so the columns cannot reflow on load. -->
-    <section class="jr-grid-wrap">
+         Every published entry is in the markup, including the
+         featured one: it is hidden under "All entries" (where it
+         already shows above) and reappears when its own tag is
+         selected. The aspect ratio on each media box is the post's
+         heroAspect, set explicitly so the columns cannot reflow.
+
+         Hidden alongside the filter while the featured entry is the
+         only published post — there is nothing left to put in the
+         grid. Add a second tile and both reappear. -->
+    <section class="jr-grid-wrap" id="jr-grid-wrap" hidden>
       <div class="jr-grid" id="jr-grid">
 
         <article class="jr-tile" data-tag="feasibility" data-featured hidden>
@@ -146,138 +149,8 @@
           </div>
         </article>
 
-        <article class="jr-tile" data-tag="capital">
-          <div class="jr-media" style="aspect-ratio: 4 / 5;">
-            <span class="jr-media-note">Photo — loan package on a desk, 4:5</span>
-          </div>
-          <div class="jr-tile-body">
-            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Capital</span></div>
-            <h3 class="jr-tile-title"><a href="journal/lender-reads-first.html" data-journal-link>What a lender actually reads first</a></h3>
-            <p class="jr-tile-dek">A credit officer spends eleven minutes with your package before forming a view. Here is the order they read it in.</p>
-            <div class="jr-byline">
-              <div class="jr-avatar">1:1</div>
-              <div style="min-width: 0;">
-                <div class="jr-byline-name">Dana Whitfield</div>
-                <div class="jr-byline-cred">SVP Credit, regional bank</div>
-              </div>
-              <div class="jr-byline-meta">7 min read</div>
-            </div>
-          </div>
-        </article>
 
-        <article class="jr-tile" data-tag="construction">
-          <div class="jr-media" style="aspect-ratio: 3 / 2;">
-            <span class="jr-media-note">Photo — trenching, wide, 3:2</span>
-          </div>
-          <div class="jr-tile-body">
-            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Construction</span></div>
-            <h3 class="jr-tile-title"><a href="journal/utility-routing.html" data-journal-link>Utility routing is the schedule</a></h3>
-            <p class="jr-tile-dek">On six of the last eight projects we audited, the critical path ran through a dry utility easement drawn late and negotiated later.</p>
-            <div class="jr-byline">
-              <div class="jr-avatar">1:1</div>
-              <div style="min-width: 0;">
-                <div class="jr-byline-name">Marcus Oyelaran</div>
-                <div class="jr-byline-cred">Site superintendent, 19 years</div>
-              </div>
-              <div class="jr-byline-meta">11 min read</div>
-            </div>
-          </div>
-        </article>
 
-        <article class="jr-tile" data-tag="operations">
-          <div class="jr-media" style="aspect-ratio: 1 / 1;">
-            <span class="jr-media-note">Photo — morning shift meeting, 1:1</span>
-          </div>
-          <div class="jr-tile-body">
-            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Operations</span></div>
-            <h3 class="jr-tile-title"><a href="journal/shoulder-season-staffing.html" data-journal-link>Staffing for a season you cannot forecast</a></h3>
-            <p class="jr-tile-dek">The shoulder-season labor model is the single largest controllable variance in a first operating year.</p>
-            <div class="jr-byline">
-              <div class="jr-avatar">1:1</div>
-              <div style="min-width: 0;">
-                <div class="jr-byline-name">Renata Alvarez</div>
-                <div class="jr-byline-cred">General manager, 240-site resort</div>
-              </div>
-              <div class="jr-byline-meta">6 min read</div>
-            </div>
-          </div>
-        </article>
-
-        <article class="jr-tile" data-tag="land-entitlement">
-          <div class="jr-media" style="aspect-ratio: 3 / 2;">
-            <span class="jr-media-note">Photo — county plat map detail, 3:2</span>
-          </div>
-          <div class="jr-tile-body">
-            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Land &amp; Entitlement</span></div>
-            <h3 class="jr-tile-title"><a href="journal/reading-a-county.html" data-journal-link>Reading a county before you read the site</a></h3>
-            <p class="jr-tile-dek">Zoning tells you what is permitted. The last four commissioners’ meetings tell you what is possible.</p>
-            <div class="jr-byline">
-              <div class="jr-avatar">1:1</div>
-              <div style="min-width: 0;">
-                <div class="jr-byline-name">Paul Steinhauer</div>
-                <div class="jr-byline-cred">Land planner, AICP</div>
-              </div>
-              <div class="jr-byline-meta">8 min read</div>
-            </div>
-          </div>
-        </article>
-
-        <article class="jr-tile" data-tag="guest-experience">
-          <div class="jr-media" style="aspect-ratio: 4 / 5;">
-            <span class="jr-media-note">Photo — gatehouse at dusk, 4:5</span>
-          </div>
-          <div class="jr-tile-body">
-            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Guest Experience</span></div>
-            <h3 class="jr-tile-title"><a href="journal/arrival-sequence.html" data-journal-link>The arrival sequence is the product</a></h3>
-            <p class="jr-tile-dek">Guests decide how they feel about a property in the ninety seconds between the gate and the pad. Most sites spend nothing there.</p>
-            <div class="jr-byline">
-              <div class="jr-avatar">1:1</div>
-              <div style="min-width: 0;">
-                <div class="jr-byline-name">Ines Bardot</div>
-                <div class="jr-byline-cred">Hospitality designer</div>
-              </div>
-              <div class="jr-byline-meta">5 min read</div>
-            </div>
-          </div>
-        </article>
-
-        <article class="jr-tile" data-tag="capital">
-          <div class="jr-media" style="aspect-ratio: 3 / 2;">
-            <span class="jr-media-note">Photo — meeting room, 3:2</span>
-          </div>
-          <div class="jr-tile-body">
-            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Capital</span></div>
-            <h3 class="jr-tile-title"><a href="journal/patient-equity.html" data-journal-link>Equity that understands seasonality</a></h3>
-            <p class="jr-tile-dek">Not all capital is patient in the same places. A partner who tolerates a slow year two may not tolerate a slow month six.</p>
-            <div class="jr-byline">
-              <div class="jr-avatar">1:1</div>
-              <div style="min-width: 0;">
-                <div class="jr-byline-name">Dana Whitfield</div>
-                <div class="jr-byline-cred">SVP Credit, regional bank</div>
-              </div>
-              <div class="jr-byline-meta">7 min read</div>
-            </div>
-          </div>
-        </article>
-
-        <article class="jr-tile" data-tag="feasibility">
-          <div class="jr-media" style="aspect-ratio: 1 / 1;">
-            <span class="jr-media-note">Photo — regional map on a tailgate, 1:1</span>
-          </div>
-          <div class="jr-tile-body">
-            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Feasibility</span></div>
-            <h3 class="jr-tile-title"><a href="journal/comparable-sets.html" data-journal-link>Comparable sets that actually compare</a></h3>
-            <p class="jr-tile-dek">A property forty miles away with a different drive-time catchment is not a comp. It is a coincidence.</p>
-            <div class="jr-byline">
-              <div class="jr-avatar">1:1</div>
-              <div style="min-width: 0;">
-                <div class="jr-byline-name">Kenny Reed</div>
-                <div class="jr-byline-cred">Principal, Ten Point Services</div>
-              </div>
-              <div class="jr-byline-meta">6 min read</div>
-            </div>
-          </div>
-        </article>
 
       </div>
       <p class="jr-empty" id="jr-empty" hidden>No entries under this tag yet.</p>
@@ -287,9 +160,10 @@
     <section class="jr-dispatch">
       <div class="jr-dispatch-inner">
         <div>
-          <div class="eyebrow" style="color: var(--accent-deep); margin-bottom: var(--s-4);">Field dispatch</div>
-          <h2>New entries, sent when they publish.</h2>
-          <p>Writing from the practice, and the occasional ledger of what a project actually cost. If that is useful to you, leave your email. Unsubscribe in one click.</p>
+          <!-- Same .eyebrow.dotted treatment as the cover eyebrow on the
+               assessment page, so the two pages read as one site. -->
+          <div class="eyebrow dotted" style="margin-bottom: var(--s-4);">Field Notes</div>
+          <h2>Subscribe to be notified when new articles are published to the Field Notes.</h2>
         </div>
         <form class="jr-form" id="jr-dispatch-form" novalidate>
           <label class="sr-only" for="jr-dispatch-email" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Email address</label>

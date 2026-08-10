@@ -47,6 +47,11 @@ a:hover { color: var(--accent-deep); }
    720px breakpoint, where base.css hides .tp-nav entirely. */
 .jr-header-cta { display: inline-flex; }
 
+/* The page hero has no right-hand meta column, so it does not need
+   base.css's 9fr 3fr split — that would just strand a third of the
+   width. Everything else about .tp-hero still applies. */
+.jr-hero-solo { grid-template-columns: 1fr; }
+
 /* =============================================================
    INDEX — featured entry
    ============================================================= */
@@ -262,16 +267,6 @@ a:hover { color: var(--accent-deep); }
   margin: var(--s-12) 0 var(--s-5);
 }
 .jr-body blockquote { margin: var(--s-12) 0; }
-
-/* Copy still with the author. Same mono treatment as the image
-   placeholders, so an unfinished entry reads as deliberate. */
-.jr-body-pending {
-  border: var(--hairline); background: var(--surface);
-  padding: var(--s-12) var(--s-8); text-align: center;
-  font-family: var(--font-mono); font-size: 11px;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--text-faint); line-height: 1.8;
-}
 
 .jr-share {
   border-top: var(--hairline); padding-top: var(--s-5);

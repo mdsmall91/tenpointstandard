@@ -19,6 +19,19 @@ var JR_STORE = 'tp-journal-return';
   var tiles = [].slice.call(document.querySelectorAll('.jr-tile'));
   var empty = document.getElementById('jr-empty');
   var grid = document.getElementById('jr-grid');
+  var gridWrap = document.getElementById('jr-grid-wrap');
+  var filterBar = document.getElementById('jr-filter');
+
+  /* The filter and the grid ship hidden and are revealed here, so
+     that a Journal with a single article shows just the featured
+     entry rather than a seven-chip filter over an empty grid. Both
+     come back on their own the moment a second tile is added —
+     there is no flag anyone has to remember to flip. */
+  var hasGrid = tiles.length > 1;
+  if (hasGrid) {
+    if (gridWrap) gridWrap.hidden = false;
+    if (filterBar) filterBar.hidden = false;
+  }
 
   /* ---------- filtering ---------- */
   function apply(tag, opts) {
@@ -39,8 +52,13 @@ var JR_STORE = 'tp-journal-return';
       chips[c].setAttribute('aria-pressed', on ? 'true' : 'false');
     }
 
-    if (empty) empty.hidden = shown > 0;
-    if (grid) grid.hidden = shown === 0;
+    /* Only meaningful once the grid is in play. With a single entry
+       there is no filter to miss with, so "no entries under this
+       tag" must never appear. */
+    if (hasGrid) {
+      if (empty) empty.hidden = shown > 0;
+      if (grid) grid.hidden = shown === 0;
+    }
 
     /* Bare /journal.html is "All". Anything else carries ?tag=.
        replaceState on the initial pass so the back button still
