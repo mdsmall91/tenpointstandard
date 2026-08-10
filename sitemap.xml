@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Only indexable URLs belong here. The seven Journal entries whose copy is
+     not written yet carry noindex and are deliberately absent; add each one
+     in the same commit that adds its body text and flips its robots tag. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://tenpointstandard.com/</loc>
     <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://tenpointstandard.com/journal.html</loc>
+    <lastmod>2026-08-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tenpointstandard.com/journal/entitlements.html</loc>
+    <lastmod>2026-08-09</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

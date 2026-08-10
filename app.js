@@ -1,16 +1,8 @@
 'use strict';
 
-/* =============================================================
-   CONFIG — the only values that need editing after launch.
-   ============================================================= */
-var CONFIG = {
-  // Mailchimp embedded-form action URL for the audience signup form.
-  // Mailchimp: Audience > Signup forms > Embedded forms > copy the <form action="..."> URL.
-  MAILCHIMP_FORM_ACTION: 'https://tenpointservicestx.us4.list-manage.com/subscribe/post?u=ca6a6d0df8860fb34744c0490&id=32ae7807af&f_id=0046d6e0f0',
-
-  // Google Analytics 4 measurement ID. Leave empty to disable.
-  GA_MEASUREMENT_ID: 'G-DK01ZN4VLE'
-};
+/* CONFIG now lives in config.js, which index.html loads before this
+   file. It is shared with the Field Journal so the Mailchimp and GA
+   values exist in exactly one place. */
 
 /* =============================================================
    DATA — canonical, copy verbatim from the design handoff.

@@ -8,6 +8,8 @@ Single-page static site: the Ten Point Standard self-assessment (40 yes/no quest
 - `app.js` — all data (POINTS/BANDS), state, rendering, Mailchimp + GA4 wiring.
 - `styles/tokens.css`, `styles/base.css` — design system (portable, from the design handoff, do not hand-edit casually).
 - `styles/site.css` — page-specific styles (stepper flow).
+- `journal.html`, `journal/<slug>.html`, `posts.js`, `journal-core.js`, `journal.js`,
+  `journal-article.js`, `styles/journal.css`, `feed.xml` — the Field Journal (see below).
 - `CNAME` — custom domain for GitHub Pages.
 
 ## Configuration (top of `app.js`)
@@ -47,12 +49,188 @@ result they already have. "Start over" clears the answers and both can fire agai
 `score_band` is the **verdict stage**, not the raw score band: an open critical gate can pull
 the shown stage below the score, and `gated: yes` marks that case.
 
+**Journal events** (fired by `journal-core.js`, per the design handoff):
+
+| Event | Fires when | Params |
+| --- | --- | --- |
+| `journal_view` | an article page loads | `slug` |
+| `journal_filter` | a filter chip is clicked (not on load or back/forward) | `tag` |
+| `journal_share` | a share link or copy-link is used | `slug`, `channel` (`linkedin`/`x`/`email`/`copy`) |
+| `journal_subscribe` | a Journal newsletter signup succeeds | — |
+
 **Legacy events**, still firing so historical reports keep working: `fg_begin`,
 `fg_view_ledger`, `fg_email_captured`, `fg_skip`, `fg_reset`, `fg_full_assessment_request`.
 
 To see `score_band`, `score`, and `cta` in reports, register them as **custom dimensions**
 (Admin > Custom definitions), scope Event. Without that they only appear in DebugView and
 Realtime.
+
+## The Field Journal
+
+Editorial section at `/journal.html`, built from the Claude Design handoff
+(*Field Guide Journal v2*). Credibility, lead gen, and SEO: every article page
+ends in the assessment CTA.
+
+**Everything is static.** `journal.html` carries the full markup for every tile,
+and each article is a hand-written page under `journal/`. No tile and no
+paragraph is injected at runtime — that is deliberate, and it is the same
+lesson `index.html` learned (see *SEO / indexing* below). The JS only filters,
+shares, and subscribes.
+
+- `posts.js` — canonical **metadata** (`TAGS`, `POSTS`). **No page loads it at
+  runtime.** It is the source of truth that the static HTML must agree with, the
+  way `QUESTIONS.md` is for the assessment. **Body copy is not in here** — it
+  lives only in the page. Mirroring a 2,000-word article in a file nothing loads
+  is two copies to keep in step, which is a drift risk rather than a safeguard.
+- `feed.xml` — RSS. This is what makes the subscription work; see below.
+- `tests/journal-tests.html` — 183 checks that the HTML, `posts.js`, and
+  `feed.xml` still agree: titles, deks, bylines, dates, read times, tags,
+  canonicals, aspect ratios, chip order, and the draft rule. Prose is not
+  diffed; instead a published page must carry a real body (≥3 paragraphs,
+  ≥300 words) with a read time within range of its actual length, every pull
+  quote must use `.pull`, and every source must carry an `https://` link.
+  **Serve over HTTP** (it fetches the pages) and run it after editing any of
+  the three.
+
+### Drafts — one article, and the rest held back
+
+An entry with `draft: true` in `posts.js` has **no tile, no page, no sitemap
+entry, and no feed item.** It is held back completely rather than published
+thin. Only its metadata lives in `posts.js`, ready for the copy.
+
+Right now **one entry is published** — *Entitlements*, by Matt Small — and
+eight are drafts, so:
+
+- The **filter bar and the grid ship with `hidden`** and are revealed by
+  `journal.js` only when a second tile exists. A seven-chip filter over a single
+  article reads as broken. Nothing has to be flipped by hand — add a second tile
+  and both come back on their own.
+- The page shows the featured entry alone.
+
+### Publishing an entry
+
+Do all of this in one commit; the drift tests fail if any step is missed.
+
+1. In `posts.js`: add the metadata and **remove `draft: true`**. Entries stay
+   newest-first, and exactly one carries `featured: true` as `POSTS[0]`. Set
+   `metaDescription` if the dek is too short to work as a search snippet.
+2. Add the tile to `journal.html` and the page at `journal/<slug>.html`. Copy
+   `entitlements.html` — the header, share row, author card, CTA, and
+   newsletter block are identical on every article. Body copy goes in the page
+   only. Available body elements: `<p>`, `<h2>`, `<ul>`, `<ol>` (a `<strong>`
+   lead-in per item reads well on numbered points), `<blockquote class="pull">`,
+   and a `.jr-sources` block of numbered citations with links.
+3. Add the URL to `sitemap.xml`, and an `<item>` to `feed.xml` with an
+   **RFC-822** `pubDate` (`Tue, 28 Jul 2026 00:00:00 -0500`, not ISO). Update
+   `<lastBuildDate>`. An ISO date here is the usual reason an RSS campaign
+   silently never sends.
+4. Run `tests/journal-tests.html` until it reports 0 failures.
+5. Bump `?v=N` on `styles/journal.css` and the journal scripts if either changed.
+
+### Field Notes subscription
+
+Built and verified end to end on Aug 9 2026, on the existing Mailchimp
+audience (Essentials plan, 500 contacts).
+
+**Done and tested:**
+
+- Hidden group **Subscriptions > Field Notes** on the one audience.
+- The subscribe form on `/journal.html` and every article sends that group, so
+  Field Notes subscribers are distinguishable from scorecard leads.
+- Saved segment **"Field Notes subscribers"** (`Subscriptions one of Field
+  Notes`) — this is what an RSS campaign targets.
+- Verified by live signup through the real form: the contact lands with
+  `Groups > Subscriptions > Field Notes`, and the segment resolves to it.
+
+**CRITICAL — it must be a group, not a tag.** `tags=<id>` on the
+`post-json` endpoint is accepted and then **silently discarded**: the contact
+subscribes, the response says `success`, and the tag never lands. This was
+confirmed by live test, not assumed — a first attempt using a tag produced a
+subscribed contact with an empty Tags column. Groups pass through correctly.
+This is the same class of trap as the `f_id` parameter in `app.js`.
+
+The field name is Mailchimp's own, `group[<categoryId>][<bit>]`, held in
+`JR_CONFIG.MAILCHIMP_GROUP_PARAM`. Read it off the hosted signup form
+(`tenpointservicestx.us4.list-manage.com/subscribe?u=..&id=..`) — **not** from
+the interest id in the admin URL, which does not work here.
+
+**Why a group and not a second audience:** Essentials allows three audiences,
+but a contact in two counts twice against the 500-contact plan and splits
+unsubscribes across two lists. A group is also the primitive Mailchimp intends
+for "which mailings do you want", so it appears in the preferences centre free.
+
+**On GoDaddy:** GoDaddy sells mailbox hosting (the Microsoft 365 mail on this
+domain) and, separately, email marketing bundled with a Websites + Marketing
+plan — different products, and the mailbox plan includes no subscriber list.
+Mailchimp was used because it is already wired, paid for, and verified.
+
+#### Still to do — two blockers
+
+**1. The RSS campaign cannot be created until the Journal is deployed.**
+"Email people when a new article publishes" is an RSS campaign, not a signup
+trigger: a signup trigger fires once on join and sends whatever existed then, so
+it will never send the *next* article. An RSS campaign watches the feed and
+sends when it changes — which is why `feed.xml` exists. Mailchimp validates the
+feed URL on creation, and `https://tenpointstandard.com/feed.xml` currently
+404s because this work is unmerged. Once it is live:
+
+> Audience > Segments > **Field Notes subscribers** > Actions > **Send RSS
+> email**, feed `https://tenpointstandard.com/feed.xml`.
+
+(That Actions menu is the only entry point left in this account's UI. There is
+no RSS option under Create > Email, and the legacy `wizard/neapolitan?type=rss`
+URL 404s. The "Share blog updates via RSS" flow template also exists under
+Automations > Flow templates.)
+
+**2. ~~The Welcome journey fires for Field Notes subscribers.~~ Fixed Aug 9
+2026.** "Welcome new contacts" triggered on any signup, so a Field Notes
+subscriber received the scorecard email with every merge field empty. The
+trigger now carries a filter:
+
+> `Group category: Subscriptions > none of > Group interest: Field Notes`
+
+It is a **trigger filter, not a step**, so it does not count against the
+4-step Essentials limit (still "2 of 4 steps left").
+
+Verified live, both directions, because the failure mode here is silent:
+
+| Test signup | Group | Welcome email |
+| --- | --- | --- |
+| `+fntest4` via the Journal form | Field Notes | **not sent** — correct |
+| `+sctest1`, scorecard-style | none | **sent**, with SCORE/BAND/ANSWERED — correct |
+
+Journey counter went 9 → 10 across two signups, confirming exactly one entered
+and that **the trigger did not go stale** on reactivation.
+
+If you edit this journey again, follow the same order: Pause & Edit → change →
+open the trigger's ⋮ > Edit > **Save Trigger** → Turn back on → run a live
+signup of each kind and check the contact's Activity. A stale trigger shows
+"Active" while silently admitting nobody.
+
+**Test contacts to clean up** (all mine, safe to delete):
+`coloradojeeper.small+` `fntest1` (no group — the failed tag attempt),
+`fntest2` (no group — stale-cache run), `fntest3` and `fntest4` (in the Field
+Notes group), `sctest1` (scorecard control, carries a fake Score of 55).
+
+### Imagery
+
+No photography has been supplied. Every media box renders the captioned
+placeholder from the design (a mono note describing the shot and its ratio) —
+never a color fill or an icon. To add a photo: drop it at
+`assets/journal/<slug>/hero.jpg` (2400px long edge) or `author.jpg` (square,
+400px), set `hero` / `author.photo` in `posts.js`, and replace the
+`.jr-media-note` span with an `<img>`. Keep the `aspect-ratio` on `.jr-media` —
+it is what stops the masonry columns reflowing as images load.
+
+### Config
+
+All shared settings live in **`config.js`** — `MAILCHIMP_FORM_ACTION`,
+`GA_MEASUREMENT_ID`, and `MAILCHIMP_GROUP_FIELD_NOTES`. Both `index.html` and
+every Journal page load it **first**, before any other script, so these values
+exist in exactly one place. `journal-core.js` throws if it is missing rather
+than silently failing to subscribe anyone.
+
+`tests/tests.html` loads it too, since `app.js` no longer defines `CONFIG`.
 
 ## SEO / indexing
 - `robots.txt` — allows everything except `/tests/`, points at the sitemap.

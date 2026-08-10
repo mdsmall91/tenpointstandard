@@ -1,0 +1,462 @@
+/* =============================================================
+   TEN POINT — THE JOURNAL (page-specific)
+   Mirrors styles/site.css in role: tokens.css and base.css stay
+   untouched, and everything here is scoped to the Journal pages.
+
+   Reuses base.css wholesale — .tp-header, .tp-hero, .tp-footer,
+   .card, .btn, .input, .pull, .eyebrow. Nothing in here restyles
+   those; it only lays them out.
+   ============================================================= */
+
+/* Sticky offset for the filter bar. The Journal header is
+   14px + 38px logo + 14px + 1px hairline = 67px. Kept as a var so
+   the filter bar and the header can never drift apart. */
+:root { --jr-header-h: 67px; }
+
+body { margin: 0; background: var(--paper); }
+a { color: inherit; }
+a:hover { color: var(--accent-deep); }
+::selection { background: var(--accent-soft); }
+
+.jr-root { min-height: 100vh; display: flex; flex-direction: column; }
+.jr-main { flex: 1; }
+
+/* =============================================================
+   HEADER — .tp-header from base.css, with the wordmark lockup.
+   Same accent-tinted PNG mask as .fg-logo in site.css, at the
+   38px the Journal header uses.
+   ============================================================= */
+.jr-brand { display: inline-flex; align-items: center; gap: 14px; }
+.jr-brand:hover .jr-logo { background: var(--accent-deep); }
+.jr-logo {
+  display: inline-block; height: 38px; aspect-ratio: 181 / 123;
+  background: var(--accent);
+  transition: background .15s;
+  -webkit-mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
+  mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
+}
+.jr-wordmark {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-faint);
+  border-left: var(--hairline); padding-left: 14px;
+  line-height: 1.5;
+}
+
+/* Nav and CTA travel together on the right-hand end of the header.
+   "Score your project" stays outside .tp-nav so it survives the
+   720px breakpoint, where base.css hides .tp-nav entirely. */
+.jr-header-right { display: flex; align-items: center; gap: var(--s-6); }
+.jr-header-cta { display: inline-flex; }
+
+/* The page hero has no right-hand meta column, so it does not need
+   base.css's 9fr 3fr split — that would just strand a third of the
+   width. Everything else about .tp-hero still applies. */
+.jr-hero-solo { grid-template-columns: 1fr; }
+
+/* =============================================================
+   INDEX — featured entry
+   ============================================================= */
+.jr-featured-wrap { max-width: var(--page-max); margin: 0 auto; padding: var(--s-16) var(--page-pad) 0; }
+
+.jr-featured {
+  display: grid; grid-template-columns: 7fr 5fr;
+  gap: var(--s-12); align-items: center;
+  padding: var(--s-8);
+  transition: border-color .15s;
+}
+.jr-featured:hover { border-color: var(--stone-200); }
+.jr-featured .jr-media { aspect-ratio: 3 / 2; }
+.jr-featured-title { font-size: var(--fs-h2); margin: 0 0 var(--s-4); text-wrap: pretty; }
+.jr-featured-dek { font-size: var(--fs-body); line-height: var(--lh-relaxed); color: var(--text-muted); margin: 0 0 var(--s-6); max-width: 52ch; text-wrap: pretty; }
+
+/* =============================================================
+   MEDIA BOX — real photo when supplied, captioned placeholder
+   until then. Never a color fill, never an icon (per handoff).
+   The aspect ratio comes from the post's heroAspect and is set
+   inline per tile, so the masonry columns cannot reflow on load.
+   ============================================================= */
+.jr-media {
+  background: var(--surface-2);
+  border: var(--hairline);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+/* A real photo fills the box edge to edge. The inset padding belongs
+   to the placeholder note, not to the frame — on the media box it
+   would matte every image with a border of dead space. */
+.jr-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.jr-media-note {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-faint); text-align: center; line-height: 1.6;
+  padding: var(--s-6);
+}
+.jr-tile .jr-media { border: 0; border-bottom: var(--hairline); }
+.jr-tile .jr-media-note { font-size: 10px; padding: var(--s-4); }
+
+/* =============================================================
+   TAG + BYLINE — shared by featured, tile, and article header
+   ============================================================= */
+.jr-tag { display: inline-flex; align-items: center; gap: 10px; margin-bottom: var(--s-4); }
+.jr-tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; flex: none; }
+.jr-tag-label {
+  font-family: var(--font-mono); font-size: var(--fs-eyebrow);
+  letter-spacing: var(--tr-eyebrow); text-transform: uppercase;
+  color: var(--accent-deep);
+}
+
+/* No author photograph anywhere — the byline is type only. */
+.jr-byline {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--border-soft);
+}
+.jr-byline-name { font-size: var(--fs-small); font-weight: 500; color: var(--text-strong); }
+.jr-byline-cred { font-size: 12px; color: var(--text-faint); line-height: 1.4; margin-top: 2px; }
+/* Company sits on its own line under the job title. */
+.jr-byline-org { font-size: 12px; color: var(--text-faint); line-height: 1.4; }
+.jr-byline-meta {
+  margin-left: auto;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em;
+  color: var(--text-faint); white-space: nowrap;
+}
+
+/* =============================================================
+   FILTER BAR — sticky under the header, single-select chips
+   ============================================================= */
+.jr-filter {
+  position: sticky; top: var(--jr-header-h); z-index: 40;
+  margin-top: var(--s-16);
+  border-bottom: var(--hairline);
+  background: color-mix(in oklab, var(--paper) 92%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.jr-filter-inner {
+  max-width: var(--page-max); margin: 0 auto;
+  padding: 0 var(--page-pad);
+  display: flex; align-items: center; gap: var(--s-2);
+  flex-wrap: wrap; min-height: 56px;
+}
+.jr-filter-label {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: var(--tr-eyebrow); text-transform: uppercase;
+  color: var(--text-faint); margin-right: var(--s-2);
+}
+/* Chips are .btn.sm scale. Inactive is transparent with --border;
+   active is solid accent. Hover only moves the border and text. */
+.jr-chip {
+  font-family: var(--font-body); font-weight: 500;
+  font-size: 13px; letter-spacing: 0.02em;
+  padding: 7px 14px; border-radius: 1px; cursor: pointer;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: background .15s, color .15s, border-color .15s;
+}
+.jr-chip:hover { border-color: var(--stone-300); color: var(--text-strong); }
+.jr-chip[aria-pressed="true"] {
+  background: var(--accent); border-color: var(--accent); color: var(--paper);
+}
+
+/* =============================================================
+   MASONRY GRID — CSS columns. Tile height varies because the
+   image aspect varies; that is the intended rhythm. Heights are
+   never randomized at runtime.
+   ============================================================= */
+.jr-grid-wrap { max-width: var(--page-max); margin: 0 auto; padding: var(--s-12) var(--page-pad) var(--s-24); }
+.jr-grid { columns: 3; column-gap: var(--s-6); }
+
+.jr-tile {
+  break-inside: avoid;
+  display: inline-block; width: 100%;
+  margin: 0 0 var(--s-6);
+  background: var(--surface); border: var(--hairline);
+  transition: border-color .15s;
+}
+.jr-tile:hover { border-color: var(--stone-200); }
+.jr-tile[hidden] { display: none; }
+.jr-tile-body { padding: var(--s-5) var(--s-5) var(--s-6); }
+.jr-tile .jr-tag { margin-bottom: var(--s-3); }
+.jr-tile .jr-tag-dot { width: 5px; height: 5px; }
+.jr-tile .jr-tag-label { font-size: 10px; letter-spacing: 0.16em; }
+.jr-tile-title { font-size: var(--fs-h4); font-family: var(--font-display); font-weight: 400; line-height: var(--lh-snug); letter-spacing: var(--tr-snug); color: var(--text-strong); margin: 0 0 var(--s-3); text-wrap: pretty; }
+.jr-tile-dek { font-size: var(--fs-small); line-height: var(--lh-relaxed); color: var(--text-muted); margin: 0 0 var(--s-5); text-wrap: pretty; }
+.jr-tile .jr-byline { gap: 10px; }
+.jr-tile .jr-byline-name { font-size: 13px; }
+.jr-tile .jr-byline-cred { font-size: 11px; margin-top: 1px; }
+.jr-tile .jr-byline-meta { font-size: 10px; }
+
+.jr-empty {
+  font-family: var(--font-mono); font-size: 12px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-faint);
+  padding: var(--s-16) 0; text-align: center;
+}
+
+/* =============================================================
+   NEWSLETTER BAND (index)
+   ============================================================= */
+.jr-dispatch { border-top: var(--hairline); background: var(--surface); }
+.jr-dispatch-inner {
+  max-width: var(--page-max); margin: 0 auto;
+  padding: var(--s-20) var(--page-pad);
+  display: grid; grid-template-columns: 9fr 3fr;
+  gap: var(--s-12); align-items: center;
+}
+.jr-dispatch h2 { font-size: var(--fs-h3); margin: 0 0 var(--s-3); max-width: 24ch; }
+.jr-dispatch p { font-size: var(--fs-small); line-height: var(--lh-relaxed); color: var(--text-muted); margin: 0; max-width: 54ch; }
+.jr-form { display: flex; flex-direction: column; gap: var(--s-3); }
+.jr-form-status { font-size: 12px; color: var(--text-muted); min-height: 1em; }
+.jr-form-status.error { color: var(--accent-deep); }
+
+/* =============================================================
+   ARTICLE
+   ============================================================= */
+.jr-article-col { max-width: 760px; margin: 0 auto; padding: 0 var(--page-pad); }
+
+.jr-back-wrap { max-width: var(--page-max); margin: 0 auto; padding: var(--s-6) var(--page-pad) 0; }
+.jr-back {
+  display: inline-block; border: 0; background: none; padding: 0; cursor: pointer;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-faint); transition: color .15s;
+}
+.jr-back:hover { color: var(--accent-deep); }
+
+.jr-article-header { max-width: 760px; margin: 0 auto; padding: var(--s-16) var(--page-pad) var(--s-12); }
+.jr-article-header .jr-tag { margin-bottom: var(--s-5); }
+.jr-article-title {
+  font-size: clamp(2.1rem, 4.4vw, var(--fs-h1));
+  margin: 0 0 var(--s-5); text-wrap: balance;
+}
+.jr-article-dek {
+  font-family: var(--font-display); font-size: var(--fs-lead);
+  line-height: var(--lh-normal); color: var(--text-muted);
+  margin: 0; max-width: 56ch; text-wrap: pretty;
+}
+.jr-article-byline {
+  margin-top: var(--s-8); padding-top: var(--s-5);
+  border-top: var(--hairline);
+  display: flex; align-items: center; gap: var(--s-4); flex-wrap: wrap;
+}
+.jr-article-byline .jr-byline-meta { display: flex; gap: var(--s-4); align-items: center; }
+.jr-rule { width: 1px; height: 14px; background: var(--border); display: block; }
+
+/* The hero figure matches the body measure exactly rather than
+   running to the page width — a full-bleed image above a narrow
+   text column reads as two layouts stacked.
+
+   The body caps paragraphs at 66ch, so matching 760px is not
+   enough: it would still overhang the text by ~14px. `ch` resolves
+   against the element's own font, so the figure carries the body's
+   display font and size purely to make this 66ch the same 66ch.
+   Children (.jr-media-note, figcaption) set their own type, so
+   nothing inherits it visually. */
+.jr-figure {
+  /* Same box as .jr-article-col, so the left edge lands in exactly
+     the same place as the body rather than centering on its own
+     narrower width. */
+  max-width: 760px;
+  margin: 0 auto var(--s-16);
+  padding: 0 var(--page-pad);
+  /* Body type, purely so the 66ch below is the body's 66ch. .jr-media
+     declares no font of its own, so it inherits this and resolves the
+     same measure; .jr-media-note and figcaption set their own type and
+     are unaffected. */
+  font-family: var(--font-display);
+  font-size: 19px;
+}
+.jr-figure .jr-media {
+  aspect-ratio: 16 / 9;
+  max-width: 66ch;
+}
+.jr-figure figcaption {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.06em; color: var(--text-faint);
+  margin-top: var(--s-3);
+}
+
+/* Body — Source Serif 4 at 19px, 66ch measure. */
+.jr-body > * { margin: 0 0 var(--s-6); }
+.jr-body p {
+  font-family: var(--font-display); font-size: 19px;
+  line-height: var(--lh-relaxed); color: var(--text);
+  max-width: 66ch; text-wrap: pretty;
+}
+.jr-body h2 {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--fs-h3); line-height: var(--lh-snug);
+  letter-spacing: var(--tr-snug); color: var(--text-strong);
+  margin: var(--s-12) 0 var(--s-5);
+}
+.jr-body blockquote { margin: var(--s-12) 0; }
+
+/* Lists read as part of the body, so they take the serif and the
+   same measure. The marker sits in the gutter rather than indenting
+   the text away from the column edge. */
+.jr-body ul, .jr-body ol {
+  font-family: var(--font-display);
+  font-size: 19px;
+  line-height: var(--lh-relaxed);
+  color: var(--text);
+  max-width: 66ch;
+  margin: 0 0 var(--s-6);
+  padding-left: var(--s-6);
+}
+.jr-body li { margin-bottom: var(--s-3); padding-left: var(--s-2); }
+.jr-body li::marker { color: var(--text-faint); }
+.jr-body ol li::marker { font-family: var(--font-mono); font-size: 0.8em; }
+/* Lead-in phrase that opens a numbered point. */
+.jr-body li strong { font-weight: 600; color: var(--text-strong); }
+@media (max-width: 640px) {
+  .jr-body ul, .jr-body ol { font-size: 17px; }
+}
+
+/* =============================================================
+   SOURCES — citations under the body. Smaller and quieter than
+   the article, but the links have to stay obviously clickable.
+   ============================================================= */
+.jr-sources {
+  margin-top: var(--s-12);
+  padding-top: var(--s-5);
+  border-top: var(--hairline);
+}
+.jr-sources h2 {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: var(--tr-eyebrow); text-transform: uppercase;
+  color: var(--text-faint); font-weight: 400;
+  margin: 0 0 var(--s-4);
+}
+.jr-sources ol { margin: 0; padding-left: var(--s-5); }
+.jr-sources li {
+  font-size: var(--fs-small);
+  line-height: var(--lh-relaxed);
+  color: var(--text-muted);
+  margin-bottom: var(--s-3);
+  max-width: 72ch;
+}
+.jr-sources li::marker { color: var(--text-faint); font-family: var(--font-mono); font-size: 0.85em; }
+.jr-sources a {
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  /* Long citation URLs must wrap rather than push the page wide. */
+  overflow-wrap: anywhere;
+  transition: color .15s, border-color .15s;
+}
+.jr-sources a:hover { color: var(--text-strong); border-color: var(--accent); }
+
+.jr-share {
+  border-top: var(--hairline); padding-top: var(--s-5);
+  display: flex; align-items: center; gap: var(--s-6); flex-wrap: wrap;
+}
+.jr-share-label {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: var(--tr-eyebrow); text-transform: uppercase;
+  color: var(--text-faint);
+}
+.jr-share-links { display: flex; gap: var(--s-5); align-items: center; }
+.jr-share-links a, .jr-share-links button {
+  font-family: var(--font-body); font-size: 13px;
+  color: var(--text-muted);
+  border: 0; border-bottom: 1px solid var(--border);
+  background: none; padding: 0 0 2px; cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.jr-share-links a:hover, .jr-share-links button:hover {
+  color: var(--text-strong); border-color: var(--accent);
+}
+
+.jr-author-card {
+  margin-top: var(--s-12);
+  padding: var(--s-8);
+  display: flex; gap: var(--s-6); align-items: flex-start;
+}
+.jr-author-eyebrow {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: var(--tr-eyebrow); text-transform: uppercase;
+  color: var(--text-faint); margin-bottom: var(--s-3);
+}
+.jr-author-name { font-size: var(--fs-h5); color: var(--text-strong); margin-bottom: 4px; }
+.jr-author-cred { font-size: 12px; color: var(--text-faint); margin-bottom: var(--s-3); }
+.jr-author-bio { font-size: var(--fs-small); line-height: var(--lh-relaxed); color: var(--text-muted); margin: 0; max-width: 56ch; text-wrap: pretty; }
+
+/* The lead-gen surface. Every article ends here. */
+.jr-cta {
+  margin-top: var(--s-6);
+  border: 1px solid var(--accent); background: var(--accent-soft);
+  padding: var(--s-8);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-8); flex-wrap: wrap;
+}
+.jr-cta-eyebrow {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: var(--tr-eyebrow); text-transform: uppercase;
+  color: var(--accent-deep); margin-bottom: var(--s-3);
+}
+.jr-cta h3 { font-size: var(--fs-h4); font-family: var(--font-display); font-weight: 400; line-height: var(--lh-snug); color: var(--text-strong); margin: 0 0 6px; max-width: 24ch; }
+.jr-cta p { font-size: var(--fs-small); line-height: var(--lh-relaxed); color: var(--text-muted); margin: 0; max-width: 46ch; }
+
+/* Quieter than the CTA on purpose — ink button, not accent. */
+.jr-article-dispatch {
+  margin-top: var(--s-6); border: var(--hairline); padding: var(--s-8);
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 300px);
+  gap: var(--s-8); align-items: center;
+}
+.jr-article-dispatch p { font-size: var(--fs-small); line-height: var(--lh-relaxed); color: var(--text-muted); margin: 0; }
+.jr-inline-form { display: flex; gap: var(--s-2); }
+.jr-inline-form .input { flex: 1; min-width: 0; padding: 11px 14px; }
+.jr-inline-form .btn { white-space: nowrap; }
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+@media (max-width: 1100px) {
+  .jr-grid { columns: 2; }
+}
+/* The featured entry stacks earlier than the 800px the rest of the
+   page uses. At 900px its 5fr text column is only ~300px, and a
+   38px serif headline in 300px breaks to about seven characters a
+   line. The handoff pinned this to base.css's 800px breakpoint;
+   that reads badly in the 800-960 band, so it stacks sooner. */
+@media (max-width: 960px) {
+  .jr-featured { grid-template-columns: 1fr; gap: var(--s-8); }
+  .jr-featured-title { font-size: var(--fs-h3); }
+}
+
+@media (max-width: 800px) {
+  /* Matches base.css @media (max-width: 800px) on .tp-hero. */
+  .jr-dispatch-inner { grid-template-columns: 1fr; gap: var(--s-8); }
+  .jr-article-dispatch { grid-template-columns: 1fr; gap: var(--s-6); }
+}
+@media (max-width: 720px) {
+  .jr-grid { columns: 1; }
+  /* Same horizontal-scroll treatment as .fg-step-nav in site.css. */
+  .jr-filter-inner {
+    flex-wrap: nowrap; overflow-x: auto;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .jr-filter-inner::-webkit-scrollbar { display: none; }
+  .jr-chip { white-space: nowrap; }
+  .jr-wordmark { display: none; }
+}
+@media (max-width: 640px) {
+  :root { --page-pad: 20px; }
+  .jr-article-title { font-size: 34px; }
+  .jr-body p { font-size: 17px; }
+  /* Body drops to 17px here, so the figure's 66ch must follow it. */
+  .jr-figure { font-size: 17px; }
+  /* 44px minimum touch target on chips and buttons. */
+  .jr-chip { min-height: 44px; padding: 10px 16px; }
+  .jr-header-cta.btn { min-height: 44px; }
+  .jr-cta { flex-direction: column; align-items: flex-start; }
+  .jr-author-card { flex-direction: column; }
+  .jr-inline-form { flex-direction: column; }
+  .jr-inline-form .btn { min-height: 44px; justify-content: center; }
+}
+
+/* No motion beyond the 150ms color/border transitions already
+   declared above — no lift, no scale, no shadow. */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; }
+}
