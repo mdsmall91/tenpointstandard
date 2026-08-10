@@ -268,6 +268,60 @@ a:hover { color: var(--accent-deep); }
 }
 .jr-body blockquote { margin: var(--s-12) 0; }
 
+/* Lists read as part of the body, so they take the serif and the
+   same measure. The marker sits in the gutter rather than indenting
+   the text away from the column edge. */
+.jr-body ul, .jr-body ol {
+  font-family: var(--font-display);
+  font-size: 19px;
+  line-height: var(--lh-relaxed);
+  color: var(--text);
+  max-width: 66ch;
+  margin: 0 0 var(--s-6);
+  padding-left: var(--s-6);
+}
+.jr-body li { margin-bottom: var(--s-3); padding-left: var(--s-2); }
+.jr-body li::marker { color: var(--text-faint); }
+.jr-body ol li::marker { font-family: var(--font-mono); font-size: 0.8em; }
+/* Lead-in phrase that opens a numbered point. */
+.jr-body li strong { font-weight: 600; color: var(--text-strong); }
+@media (max-width: 640px) {
+  .jr-body ul, .jr-body ol { font-size: 17px; }
+}
+
+/* =============================================================
+   SOURCES — citations under the body. Smaller and quieter than
+   the article, but the links have to stay obviously clickable.
+   ============================================================= */
+.jr-sources {
+  margin-top: var(--s-12);
+  padding-top: var(--s-5);
+  border-top: var(--hairline);
+}
+.jr-sources h2 {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: var(--tr-eyebrow); text-transform: uppercase;
+  color: var(--text-faint); font-weight: 400;
+  margin: 0 0 var(--s-4);
+}
+.jr-sources ol { margin: 0; padding-left: var(--s-5); }
+.jr-sources li {
+  font-size: var(--fs-small);
+  line-height: var(--lh-relaxed);
+  color: var(--text-muted);
+  margin-bottom: var(--s-3);
+  max-width: 72ch;
+}
+.jr-sources li::marker { color: var(--text-faint); font-family: var(--font-mono); font-size: 0.85em; }
+.jr-sources a {
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  /* Long citation URLs must wrap rather than push the page wide. */
+  overflow-wrap: anywhere;
+  transition: color .15s, border-color .15s;
+}
+.jr-sources a:hover { color: var(--text-strong); border-color: var(--accent); }
+
 .jr-share {
   border-top: var(--hairline); padding-top: var(--s-5);
   display: flex; align-items: center; gap: var(--s-6); flex-wrap: wrap;

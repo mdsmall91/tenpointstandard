@@ -77,14 +77,20 @@ paragraph is injected at runtime — that is deliberate, and it is the same
 lesson `index.html` learned (see *SEO / indexing* below). The JS only filters,
 shares, and subscribes.
 
-- `posts.js` — canonical content model (`TAGS`, `POSTS`). **No page loads it at
+- `posts.js` — canonical **metadata** (`TAGS`, `POSTS`). **No page loads it at
   runtime.** It is the source of truth that the static HTML must agree with, the
-  way `QUESTIONS.md` is for the assessment.
+  way `QUESTIONS.md` is for the assessment. **Body copy is not in here** — it
+  lives only in the page. Mirroring a 2,000-word article in a file nothing loads
+  is two copies to keep in step, which is a drift risk rather than a safeguard.
 - `feed.xml` — RSS. This is what makes the subscription work; see below.
-- `tests/journal-tests.html` — 168 checks that the HTML, `posts.js`, and
+- `tests/journal-tests.html` — 183 checks that the HTML, `posts.js`, and
   `feed.xml` still agree: titles, deks, bylines, dates, read times, tags,
-  canonicals, aspect ratios, body copy, and the draft rule. **Serve over HTTP**
-  (it fetches the pages) and run it after editing any of the three.
+  canonicals, aspect ratios, chip order, and the draft rule. Prose is not
+  diffed; instead a published page must carry a real body (≥3 paragraphs,
+  ≥300 words) with a read time within range of its actual length, every pull
+  quote must use `.pull`, and every source must carry an `https://` link.
+  **Serve over HTTP** (it fetches the pages) and run it after editing any of
+  the three.
 
 ### Drafts — one article, and the rest held back
 
@@ -92,7 +98,8 @@ An entry with `draft: true` in `posts.js` has **no tile, no page, no sitemap
 entry, and no feed item.** It is held back completely rather than published
 thin. Only its metadata lives in `posts.js`, ready for the copy.
 
-Right now one entry is published and seven are drafts, so:
+Right now **one entry is published** — *Entitlements*, by Matt Small — and
+eight are drafts, so:
 
 - The **filter bar and the grid ship with `hidden`** and are revealed by
   `journal.js` only when a second tile exists. A seven-chip filter over a single
@@ -104,11 +111,15 @@ Right now one entry is published and seven are drafts, so:
 
 Do all of this in one commit; the drift tests fail if any step is missed.
 
-1. In `posts.js`: add the `body` array and **remove `draft: true`**. Entries stay
-   newest-first, and exactly one carries `featured: true` as `POSTS[0]`.
+1. In `posts.js`: add the metadata and **remove `draft: true`**. Entries stay
+   newest-first, and exactly one carries `featured: true` as `POSTS[0]`. Set
+   `metaDescription` if the dek is too short to work as a search snippet.
 2. Add the tile to `journal.html` and the page at `journal/<slug>.html`. Copy
-   `absorption-curve.html` — the header, share row, author card, CTA, and
-   newsletter block are identical on every article.
+   `entitlements.html` — the header, share row, author card, CTA, and
+   newsletter block are identical on every article. Body copy goes in the page
+   only. Available body elements: `<p>`, `<h2>`, `<ul>`, `<ol>` (a `<strong>`
+   lead-in per item reads well on numbered points), `<blockquote class="pull">`,
+   and a `.jr-sources` block of numbered citations with links.
 3. Add the URL to `sitemap.xml`, and an `<item>` to `feed.xml` with an
    **RFC-822** `pubDate` (`Tue, 28 Jul 2026 00:00:00 -0500`, not ISO). Update
    `<lastBuildDate>`. An ISO date here is the usual reason an RSS campaign

@@ -1,16 +1,21 @@
 'use strict';
 
 /* =============================================================
-   THE JOURNAL — CONTENT MODEL
-   Canonical, copied from the design handoff (Field Guide Journal
-   v2). One source of truth for the index grid, the filter counts,
-   and any future related-post logic.
+   THE FIELD JOURNAL — CONTENT MODEL
+   Canonical metadata for every entry. One source of truth for the
+   index grid, the filter, the sitemap, the feed, and any future
+   related-post logic.
 
-   The article pages under journal/ are static HTML and do NOT
-   read from this file at runtime — that is deliberate, so a
-   crawler sees the full text of every entry with JS disabled.
-   When you edit an entry here, edit its journal/<slug>.html to
-   match. The check in tests/ enforces that they agree.
+   The article pages under journal/ are static HTML and do NOT read
+   from this file at runtime — that is deliberate, so a crawler sees
+   the full text of every entry with JS disabled.
+
+   Article BODY COPY lives only in the page. It used to be mirrored
+   here as a block array, which meant maintaining two copies of
+   every paragraph; at 2,000 words an entry that is a drift risk,
+   not a safeguard. The tests in tests/journal-tests.html check that
+   the metadata below matches the page exactly, and that a published
+   page carries a substantial body — they no longer diff prose.
    ============================================================= */
 
 /* Fixed enum. Adding a tag is a code change on purpose: it keeps
@@ -31,56 +36,70 @@ function tagSlug(tag) {
 }
 
 /* -------------------------------------------------------------
-   Entries, newest first. POSTS[0] is the featured entry.
+   Entries, newest first. POSTS[0] is the featured entry and must
+   not be a draft.
+
+   draft: true means the copy is not written. A draft has NO tile,
+   NO page, NO sitemap entry and NO feed item — it is held back
+   entirely rather than published thin. Its metadata stays here so
+   the entry is ready the moment the copy lands.
 
    hero / author.photo are null until the photography lands. The
    renderer keeps the captioned placeholder block in that case —
-   never a color fill or an icon (handoff, "Imagery"). Drop the
-   file at the documented path and set the field to that path.
+   never a color fill or an icon (handoff, "Imagery").
 
    heroAspect drives the tile height, which is what produces the
    masonry rhythm. It is never randomized at runtime.
 
-   draft: true means the copy is not written. A draft has NO tile on
-   the index and NO page under journal/ — it is held back entirely
-   rather than published thin. Its metadata stays here so the entry
-   is ready to go the moment the copy lands: add the body array,
-   drop the draft flag, add the tile and the page, and add the URL
-   to sitemap.xml and feed.xml. The drift tests enforce that these
-   move together in both directions.
+   metaDescription is optional. The dek is the on-page standfirst
+   and is often short; where a longer, search-facing sentence is
+   wanted, set it here and the page's meta description uses it.
    ------------------------------------------------------------- */
 var POSTS = [
   {
+    slug: 'entitlements',
+    tag: 'Land & Entitlement',
+    title: 'Entitlements',
+    dek: 'Outdoor hospitality owners should have a strategy.',
+    metaDescription: 'Entitlements are what you are allowed to do on a parcel. The gray-zone years are ending — how to build an entitlement strategy for a campground, RV resort, or glamping project.',
+    hero: null,                                    // assets/journal/entitlements/hero.jpg
+    heroAspect: '16/9',
+    heroNote: 'Hero photo — lit safari tent under a night sky, 16:9, 2400px min',
+    heroCaption: 'Photograph: client-supplied field documentation.',
+    author: {
+      name: 'Matt Small',
+      credential: 'Director of Outdoor Hospitality, RVi Planning & Landscape Architecture',
+      photo: null,                                 // assets/journal/entitlements/author.jpg
+      bio: null                                    // not supplied — author card renders without it
+    },
+    publishedAt: '2026-08-09',
+    readTime: '9 min read',
+    featured: true
+  },
+  {
+    /* Sample copy that shipped with the Claude Design handoff, under
+       a byline nobody has confirmed. Held as a draft rather than
+       published: it reads as a real article by a real person and
+       was written by neither. Delete it or replace the copy and the
+       byline before this ever goes live. */
     slug: 'absorption-curve',
     tag: 'Feasibility',
     title: 'The absorption curve nobody underwrites',
     dek: 'Most outdoor-resort models assume stabilization in year two. The projects that get there share three things, and none of them are in the pro forma.',
-    hero: null,                                    // assets/journal/absorption-curve/hero.jpg
+    hero: null,
     heroAspect: '16/9',
     heroNote: 'Hero photo — site at first light, 16:9, 2400px min',
     heroCaption: 'Photograph: client-supplied field documentation. Caption goes here.',
     author: {
       name: 'Kenny Reed',
       credential: 'Principal, Ten Point Services',
-      photo: null,                                 // assets/journal/absorption-curve/author.jpg
+      photo: null,
       bio: "Twenty-two years across resort development and operations in Texas and the Mountain West. Leads Ten Point's preconstruction audit practice."
     },
     publishedAt: '2026-07-28',
     readTime: '9 min read',
-    featured: true,
-    body: [
-      { type: 'para', text: 'The first operating year of an outdoor resort is not a smaller version of the third. It is a different business, run by a different number of people, against a demand curve that has not yet formed. Underwriting it as a discount to stabilization is the most common error we find in preconstruction audit.' },
-      { type: 'para', text: 'Across the projects Ten Point has reviewed since 2021, the ones that hit their year-two occupancy target shared three characteristics. None appeared in the financial model. All three were decisions made before the first pad was graded.' },
-      { type: 'head', text: 'One: the arrival radius was tested, not assumed' },
-      { type: 'para', text: 'Drive-time catchment gets treated as a mapping exercise. It is a behavioral one. A ninety-minute radius that crosses a metro edge on a Friday afternoon is not a ninety-minute radius. Operators who drove the route at the hour guests actually leave consistently forecast a tighter and more accurate market than those who accepted the isochrone.' },
-      { type: 'quote', text: 'The model said two hours. The guests said an hour and ten. We built for the model and spent year one correcting it.', attrib: 'Owner, 210-site property, Hill Country' },
-      { type: 'head', text: 'Two: staffing scaled behind occupancy, not ahead of it' },
-      { type: 'para', text: 'The instinct is to staff for the season you hope to have. The properties that stabilized on schedule staffed to the reservations on the books, with a named plan for adding a shift inside seventy-two hours. That plan is worth writing down, and worth rehearsing before opening week, when nobody has the attention left to invent it.' },
-      { type: 'para', text: 'This is not a labor-cost argument. It is a service-consistency argument. An overstaffed shoulder month teaches a crew habits that break the first time the property is full.' },
-      { type: 'head', text: 'Three: the operating reserve survived value engineering' },
-      { type: 'para', text: 'When a project runs over on hard costs, the operating reserve is the quietest place to find money. It is also the only line item that determines whether year one is recoverable. Every project we have audited that cut its reserve below four months of fixed operating cost spent year two in conversation with its lender rather than with its guests.' },
-      { type: 'para', text: 'None of this is exotic. It is the discipline of deciding things early, in writing, while the decisions are still cheap. That is the whole of the practice.' }
-    ]
+    featured: false,
+    draft: true
   },
   {
     slug: 'lender-reads-first',
@@ -100,8 +119,7 @@ var POSTS = [
     publishedAt: '2026-07-14',
     readTime: '7 min read',
     featured: false,
-    draft: true,
-    body: null
+    draft: true
   },
   {
     slug: 'utility-routing',
@@ -121,8 +139,7 @@ var POSTS = [
     publishedAt: '2026-06-30',
     readTime: '11 min read',
     featured: false,
-    draft: true,
-    body: null
+    draft: true
   },
   {
     slug: 'shoulder-season-staffing',
@@ -142,8 +159,7 @@ var POSTS = [
     publishedAt: '2026-06-18',
     readTime: '6 min read',
     featured: false,
-    draft: true,
-    body: null
+    draft: true
   },
   {
     slug: 'reading-a-county',
@@ -163,8 +179,7 @@ var POSTS = [
     publishedAt: '2026-06-02',
     readTime: '8 min read',
     featured: false,
-    draft: true,
-    body: null
+    draft: true
   },
   {
     slug: 'arrival-sequence',
@@ -184,8 +199,7 @@ var POSTS = [
     publishedAt: '2026-05-21',
     readTime: '5 min read',
     featured: false,
-    draft: true,
-    body: null
+    draft: true
   },
   {
     slug: 'patient-equity',
@@ -205,8 +219,7 @@ var POSTS = [
     publishedAt: '2026-05-09',
     readTime: '7 min read',
     featured: false,
-    draft: true,
-    body: null
+    draft: true
   },
   {
     slug: 'comparable-sets',
@@ -226,7 +239,6 @@ var POSTS = [
     publishedAt: '2026-04-24',
     readTime: '6 min read',
     featured: false,
-    draft: true,
-    body: null
+    draft: true
   }
 ];

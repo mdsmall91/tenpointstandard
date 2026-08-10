@@ -62,11 +62,10 @@
     check('featured entry is published', POSTS[0] && !POSTS[0].draft);
     check('at least one published entry', published().length >= 1, published().length);
 
-    /* draft and body must agree, or the site publishes an empty page
-       or holds back a finished one. */
+    /* Body copy lives only in the page now, so there is nothing to
+       diff here — the page-level checks assert it is substantial. */
     POSTS.forEach(function (p) {
-      if (p.draft) check('draft has no body: ' + p.slug, p.body === null);
-      else check('published has body: ' + p.slug, !!(p.body && p.body.length));
+      check('no stale body array: ' + p.slug, p.body === undefined);
     });
 
     var slugs = {};
@@ -79,7 +78,10 @@
       check('has dek: ' + p.slug, !!p.dek);
       check('has readTime: ' + p.slug, /^\d+ min read$/.test(p.readTime), p.readTime);
       check('has heroAspect: ' + p.slug, /^\d+\/\d+$/.test(p.heroAspect), p.heroAspect);
-      check('author is inline: ' + p.slug, !!(p.author && p.author.name && p.author.credential && p.author.bio));
+      /* Name and credential are required; bio is optional, because an
+         author who has not written one gets no bio rather than an
+         invented one. */
+      check('author is inline: ' + p.slug, !!(p.author && p.author.name && p.author.credential));
     });
 
     for (var i = 1; i < POSTS.length; i++) {
@@ -198,11 +200,15 @@
     eq(s + 'tag', text(doc, '.jr-article-header .jr-tag-label'), p.tag);
     eq(s + 'author', text(doc, '.jr-article-byline .jr-byline-name'), p.author.name);
     eq(s + 'credential', text(doc, '.jr-article-byline .jr-byline-cred'), p.author.credential);
-    eq(s + 'bio', text(doc, '.jr-author-bio'), p.author.bio);
+    /* Bio is optional — an author card without one renders no bio
+       paragraph rather than an invented sentence. */
+    eq(s + 'bio', text(doc, '.jr-author-bio'), p.author.bio || null);
     eq(s + 'canonical',
       doc.querySelector('link[rel="canonical"]').getAttribute('href'),
       'https://tenpointstandard.com/journal/' + p.slug + '.html');
-    eq(s + 'description', doc.querySelector('meta[name="description"]').content, p.dek);
+    eq(s + 'description',
+      doc.querySelector('meta[name="description"]').content,
+      p.metaDescription || p.dek);
     eq(s + 'published time',
       doc.querySelector('meta[property="article:published_time"]').content, p.publishedAt);
 
@@ -227,20 +233,37 @@
     check(s + 'has Article JSON-LD', !!doc.querySelector('script[type="application/ld+json"]'));
     check(s + 'header carries no wordmark', !doc.querySelector('.jr-wordmark'));
 
-    var paras = [].slice.call(doc.querySelectorAll('.jr-body p')).map(function (el) { return norm(el.textContent); });
-    var heads = [].slice.call(doc.querySelectorAll('.jr-body h2')).map(function (el) { return norm(el.textContent); });
-    var quotes = [].slice.call(doc.querySelectorAll('.jr-body blockquote')).map(function (el) {
-      return norm(el.childNodes[0].textContent);
-    });
+    /* The body is not diffed against posts.js any more, so guard the
+       thing that actually matters: a published page must carry real
+       copy. An empty or stub body would otherwise sail through with
+       correct metadata and reach the index. */
+    var body = doc.querySelector('.jr-body');
+    check(s + 'has a body', !!body);
+    if (!body) return;
 
-    var wantParas = p.body.filter(function (b) { return b.type === 'para'; }).map(function (b) { return norm(b.text); });
-    var wantHeads = p.body.filter(function (b) { return b.type === 'head'; }).map(function (b) { return norm(b.text); });
-    var wantQuotes = p.body.filter(function (b) { return b.type === 'quote'; }).map(function (b) { return norm(b.text); });
+    var paras = body.querySelectorAll('p').length;
+    var words = norm(body.textContent).split(' ').length;
+    check(s + 'body has paragraphs', paras >= 3, paras);
+    check(s + 'body is substantial', words >= 300, words + ' words');
 
-    eq(s + 'body paragraphs', JSON.stringify(paras), JSON.stringify(wantParas));
-    eq(s + 'body headings', JSON.stringify(heads), JSON.stringify(wantHeads));
-    eq(s + 'body quotes', JSON.stringify(quotes), JSON.stringify(wantQuotes));
-    check(s + 'pull quote uses .pull', wantQuotes.length === 0 || !!doc.querySelector('.jr-body blockquote.pull'));
+    /* Read time should be within sight of the actual length, at a
+       normal 200-250 wpm. Catches a copy/paste byline. */
+    var claimed = parseInt(p.readTime, 10);
+    var estimate = words / 225;
+    check(s + 'readTime is plausible',
+      claimed >= Math.floor(estimate * 0.5) && claimed <= Math.ceil(estimate * 2),
+      'claims ' + claimed + ' min for ' + words + ' words');
+
+    /* Any pull quote must use the shared .pull component. */
+    var quotes = [].slice.call(body.querySelectorAll('blockquote'));
+    check(s + 'pull quotes use .pull',
+      quotes.every(function (q) { return q.classList.contains('pull'); }));
+
+    /* Every source citation needs a reachable-looking link. */
+    var sources = [].slice.call(doc.querySelectorAll('.jr-sources li'));
+    check(s + 'each source has a link',
+      sources.every(function (li) { return !!li.querySelector('a[href^="https://"]'); }),
+      sources.length + ' sources');
   }
 
   /* ---------- run ---------- */
