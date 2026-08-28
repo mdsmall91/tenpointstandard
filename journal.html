@@ -76,7 +76,7 @@
       <div class="eyebrow faint" style="margin-bottom: var(--s-6);">Latest entry</div>
       <article class="card jr-featured">
         <div class="jr-media" style="aspect-ratio: 3 / 2;">
-          <img src="assets/journal/entitlements/hero.jpg" alt="A lit safari tent glowing under the Milky Way in a eucalyptus clearing at night" width="2400" height="1350">
+          <img src="assets/journal/nature-first/hero.jpg" alt="A cabin on a Texas Hill Country ridgeline at sunrise, framed by live oaks with a valley of native brush below" width="1536" height="1024">
         </div>
         <div>
           <div class="jr-tag">
@@ -84,28 +84,27 @@
             <span class="jr-tag-label">Land &amp; Entitlement</span>
           </div>
           <h2 class="jr-featured-title">
-            <a href="journal/entitlements.html" data-journal-link>Entitlements</a>
+            <a href="journal/nature-first.html" data-journal-link>Nature Should Be Your First Amenity</a>
           </h2>
-          <p class="jr-featured-dek">Outdoor hospitality owners should have a strategy.</p>
+          <p class="jr-featured-dek">Why the best outdoor hospitality projects start with the land.</p>
           <div class="jr-byline">
             <div>
-              <div class="jr-byline-name">Matt Small</div>
-              <div class="jr-byline-cred">Director of Outdoor Hospitality</div>
-              <div class="jr-byline-org">RVi Planning &amp; Landscape Architecture</div>
+              <div class="jr-byline-name">Kenny Reed &amp; Matt Small</div>
+              <div class="jr-byline-cred">Principal &amp; Director of Outdoor Hospitality</div>
+              <div class="jr-byline-org">Ten Point Services &amp; RVi Planning &amp; Landscape Architecture</div>
             </div>
-            <div class="jr-byline-meta">9 min read</div>
+            <div class="jr-byline-meta">6 min read</div>
           </div>
         </div>
       </article>
     </section>
 
     <!-- ---------- filter ----------
-         Hidden until there is more than one published entry: a
-         seven-chip filter over a single article reads as broken.
-         journal.js counts the tiles and reveals this, so it comes
-         back on its own as soon as a second entry is added — no
-         flag to remember to flip. -->
-    <div class="jr-filter" id="jr-filter" hidden>
+         Ships visible once more than one entry is published: a
+         seven-chip filter over a single article reads as broken, so
+         journal.js hides this (and the grid below) again if published
+         entries ever drop back to one. -->
+    <div class="jr-filter" id="jr-filter">
       <div class="jr-filter-inner">
         <span class="jr-filter-label">Filter</span>
         <button class="jr-chip" data-tag="all" aria-pressed="true">All entries</button>
@@ -123,15 +122,49 @@
          featured one: it is hidden under "All entries" (where it
          already shows above) and reappears when its own tag is
          selected. The aspect ratio on each media box is the post's
-         heroAspect, set explicitly so the columns cannot reflow.
-
-         Hidden alongside the filter while the featured entry is the
-         only published post — there is nothing left to put in the
-         grid. Add a second tile and both reappear. -->
-    <section class="jr-grid-wrap" id="jr-grid-wrap" hidden>
+         heroAspect, set explicitly so the columns cannot reflow. -->
+    <section class="jr-grid-wrap" id="jr-grid-wrap">
       <div class="jr-grid" id="jr-grid">
 
         <article class="jr-tile" data-tag="land-entitlement" data-featured hidden>
+          <div class="jr-media" style="aspect-ratio: 3 / 2;">
+            <img src="assets/journal/nature-first/hero.jpg" alt="A cabin on a Texas Hill Country ridgeline at sunrise, framed by live oaks with a valley of native brush below" width="1536" height="1024" loading="lazy">
+          </div>
+          <div class="jr-tile-body">
+            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Land &amp; Entitlement</span></div>
+            <h3 class="jr-tile-title"><a href="journal/nature-first.html" data-journal-link>Nature Should Be Your First Amenity</a></h3>
+            <p class="jr-tile-dek">Why the best outdoor hospitality projects start with the land.</p>
+            <div class="jr-byline">
+              <div>
+                <div class="jr-byline-name">Kenny Reed &amp; Matt Small</div>
+                <div class="jr-byline-cred">Principal &amp; Director of Outdoor Hospitality</div>
+                <div class="jr-byline-org">Ten Point Services &amp; RVi Planning &amp; Landscape Architecture</div>
+              </div>
+              <div class="jr-byline-meta">6 min read</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="jr-tile" data-tag="construction">
+          <div class="jr-media" style="aspect-ratio: 16 / 9;">
+            <img src="assets/journal/built-for-the-stay/hero.jpg" alt="Guest cabins glowing at dusk along a lit gravel path beneath a live oak" width="1672" height="941" loading="lazy">
+          </div>
+          <div class="jr-tile-body">
+            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Construction</span></div>
+            <h3 class="jr-tile-title"><a href="journal/built-for-the-stay.html" data-journal-link>Build for the Stay, Not Just the Inspection</a></h3>
+            <p class="jr-tile-dek">Why hospitality-first construction protects the guest experience, operating budget, and the next phase of growth.</p>
+            <div class="jr-byline">
+              <div>
+                <div class="jr-byline-name">Kenny Reed</div>
+                <div class="jr-byline-cred">Principal</div>
+                <div class="jr-byline-org">Ten Point Services</div>
+              </div>
+              <div class="jr-byline-meta">7 min read</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="jr-tile" data-tag="land-entitlement">
           <div class="jr-media" style="aspect-ratio: 16 / 9;">
             <img src="assets/journal/entitlements/hero.jpg" alt="A lit safari tent glowing under the Milky Way in a eucalyptus clearing at night" width="2400" height="1350" loading="lazy">
           </div>
@@ -149,9 +182,6 @@
             </div>
           </div>
         </article>
-
-
-
 
       </div>
       <p class="jr-empty" id="jr-empty" hidden>No entries under this tag yet.</p>

@@ -61,6 +61,46 @@ function tagSlug(tag) {
    ------------------------------------------------------------- */
 var POSTS = [
   {
+    slug: 'nature-first',
+    tag: 'Land & Entitlement',
+    title: 'Nature Should Be Your First Amenity',
+    dek: 'Why the best outdoor hospitality projects start with the land.',
+    metaDescription: 'Outdoor hospitality projects often make their first expensive mistake before construction begins: treating raw land as something to clear instead of something to understand. How to plan a site so the land does real work for the guest experience and the budget.',
+    hero: 'assets/journal/nature-first/hero.jpg',
+    heroAlt: 'A cabin on a Texas Hill Country ridgeline at sunrise, framed by live oaks with a valley of native brush below',
+    heroAspect: '3/2',
+    heroCaption: 'Photograph: Ten Point Services and RVi.',
+    author: {
+      name: 'Kenny Reed & Matt Small',
+      credential: 'Principal & Director of Outdoor Hospitality',
+      company: 'Ten Point Services & RVi Planning & Landscape Architecture',
+      bio: null
+    },
+    publishedAt: '2026-08-28',
+    readTime: '6 min read',
+    featured: true
+  },
+  {
+    slug: 'built-for-the-stay',
+    tag: 'Construction',
+    title: 'Build for the Stay, Not Just the Inspection',
+    dek: 'Why hospitality-first construction protects the guest experience, operating budget, and the next phase of growth.',
+    metaDescription: 'Building code and a final inspection prove a project can open. They do not prove it can be staffed, cleaned, maintained, and expanded without workarounds — here is what hospitality-first construction changes before the drawings are locked.',
+    hero: 'assets/journal/built-for-the-stay/hero.jpg',
+    heroAlt: 'Guest cabins glowing at dusk along a lit gravel path beneath a live oak',
+    heroAspect: '16/9',
+    heroCaption: 'Photograph: Ten Point Services.',
+    author: {
+      name: 'Kenny Reed',
+      credential: 'Principal',
+      company: 'Ten Point Services',
+      bio: null
+    },
+    publishedAt: '2026-08-28',
+    readTime: '7 min read',
+    featured: false
+  },
+  {
     slug: 'entitlements',
     tag: 'Land & Entitlement',
     title: 'Entitlements',
@@ -78,7 +118,7 @@ var POSTS = [
     },
     publishedAt: '2026-08-09',
     readTime: '9 min read',
-    featured: true
+    featured: false
   },
   {
     /* Sample copy that shipped with the Claude Design handoff, under

@@ -11,9 +11,21 @@
   </url>
   <url>
     <loc>https://tenpointstandard.com/journal.html</loc>
-    <lastmod>2026-08-09</lastmod>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tenpointstandard.com/journal/nature-first.html</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tenpointstandard.com/journal/built-for-the-stay.html</loc>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tenpointstandard.com/journal/entitlements.html</loc>
