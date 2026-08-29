@@ -160,17 +160,17 @@ a:hover { color: var(--accent-deep); }
 }
 
 /* =============================================================
-   MASONRY GRID — CSS columns. Tile height varies because the
-   image aspect varies; that is the intended rhythm. Heights are
-   never randomized at runtime.
+   GRID — three across, filled left-to-right, then a new row.
+   Tile height varies because the image aspect varies (that is the
+   intended rhythm), so rows are top-aligned rather than stretched
+   to a uniform height. This used to be CSS columns, which fills
+   column-first: with fewer than a full set of tiles that stacked
+   everything in column one and left columns two and three empty.
    ============================================================= */
 .jr-grid-wrap { max-width: var(--page-max); margin: 0 auto; padding: var(--s-12) var(--page-pad) var(--s-24); }
-.jr-grid { columns: 3; column-gap: var(--s-6); }
+.jr-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-6); align-items: start; }
 
 .jr-tile {
-  break-inside: avoid;
-  display: inline-block; width: 100%;
-  margin: 0 0 var(--s-6);
   background: var(--surface); border: var(--hairline);
   transition: border-color .15s;
 }
@@ -412,7 +412,7 @@ a:hover { color: var(--accent-deep); }
    RESPONSIVE
    ============================================================= */
 @media (max-width: 1100px) {
-  .jr-grid { columns: 2; }
+  .jr-grid { grid-template-columns: repeat(2, 1fr); }
 }
 /* The featured entry stacks earlier than the 800px the rest of the
    page uses. At 900px its 5fr text column is only ~300px, and a
@@ -430,7 +430,7 @@ a:hover { color: var(--accent-deep); }
   .jr-article-dispatch { grid-template-columns: 1fr; gap: var(--s-6); }
 }
 @media (max-width: 720px) {
-  .jr-grid { columns: 1; }
+  .jr-grid { grid-template-columns: 1fr; }
   /* Same horizontal-scroll treatment as .fg-step-nav in site.css. */
   .jr-filter-inner {
     flex-wrap: nowrap; overflow-x: auto;
