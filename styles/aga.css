@@ -1,0 +1,169 @@
+/* =============================================================
+   AGA SESSION SPLASH — aga.html only
+   Sits on tokens.css + base.css, which supply the type scale,
+   .card, .btn, .input, .textarea, .eyebrow and the header and
+   footer chrome. Nothing here restyles those; this file only
+   lays out the page and the two blocks base.css has no shape
+   for, the detail strip and the signup card.
+   ============================================================= */
+
+.aga-root { min-height: 100vh; display: flex; flex-direction: column; }
+.aga-main { flex: 1; }
+
+/* base.css strips links to color:inherit and no underline, and the hover
+   colour lives in site.css, which this page does not load. Restate the
+   two link behaviours the page actually uses rather than pulling in the
+   whole assessment stylesheet for them. */
+a:hover { color: var(--accent-deep); }
+.aga-fineprint a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+/* The wordmark is the same masked PNG the assessment and Journal use.
+   Restated here for the same reason as the link rules. */
+.fg-logo-link { display: inline-flex; align-items: center; }
+.fg-logo-link:hover .fg-logo { background: var(--accent-deep); }
+.fg-logo {
+  display: inline-block; height: 44px; aspect-ratio: 181 / 123;
+  background: var(--accent);
+  transition: background .15s;
+  -webkit-mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
+  mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
+}
+
+.aga-page {
+  max-width: 1040px;
+  margin: 0 auto;
+  /* No bottom padding: .tp-footer carries its own margin-top. */
+  padding: var(--s-12) var(--page-pad) 0;
+}
+
+/* ---------- hero ---------- */
+.aga-hero { border-bottom: 1px solid var(--border); padding-bottom: var(--s-10); }
+.aga-hero h1 { font-size: clamp(2.25rem, 5vw, var(--fs-h1)); margin-top: var(--s-4); }
+.aga-hero .lede { margin-top: var(--s-5); max-width: 60ch; }
+
+.aga-hosts {
+  margin-top: var(--s-6);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+.aga-hosts strong { color: var(--text-strong); font-weight: 600; }
+
+/* ---------- detail strip ----------
+   Date, time, place, length. Four cells on a desktop, stacking to
+   two and then one. auto-fit rather than a fixed four so the last
+   row never leaves a lone orphan cell at odd widths. */
+.aga-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin: var(--s-10) 0 var(--s-12);
+}
+.aga-detail { background: var(--surface); padding: var(--s-5) var(--s-5) var(--s-6); }
+.aga-detail dt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--tr-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--s-3);
+}
+.aga-detail dd {
+  margin: 0;
+  font-size: var(--fs-h5);
+  line-height: var(--lh-snug);
+  color: var(--text-strong);
+  font-weight: 500;
+}
+.aga-detail dd .sub {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* ---------- body columns ----------
+   The session description and the takeaways sit side by side and
+   collapse in source order on a phone. */
+.aga-cols {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: var(--s-12);
+  align-items: start;
+}
+.aga-cols h2 { font-size: var(--fs-h3); }
+.aga-cols h3 { font-size: var(--fs-h5); margin-top: var(--s-10); }
+.aga-prose > * + * { margin-top: var(--s-5); }
+.aga-prose ul { margin: 0; padding-left: 1.15em; }
+/* .aga-cols h3 outranks the sibling rule above, so the list that follows a
+   subhead needs its own gap or it crowds the heading. */
+.aga-prose h3 + ul { margin-top: var(--s-4); }
+.aga-prose li + li { margin-top: var(--s-3); }
+
+.aga-aside { position: sticky; top: var(--s-6); }
+.aga-aside .card + .card { margin-top: var(--s-5); }
+.aga-aside h3 { margin: 0 0 var(--s-4); font-size: var(--fs-h6); }
+.aga-takeaways { margin: 0; padding-left: 1.15em; font-size: var(--fs-small); }
+.aga-takeaways li + li { margin-top: var(--s-3); }
+
+/* Not a lecture. Set apart because it is the line that tells someone
+   at a trade show whether to walk over or keep walking. */
+.aga-note-block {
+  margin-top: var(--s-10);
+  border-left: 2px solid var(--accent);
+  padding-left: var(--s-5);
+}
+.aga-note-block p { font-family: var(--font-display); font-size: var(--fs-lead); line-height: var(--lh-snug); }
+
+/* ---------- signup ---------- */
+.aga-signup {
+  margin-top: var(--s-16);
+  scroll-margin-top: var(--s-8);
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-12);
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: var(--s-12);
+  align-items: start;
+}
+.aga-signup h2 { font-size: var(--fs-h3); }
+.aga-signup .lede { margin-top: var(--s-4); }
+
+.aga-form { display: flex; flex-direction: column; gap: var(--s-5); }
+.aga-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); }
+.aga-form .textarea { min-height: 110px; resize: vertical; }
+.aga-form button { align-self: flex-start; }
+
+.aga-optional { text-transform: none; letter-spacing: 0; color: var(--text-faint); font-weight: 400; }
+
+.aga-status {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  min-height: 1.4em;
+  max-width: 46ch;
+}
+.aga-status.error { color: var(--accent-deep); }
+
+.aga-fineprint { font-size: var(--fs-caption); color: var(--text-muted); max-width: 52ch; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .aga-cols, .aga-signup { grid-template-columns: 1fr; gap: var(--s-10); }
+  .aga-aside { position: static; }
+}
+
+@media (max-width: 560px) {
+  .aga-page { padding: var(--s-8) var(--s-5) var(--s-12); }
+  .aga-form-row { grid-template-columns: 1fr; }
+  /* 44px is the minimum comfortable tap target; .btn's own padding
+     lands just under it at this font size. */
+  .aga-form button, .aga-header-cta.btn { min-height: 44px; justify-content: center; }
+}
