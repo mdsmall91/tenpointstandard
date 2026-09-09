@@ -110,6 +110,34 @@ is short, tightly specified rewriting with every fact already supplied). Roughly
 0.8 cents per completed Quick Scan. Thinking stays on; lowering effort gets the
 saving without the risk that comes with switching reasoning off.
 
+## The card board at `/standard/play/`
+
+A second interface to the same forty questions: ten photographic cards
+that flip to reveal four questions each, answered in any order. It is
+`noindex,nofollow` and does not replace `/standard/`, which is still the
+Full Assessment.
+
+What it does today: asks all forty questions, saves answers to
+`localStorage['tp-card-board-v1']`, and downloads them as plain text.
+
+What it does NOT do yet, and must before it could replace `/standard/`:
+
+- **Score.** It has no access to the results engine, so it cannot produce
+  a score, a verdict, the critical gates, the findings, or the three
+  actions. Completion is not readiness and the board must never imply it
+  is: ten complete cards can still be a project with six gates open.
+- **Carry forward** from the Quick Scan, or read answers already saved by
+  the Full Assessment. Its answer format differs (`0:2` and `0`/`1`/`2`
+  against `0-2` and `true`/`false`/`'unsure'`), so an adapter is needed;
+  do not copy one map into the other.
+- **Send anything.** No scorecard, no Mailchimp, no model layer.
+- **Report.** No GA4 events. Anything added must keep the localhost guard
+  in `analytics.js`.
+
+The forty questions themselves come from `/questions.js`, which the Full
+Assessment reads too, so the two interfaces cannot drift. `tests/tests.js`
+fails if either surface grows its own copy again.
+
 ## What is still open
 
 - **Ten field notes** in `app.js` `FIELD_NOTES`, and the template reads in
