@@ -54,40 +54,9 @@ function esc(s) {
   });
 }
 
-/* ---------------------------------------------------------------
-   THE MODEL PROXY
-   Optional everywhere. No key ever reaches this file: the proxy
-   holds it. Any failure, any timeout, any malformed shape falls
-   through to the deterministic template and the visitor never
-   learns a call was attempted.
-   --------------------------------------------------------------- */
-function askModel(task, payload, cb) {
-  if (!CONFIG.MODEL_PROXY_URL) { cb(null); return; }
-  var done = false;
-  var timer = setTimeout(function () {
-    if (!done) { done = true; cb(null); }
-  }, CONFIG.MODEL_PROXY_TIMEOUT_MS || 6000);
-
-  try {
-    fetch(CONFIG.MODEL_PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task: task, payload: payload })
-    }).then(function (r) {
-      return r.ok ? r.json() : null;
-    }).then(function (j) {
-      if (done) return;
-      done = true; clearTimeout(timer);
-      cb(j && typeof j === 'object' ? j : null);
-    })['catch'](function () {
-      if (done) return;
-      done = true; clearTimeout(timer);
-      cb(null);
-    });
-  } catch (e) {
-    if (!done) { done = true; clearTimeout(timer); cb(null); }
-  }
-}
+/* The model layer lives in modelproxy.js and is optional everywhere.
+   Every read below is already correct before a call is made. */
+function askModel(task, payload, cb) { TPModel.ask(task, payload, cb); }
 
 /* ---------------------------------------------------------------
    RENDER HELPERS
@@ -387,18 +356,14 @@ function go(n) {
    language. The template is already on screen; a successful reply
    swaps it, a failure changes nothing. */
 function requestModelRead() {
-  if (!CONFIG.MODEL_PROXY_URL) return;
+  if (!TPModel.enabled()) return;
   askModel('read', {
     type: S.type, land: S.land, stage: S.stage, size: S.size,
     money: S.money, date: S.date, team: S.team, worry: S.worry,
     intake: S.intake, gate: M.evaluate(S).gateKey, band: M.evaluate(S).bandName
   }, function (out) {
-    if (!out || !out.lines || !out.lines.length) return;
-    var clean = [];
-    for (var i = 0; i < out.lines.length && i < 5; i++) {
-      if (typeof out.lines[i] === 'string' && out.lines[i].length < 400) clean.push(out.lines[i]);
-    }
-    if (clean.length < 2) return;
+    var clean = TPModel.cleanLines(out, 3);
+    if (!clean) return;
     S.modelLines = clean;
     if (S.step === RESULT) render();
   });

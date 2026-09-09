@@ -58,14 +58,53 @@ file and fresh HTML can then pair with stale config. Bump them all together:
 
     grep -rl "?v=13" --include=*.html --include=*.js . | xargs sed -i 's|?v=13|?v=14|g'
 
+## The model layer
+
+Optional everywhere. Every read has a deterministic template behind it, and a
+proxy that is down, slow, rate limited, or never deployed changes nothing a
+visitor sees. That is a design rule, not a fallback.
+
+Three tasks, all defined in `worker/prompts.json` so the two runtimes cannot
+drift: `intake` (pull the stated facts out of what somebody typed), `read`
+(lane one's four sentences), and `standard_read` (lane two's six to eight).
+
+**The boundary is enforced three times.** No cost, no schedule, no yield, no
+ruling on what a jurisdiction will approve. It is stated in the system prompt,
+constrained by the output schema, and checked again by regex on the way out.
+A response that fails any of the three is discarded and the page keeps its
+template. Never remove one of the three because the other two look sufficient.
+
+**Testing locally, no cloud account needed:**
+
+    python tools/dev-proxy.py
+
+It reads the key from `ANTHROPIC_API_KEY` or `~/.secrets/anthropic_api_key.txt`,
+never from this repository, and prints the tokens and cost of every call.
+`modelproxy.js` points the site at it automatically when served from localhost.
+
+**Production** is `worker/`, a Cloudflare Worker. Deploying needs Node:
+
+    winget install OpenJS.NodeJS.LTS
+    cd worker && npm install
+    npx wrangler secret put ANTHROPIC_API_KEY
+    npx wrangler deploy
+
+Then set the deployed URL as `CONFIG.MODEL_PROXY_URL`. Nothing else changes.
+
+Model is `claude-opus-5` at `effort: "low"` in both runtimes. Low effort is the
+right setting for a short, tightly specified rewrite inside a six second
+budget; it is not a quality compromise. Thinking stays on, because disabling it
+on this model can leak reasoning into the visible text.
+
 ## What is still open
 
 - **Ten field notes** in `app.js` `FIELD_NOTES`, and the template reads in
   `readmodel.js` and `standardread.js`, are DRAFT pending Kenny's pass.
 - **Four scope sentences** on `/about/`, one per project. The cards say less
   rather than inventing a condition that was solved.
-- **`CONFIG.MODEL_PROXY_URL`** is empty, so every read comes from the template.
-  Setting it switches the AI layer on; nothing else changes.
+- **`CONFIG.MODEL_PROXY_URL`** is empty, so production reads come from the
+  template. Set it to the deployed Worker URL to switch the AI layer on.
+  Local testing already works through `tools/dev-proxy.py`.
 - **`CONFIG.MAILCHIMP_GROUP_CONSULT`** is empty, so the consultation form opens
   a mail client instead of posting to Mailchimp. See the comment in `config.js`.
 - **A `SCORECARD` merge field** does not exist in Mailchimp yet. The site sends

@@ -118,7 +118,10 @@ var state = { answers: {}, revealed: false, sentTo: '', email: '', emailError: f
      with an edit link and so `questions_skipped_by_carry` is a real
      number rather than an estimate. `readCtx` is the lane one context
      used to describe the project back to the person. */
-  carried: [], readCtx: null, carryConfirmed: false };
+  carried: [], readCtx: null, carryConfirmed: false,
+  /* Set only if the model layer answered in time. The template read is
+     what renders until then, and what keeps rendering if it does not. */
+  modelLines: null, modelAsked: false };
 
 function load() {
   try {
@@ -553,7 +556,7 @@ function renderLedger() {
         '<div class="fg-hero-read">' +
           '<div class="eyebrow dotted">Your read</div>' +
           '<div class="fg-read-lines">' +
-            TPStandardRead.compose(R, state.readCtx).map(function (l) {
+            (state.modelLines || TPStandardRead.compose(R, state.readCtx)).map(function (l) {
               return '<p>' + esc(l) + '</p>';
             }).join('') +
           '</div>' +
@@ -728,6 +731,32 @@ function renderFooterNote(R) {
   '</section>';
 }
 
+/* The template read is already rendered before this runs. A success
+   swaps in warmer wording; a failure, a timeout, or a proxy that was
+   never deployed all leave the page exactly as it is. Fires once. */
+function requestModelRead() {
+  if (state.modelAsked || !state.revealed) return;
+  if (typeof TPModel === 'undefined' || !TPModel.enabled()) return;
+  state.modelAsked = true;
+  var R = TPResults.evaluate(state.answers);
+  TPModel.ask('standard_read', {
+    template: TPStandardRead.compose(R, state.readCtx),
+    score: R.score,
+    band: R.verdict.label,
+    open_gates: R.openGates.map(function (g) { return g.name; }),
+    not_sure_count: R.notSureCount,
+    project: state.readCtx ? {
+      type: state.readCtx.type, land: state.readCtx.land,
+      size: state.readCtx.size, stage: state.readCtx.stage
+    } : null
+  }, function (out) {
+    var clean = TPModel.cleanLines(out, 5);
+    if (!clean) return;
+    state.modelLines = clean;
+    if (state.step === 11 && state.revealed) render();
+  });
+}
+
 function render() {
   /* Drives the static #fg-about block, which is crawlable copy that belongs
      with the cover and would be noise once the assessment is underway. */
@@ -737,7 +766,7 @@ function render() {
   var app = document.getElementById('app');
   if (state.step === 0) app.innerHTML = renderCover();
   else if (state.step >= 1 && state.step <= 10) app.innerHTML = renderPoint(state.step);
-  else app.innerHTML = renderLedger();
+  else { app.innerHTML = renderLedger(); requestModelRead(); }
 }
 
 /* =============================================================
@@ -902,6 +931,8 @@ document.addEventListener('click', function (e) {
       state.ctaError = false;
       state.carried = [];
       state.carryConfirmed = false;
+      state.modelLines = null;
+      state.modelAsked = false;
       save();
       /* Starting over has to let the milestones fire again, or the
          second run through is invisible in the funnel. */

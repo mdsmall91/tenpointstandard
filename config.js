@@ -49,6 +49,11 @@ var CONFIG = {
      drop back to the template on any failure.
      --------------------------------------------------------------- */
   MODEL_PROXY_URL: '',
+  /* The local proxy, tools/dev-proxy.py. modelproxy.js picks this one
+     automatically when the page is served from localhost and the
+     production URL everywhere else, so testing the AI layer needs no
+     code change and cannot accidentally point production at a laptop. */
+  MODEL_PROXY_URL_LOCAL: 'http://localhost:8788',
   MODEL_PROXY_TIMEOUT_MS: 6000,
 
   /* Marks Field Notes subscribers so they are distinguishable from

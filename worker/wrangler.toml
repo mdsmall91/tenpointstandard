@@ -1,0 +1,20 @@
+name = "tenpoint-model-proxy"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Twenty calls a minute per address. A completed Read makes two, so this
+# is roughly ten sessions a minute from one address: comfortable for a
+# booth tablet, tight enough that a script cannot run up a bill.
+[[ratelimits]]
+name = "READ_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 20
+  period = 60
+
+# The API key is NOT here and must never be. It is a secret:
+#   npx wrangler secret put ANTHROPIC_API_KEY
+# Wrangler prompts for the value, stores it encrypted with Cloudflare,
+# and it never touches this repository or the deployed bundle's source.
