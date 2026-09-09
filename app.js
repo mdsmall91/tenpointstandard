@@ -305,9 +305,13 @@ function esc(s) {
 function goTop() { document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }
 function goStep(i) { state.step = i; save(); render(); goTop(); }
 
-// Cover = 0, each point advances a tenth, ledger = complete.
+/* Cover = 0, ledger = 100, and in between the rail tracks answers.
+   The board has no sequence to measure, so counting screens would
+   leave the rail frozen at ten percent through all forty questions. */
 function progressPct() {
-  return state.step === 0 ? 0 : Math.min(100, Math.round((state.step / 10) * 100));
+  if (state.step === 0) return 0;
+  if (state.step === 11) return 100;
+  return Math.min(100, Math.round((answeredCount() / 40) * 100));
 }
 
 function renderRail() {
@@ -452,87 +456,26 @@ function renderCover() {
    The old assessment paid out once, at the very end. This one pays
    out ten times, so a person who stops at point six still leaves
    with six points of value and a reason to come back. */
+/* What the fourth answer on a card is worth saying out loud. This is
+   the one place the assessment tells somebody something true about a
+   point while they are still answering, so it has to be honest in
+   both directions: four yeses is not praise, and an open gate is not
+   a failing. It says what is open, and that being early is fine.
+
+   A card is complete when four questions are answered, whatever the
+   answers were. Nothing on the board may read as readiness, so the
+   verdict this pays out is a sentence about the point, never a grade. */
 function payoutLine(pi) {
   var R = TPResults.evaluate(state.answers);
-  var row = R.ledger[pi];
   var yes = pointYes(pi);
-  var line;
-  if (row.gateOpen) {
-    line = 'One of the six critical gates sits in this point, and it is still open. That is normal at your stage, and it is worth handling before the work downstream of it.';
-  } else if (yes === 4) {
-    line = 'Nothing open here. This is the part of the project you can build on.';
-  } else if (yes >= 2) {
-    line = 'Most of this is settled. The rest is worth closing while it is still cheap to change.';
-  } else {
-    line = 'This one is mostly open. It is early work rather than late work, which is the good news.';
+  if (R.ledger[pi].gateOpen) {
+    return 'One of the six critical gates sits in this point, and it is still open. That is normal at your stage, and it is worth handling before the work downstream of it.';
   }
-  return '<div class="fg-payout">' +
-      '<div class="fg-payout-ring">' + TPRing.svg({
-        segments: ringSegments(), size: 150, band: 13,
-        center: { main: String(totalScore()), sub: 'of 100' }
-      }) + '</div>' +
-      '<div class="fg-payout-body">' +
-        '<h4>' + POINTS[pi].title + ': ' + yes + ' of 4.</h4>' +
-        '<p class="muted">' + line + '</p>' +
-      '</div>' +
-    '</div>';
+  if (yes === 4) return 'Nothing open here. This is the part of the project you can build on.';
+  if (yes >= 2) return 'Most of this is settled. The rest is worth closing while it is still cheap to change.';
+  return 'This one is mostly open. It is early work rather than late work, which is the good news.';
 }
 
-function renderPoint(step) {
-  var pi = step - 1, p = POINTS[pi], score = pointScore(pi);
-  var img = '/assets/points/' + POINT_IMG[pi] + '-' + POINT_IMG_W[pi] + '.webp';
-  var html = '' +
-    /* The opener runs full width of the column, with the point name
-       over it. Every one is a real Ten Point project and the caption
-       says which. */
-    '<figure class="fg-opener">' +
-      '<img src="' + img + '" alt="" loading="lazy" decoding="async" width="' + POINT_IMG_W[pi] + '" height="' + Math.round(POINT_IMG_W[pi] * 9 / 16) + '">' +
-      /* The credit sits inside the caption rather than under the frame.
-         Below the image it has to clear an absolutely positioned
-         overlay to avoid colliding with the title, and that is a
-         layout that breaks quietly the first time a photograph
-         changes aspect. Inside, it cannot collide with anything. */
-      '<figcaption>' +
-        '<span class="fg-opener-n mono">POINT ' + p.n + ' / 10</span>' +
-        '<span class="fg-opener-title">' + p.title + '</span>' +
-        '<span class="fg-opener-credit mono">' + esc(POINT_IMG_CAP[pi]) + ' &middot; Ten Point Services</span>' +
-      '</figcaption>' +
-    '</figure>' +
-    '<section class="fg-pstep">' +
-      '<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap;">' +
-        '<div class="eyebrow dotted">Point ' + p.n + ' / 10</div>' +
-        '<div class="mono" style="font-size: 11px; color: var(--text-faint);">EACH YES = ' + p.pts + ' PTS · ' + score + ' / ' + p.max + '</div>' +
-      '</div>' +
-      '<h2 style="margin-top: 28px;">' + p.title + '.</h2>' +
-      /* The field note. One line of plain language from a real
-         project, and the thing that makes this read like a person. */
-      '<p class="fg-note">' + esc(FIELD_NOTES[pi]) + '</p>' +
-      '<div style="margin-top: 24px;">';
-  for (var qi = 0; qi < p.qs.length; qi++) {
-    var key = pi + '-' + qi, ans = state.answers[key];
-    var carried = false;
-    for (var c = 0; c < state.carried.length; c++) if (state.carried[c].key === key) carried = true;
-    html += '' +
-      '<div class="fg-q' + (carried ? ' is-carried' : '') + '">' +
-        '<div style="display: flex; gap: 14px; align-items: baseline;"><span class="mono" style="font-size: 11px; color: var(--text-faint); flex: none;">Q' + (qi + 1) + '</span><span style="font-size: 16px; color: var(--text); max-width: 58ch;">' + p.qs[qi] +
-          (carried ? '<span class="fg-carried-tag mono">FROM QUICK SCAN</span>' : '') + '</span></div>' +
-        '<div class="fg-seg" style="display: flex; gap: 6px;">' +
-          '<button class="fg-yn yes' + (ans === true ? ' on' : '') + '" data-key="' + key + '" data-val="1">Yes</button>' +
-          '<button class="fg-yn no' + (ans === false ? ' on' : '') + '" data-key="' + key + '" data-val="0">No</button>' +
-          '<button class="fg-yn unsure' + (ans === 'unsure' ? ' on' : '') + '" data-key="' + key + '" data-val="u">Not sure</button>' +
-        '</div>' +
-      '</div>';
-  }
-  html += '</div>';
-  /* Pay out the moment the fourth answer lands, not at the end. */
-  if (pointDone(pi)) html += payoutLine(pi);
-  html += '</section>' +
-    '<div style="display: flex; justify-content: space-between; padding: 24px 0 64px;">' +
-      '<button class="btn ghost" data-action="prev">Back</button>' +
-      '<button class="btn" data-action="next">' + (step === 10 ? 'See the ledger' : 'Next point') + '</button>' +
-    '</div>';
-  return html;
-}
 
 function renderLedger() {
   var total = totalScore();
@@ -754,6 +697,57 @@ function requestModelRead() {
   });
 }
 
+/* The board owns its own DOM once mounted. Rebuilding #app from a
+   string on every answer is how the rest of this file works, and it
+   is exactly what the board cannot survive: it would throw away the
+   flip mid-animation and slam the open card shut under somebody's
+   hand. So the board is mounted once and then repaints only the card
+   that changed, and render() must not touch #app while it is up. */
+function boardApi() {
+  return {
+    points: POINTS,
+    get: function (key) { return state.answers[key]; },
+    set: function (key, value, pi) {
+      state.answers[key] = value;
+      save();
+      trackOnce('assessment_start', { method: 'ten_point_standard' });
+      trackOnce('standard_start', { carried_from_read: state.carried.length ? 'yes' : 'no' });
+      if (pointDone(pi)) {
+        trackOnce('standard_point_complete', {
+          point_number: pi + 1,
+          point_name: POINTS[pi].title,
+          point_score: pointScore(pi)
+        }, 'point-' + (pi + 1));
+      }
+    },
+    /* A carried answer is one the Quick Scan gave us, not one they
+       typed. The board says so on the question so it can be changed. */
+    isCarried: function (key) {
+      for (var i = 0; i < state.carried.length; i++) if (state.carried[i].key === key) return true;
+      return false;
+    },
+    note: function (pi) { return FIELD_NOTES[pi]; },
+    /* Paid out the moment the fourth answer lands, not at the end. */
+    payout: function (pi) { return payoutLine(pi); },
+    image: function (pi) {
+      return '/assets/points/' + POINT_IMG[pi] + '-' + POINT_IMG_W[pi] + '.webp';
+    },
+    cardOpened: function (pi) {
+      TPA.once('full_assessment_point_opened', { point: POINTS[pi].n }, 'open-' + (pi + 1));
+    },
+    cardCompleted: function () {
+      if (answeredCount() === 40) trackOnce('standard_all_answered', { score: totalScore() });
+    },
+    /* The header score and the rail live outside the board, so the
+       board tells us when a number it does not own has changed. */
+    chromeChanged: function () { renderHeader(); renderRail(); },
+    goLedger: function () {
+      track('fg_view_ledger', { score: totalScore() });
+      goStep(11);
+    }
+  };
+}
+
 function render() {
   /* Drives the static #fg-about block, which is crawlable copy that belongs
      with the cover and would be noise once the assessment is underway. */
@@ -761,8 +755,12 @@ function render() {
   renderHeader();
   renderRail();
   var app = document.getElementById('app');
+  if (state.step === 1) {
+    if (!TPBoard.isMounted(app)) TPBoard.mount(app, boardApi());
+    else TPBoard.repaint();
+    return;
+  }
   if (state.step === 0) app.innerHTML = renderCover();
-  else if (state.step >= 1 && state.step <= 10) app.innerHTML = renderPoint(state.step);
   else { app.innerHTML = renderLedger(); requestModelRead(); }
 }
 
@@ -780,8 +778,17 @@ document.addEventListener('click', function (e) {
 
   if (el.dataset.go !== undefined) {
     var target = parseInt(el.dataset.go, 10);
+    /* 1 through 10 used to be ten screens. They are now ten cards on
+       one screen, so the rail goes to the board and opens the card. */
     if (target >= 1 && target <= 10) {
-      TPA.once('full_assessment_point_opened', { point: POINTS[target - 1].n }, 'open-' + target);
+      var wasBoard = state.step === 1;
+      if (!wasBoard) goStep(1);
+      TPBoard.open(target - 1);
+      if (wasBoard) {
+        var card = document.getElementById('card-' + (target - 1));
+        if (card && card.scrollIntoView) card.scrollIntoView({ block: 'nearest' });
+      }
+      return;
     }
     goStep(target);
     return;
@@ -836,11 +843,12 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'next':
-      if (state.step === 10) track('fg_view_ledger', { score: totalScore() });
-      goStep(Math.min(11, state.step + 1));
+      /* Cover to board, board to ledger. */
+      if (state.step === 1) track('fg_view_ledger', { score: totalScore() });
+      goStep(state.step === 0 ? 1 : 11);
       break;
     case 'prev':
-      goStep(Math.max(0, state.step - 1));
+      goStep(state.step === 11 ? 1 : 0);
       break;
     case 'submit-email': {
       var em = (document.getElementById('gate-email').value || '').trim();

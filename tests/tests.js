@@ -177,8 +177,7 @@
      point the two interfaces would be running different assessments
      and their scores would stop meaning the same thing. The snapshot
      is gone; this keeps it gone. */
-  var SURFACES = ['../standard/index.html', '../scorecard/index.html',
-                  '../standard/play/index.html'];
+  var SURFACES = ['../standard/index.html', '../scorecard/index.html'];
   Promise.all(SURFACES.map(function (url) {
     return fetch(url, { cache: 'no-store' }).then(function (r) {
       check('surface ' + url + ' exists', r.ok, 'HTTP ' + r.status);
@@ -198,9 +197,24 @@
         !/src="(?!\.\.\/|\/)[^"]*questions\.js/.test(html));
     });
   })).then(function () {
-    return fetch('../standard/play/questions.js', { cache: 'no-store' });
-  }).then(function (r) {
-    check('board has no snapshot of its own', r.status === 404, 'HTTP ' + r.status);
+    /* The board arrived as a standalone page at /standard/play/ with its
+       own copy of the questions. It is the assessment now, and both are
+       gone. A page left behind there would be an orphan running an
+       assessment nobody is maintaining. */
+    return Promise.all(['../standard/play/', '../standard/play/questions.js',
+                        '../standard/play/play.js'].map(function (u) {
+      return fetch(u, { cache: 'no-store' }).then(function (r) {
+        check('no orphan at ' + u, r.status === 404, 'HTTP ' + r.status);
+      });
+    }));
+  }).then(function () {
+    /* The board is loaded by the assessment, and it is what asks the
+       questions now. If this ever stops being true the assessment has
+       no question screen at all. */
+    return fetch('../standard/index.html', { cache: 'no-store' }).then(function (r) { return r.text(); });
+  }).then(function (html) {
+    check('assessment loads the board', html.indexOf('board.js') !== -1);
+    check('assessment loads the board stylesheet', html.indexOf('board.css') !== -1);
   }).catch(function (e) {
     check('question-source check', false, String(e));
   }).then(questionsMd);

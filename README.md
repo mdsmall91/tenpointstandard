@@ -12,7 +12,7 @@ Static site, no build step. Two ways in to the same readiness framework, plus th
 | --- | --- | --- |
 | `/` | The Field Journal. The front door. | yes |
 | `/read/` | **Quick Scan.** `read.js` + `readmodel.js` | yes |
-| `/standard/` | **Full Assessment.** `app.js` + `results.js` | yes |
+| `/standard/` | **Full Assessment.** Ten cards. `board.js` + `app.js` + `results.js` | yes |
 | `/scorecard/` | The forwardable scorecard, answers in the URL fragment | no |
 | `/about/` | One screen on Ten Point Services | yes |
 | `/consultation/` | Kenny's direct line, plus a form | yes |
@@ -110,38 +110,44 @@ is short, tightly specified rewriting with every fact already supplied). Roughly
 0.8 cents per completed Quick Scan. Thinking stays on; lowering effort gets the
 saving without the risk that comes with switching reasoning off.
 
-## The card board at `/standard/play/`
+## The Full Assessment is a board
 
-A second interface to the same forty questions: ten photographic cards
-that flip to reveal four questions each, answered in any order. It is
-`noindex,nofollow` and does not replace `/standard/`, which is still the
-Full Assessment.
+`/standard/` asks its forty questions as ten photographic cards. A card
+flips in place to its four questions; any card, any order, come back to
+anything. It replaced ten sequential screens on 2026-09-09.
 
-What it does today: asks all forty questions, saves answers to
-`localStorage['tp-card-board-v1']`, and downloads them as plain text.
+Only the question surface changed. The scoring, the six critical gates,
+the verdict, the findings, the three actions, the ledger, the scorecard,
+the Mailchimp send and the model layer are the same code they were, and
+`board.js` writes into the same `state.answers` in the same format, so
+identical answers give an identical result either way. `tests/tests.js`
+checks that, and checks that nothing is left orphaned at
+`/standard/play/`, where the board first arrived as a prototype.
 
-What it does NOT do yet, and must before it could replace `/standard/`:
+Two rules the board has to keep:
 
-- **Score.** It has no access to the results engine, so it cannot produce
-  a score, a verdict, the critical gates, the findings, or the three
-  actions. Completion is not readiness and the board must never imply it
-  is: ten complete cards can still be a project with six gates open.
-- **Carry forward** from the Quick Scan, or read answers already saved by
-  the Full Assessment. Its answer format differs (`0:2` and `0`/`1`/`2`
-  against `0-2` and `true`/`false`/`'unsure'`), so an adapter is needed;
-  do not copy one map into the other.
-- **Send anything.** No scorecard, no Mailchimp, no model layer.
-- **Report.** No GA4 events. Anything added must keep the localhost guard
-  in `analytics.js`.
+- **It is mounted, not re-rendered.** `app.js` rebuilds `#app` from a
+  string on most state changes. Doing that to the board would throw the
+  flip away mid-animation and shut the open card under someone's hand.
+  `render()` mounts it once and then leaves it alone; the board repaints
+  only the card that changed and calls `chromeChanged()` for the score
+  and the rail, which it does not own.
+- **A card is answered, not good.** Four answers complete a card whatever
+  those answers were. The front says "All four answered", never
+  "complete" in a sense that could read as ready, and the payout line on
+  the back names an open gate when there is one. Readiness is the
+  ledger's verdict to give, and only after all six gates have spoken.
 
-The forty questions themselves come from `/questions.js`, which the Full
-Assessment reads too, so the two interfaces cannot drift. `tests/tests.js`
-fails if either surface grows its own copy again.
+Carry-forward from the Quick Scan still applies: anything lane one
+established is filled in, confirmed on its own screen first, and marked
+on the card with "From your Quick Scan" so it can be changed.
 
 ## What is still open
 
-- **Ten field notes** in `app.js` `FIELD_NOTES`, and the template reads in
-  `readmodel.js` and `standardread.js`, are DRAFT pending Kenny's pass.
+- **Ten field notes** in `app.js` `FIELD_NOTES`, the ten card teasers in
+  `board.js` `TEASERS`, and the template reads in `readmodel.js` and
+  `standardread.js` are DRAFT. Kenny reviews them after launch, so they go
+  live as they are.
 - **Four scope sentences** on `/about/`, one per project. The cards say less
   rather than inventing a condition that was solved.
 - **`CONFIG.MODEL_PROXY_URL`** is empty, so production reads come from the
