@@ -23,10 +23,19 @@ BASE = os.environ.get('TP_PREVIEW', 'http://localhost:4174')
 SKIP_PREFIX = ('http', 'mailto:', 'tel:', 'data:', '//')
 
 
+# Directories that contain HTML but are not the site. node_modules
+# arrived with the Worker's dependencies and brought wrangler's own
+# local UI with it, which is a few dozen pages of someone else's
+# markup pointing at /cdn-cgi/ paths this server has never heard of.
+# Crawling it turns a clean run into forty phantom 404s.
+NOT_THE_SITE = ('.git', 'node_modules', '.wrangler', 'dist')
+
+
 def pages():
     out = []
     for dirpath, dirnames, filenames in os.walk('.'):
-        if '.git' in dirpath:
+        dirnames[:] = [d for d in dirnames if d not in NOT_THE_SITE]
+        if any(part in NOT_THE_SITE for part in dirpath.replace(os.sep, '/').split('/')):
             continue
         for f in filenames:
             if f.endswith('.html'):
