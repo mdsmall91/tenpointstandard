@@ -25,6 +25,10 @@ var S = {
   prefilled: {},          // field -> true, drives the "we read this" confirmation
   type: '', land: '', stage: '', compare: '',
   size: 20, money: '', date: '', team: [], worry: '',
+  /* Size is the only field with a non-empty default, so emptiness
+     cannot tell "they have not answered" from "they answered 20".
+     Only a hand on the slider does. */
+  sizeTouched: false,
   done: false
 };
 
@@ -531,7 +535,8 @@ function applyExtract(fields) {
        screen it is about, and their tap outranks it every time. A field
        is safe to fill only while it is still empty, or still carrying
        our own guess, which the tap handler clears. */
-    if (S[k] && !S.prefilled[k]) continue;
+    var theirs = (k === 'size') ? S.sizeTouched : (S[k] && !S.prefilled[k]);
+    if (theirs) continue;
     S[k] = v;
     S.prefilled[k] = true;
     used = true;
@@ -619,7 +624,8 @@ document.addEventListener('click', function (e) {
     case 'reset':
       TPA.reset('read_');
       S = { step: 0, intake: '', intakeUsed: false, prefilled: {}, type: '', land: '', stage: '',
-        compare: '', size: 20, money: '', date: '', team: [], worry: '', done: false };
+        compare: '', size: 20, money: '', date: '', team: [], worry: '',
+        sizeTouched: false, done: false };
       save();
       render();
       break;
@@ -641,6 +647,7 @@ document.addEventListener('input', function (e) {
   }
   if (el.hasAttribute && el.hasAttribute('data-size')) {
     S.size = parseInt(el.value, 10);
+    S.sizeTouched = true;
     delete S.prefilled.size;
     save();
     var wrap = document.querySelector('.rd-size');

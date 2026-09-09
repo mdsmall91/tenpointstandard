@@ -28,8 +28,14 @@
      comparison against a single-line string in posts.js. */
   function norm(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
 
+  /* Every page this suite reads is fetched fresh. The browser's HTTP
+     cache once served a stale mix of pages here and the suite reported
+     121 of 122 passing while real drift sat on disk unnoticed. A drift
+     test whose answer depends on the cache is worse than no test. */
+  var NOCACHE = { cache: 'no-store' };
+
   function get(url) {
-    return fetch(url).then(function (r) {
+    return fetch(url, NOCACHE).then(function (r) {
       if (!r.ok) throw new Error(url + ' -> HTTP ' + r.status);
       return r.text();
     }).then(function (t) {
@@ -339,7 +345,7 @@
   Promise.all([
     get('../index.html').then(checkIndex),   // the Journal is the site root now
 
-    fetch('../feed.xml').then(function (r) { return r.text(); }).then(function (t) {
+    fetch('../feed.xml', NOCACHE).then(function (r) { return r.text(); }).then(function (t) {
       checkFeed(new DOMParser().parseFromString(t, 'text/xml'));
     }),
 
@@ -353,7 +359,7 @@
        orphaned — reachable by URL, absent from the index, and
        invisible to anyone reviewing the site. */
     Promise.all(POSTS.filter(function (p) { return p.draft; }).map(function (p) {
-      return fetch('../journal/' + p.slug + '.html').then(function (r) {
+      return fetch('../journal/' + p.slug + '.html', NOCACHE).then(function (r) {
         check('draft ' + p.slug + ': has no page', r.status === 404, 'HTTP ' + r.status);
       });
     }))

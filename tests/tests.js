@@ -171,7 +171,7 @@
   check('cap label', R.ledger[1].label === 'In Progress' && R.ledger[1].gateOpen, JSON.stringify(R.ledger[1]));
 
   /* ---------- QUESTIONS.md consistency (spec check 6) ---------- */
-  fetch('../QUESTIONS.md').then(function (r) { return r.text(); }).then(function (md) {
+  fetch('../QUESTIONS.md', { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (md) {
     var rx = /^- Q(\d+)\.(\d+)( \(GATE\))?: (.+)$/gm, m, found = 0, gateIds = [];
     while ((m = rx.exec(md)) !== null) {
       found++;

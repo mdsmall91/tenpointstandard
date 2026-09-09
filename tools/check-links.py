@@ -16,7 +16,10 @@ import re
 import sys
 import urllib.request
 
-BASE = 'http://localhost:4173'
+# The preview port. It moved once, to escape a browser cache that
+# would not let go of the old build, so it is read from the environment
+# with the current default rather than pinned.
+BASE = os.environ.get('TP_PREVIEW', 'http://localhost:4174')
 SKIP_PREFIX = ('http', 'mailto:', 'tel:', 'data:', '//')
 
 

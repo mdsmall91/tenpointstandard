@@ -306,14 +306,12 @@ function submitToMailchimp(email, extra) {
      answers and a written read through merge fields that truncate at
      255 characters.
 
-     NOTE FOR MAILCHIMP: the audience is at the 30 merge-field cap and
-     "Create a new field" there is a silent no-op, so SCORECARD needs
-     an unused default RELABELLED to it (Audience > Contacts > "..." >
-     merge fields; BIRTHDAY and ADDRESS are the remaining unused
-     ones). Until that is done this value is accepted and silently
-     dropped, exactly like FINDINGS, and the link still works on the
-     result screen. Do not delete a field to make room: that destroys
-     the column for every contact. */
+     MAILCHIMP: SCORECARD is a live text field, created 2026-09-09 in
+     the slot freed by deleting Birthday, and the scorecard email's
+     button href is the bare merge tag. The audience sits at the 30
+     merge-field cap, so there is no room for another one: FINDINGS is
+     still accepted and silently dropped, which is why the findings
+     ride in F1, F2 and F3 instead. */
   params.push('SCORECARD=' + encodeURIComponent(TPScoreCode.url(state.answers)));
 
   if (extra) {

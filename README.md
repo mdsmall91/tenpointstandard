@@ -121,8 +121,11 @@ saving without the risk that comes with switching reasoning off.
   Local testing already works through `tools/dev-proxy.py`.
 - **`CONFIG.MAILCHIMP_GROUP_CONSULT`** is empty, so the consultation form opens
   a mail client instead of posting to Mailchimp. See the comment in `config.js`.
-- **A `SCORECARD` merge field** does not exist in Mailchimp yet. The site sends
-  it and Mailchimp silently drops it, exactly like `FINDINGS`.
+- **The scorecard link has not been clicked from a real send yet.** The merge
+  tag resolves to the full URL with its `#s=` fragment intact in Mailchimp's
+  live preview, but Mailchimp rewrites links for click tracking at send time.
+  One real click after deploy settles it. If the fragment ever comes back
+  stripped, turn click tracking off for that one email.
 
 ## Configuration (top of `app.js`)
 ```js
@@ -139,6 +142,11 @@ var CONFIG = {
    - `BAND` — Ten Point Align / Ten Point Design / Ten Point Build
    - `ANSWERED` (Number) — questions answered out of 40
    - `P01` … `P10` — per-point scores, stored as "n / max" (e.g. "9 / 12")
+   - `HEADLINE`, `VERDICT`, `GATES`, `F1`-`F3`, `A1`-`A3`, `SCORECARD`
+   These already exist in the live audience, which is at the 30-field cap.
+   Adding another one silently does nothing: an unused field has to be
+   relabelled instead. Never delete a field that holds data — that destroys
+   the column for every contact.
 3. Build a **Customer Journey** (or classic automation) triggered on "signs up" that sends the scorecard email **from letstalk@tenpointstandard.com**, using merge tags like `*|SCORE|*`, `*|BAND|*`, `*|P01|*` … `*|P10|*`.
 4. To send from `letstalk@tenpointstandard.com`, authenticate the domain in Mailchimp (**Website > Domains**) — it will give you DKIM CNAME records to add in GoDaddy DNS.
 5. Recommended: disable double opt-in for this audience, or the scorecard journey should trigger on confirmation instead of signup.
@@ -395,4 +403,16 @@ To confirm a deploy actually landed, check the server directly rather than the b
 `curl -s https://tenpointstandard.com/app.js | grep <some-new-string>`
 
 ## Local preview
-Any static server, e.g. `python -m http.server 4173` in this folder, then open http://localhost:4173.
+Run `python tools/preview-server.py`, then open http://localhost:4174.
+
+Use that rather than `python -m http.server`. The plain server sends no
+cache headers, and a browser handed HTML with none of its own invents a
+freshness lifetime and keeps serving an old build. That has already cost
+this project twice: a review pass that got a version of the site several
+builds old and looked broken, and a drift suite that reported 121 of 122
+passing against a stale copy of its own test file. `tools/preview-server.py`
+sends `no-store`, refuses to answer 304, and listens on both spellings of
+loopback so `localhost` does not pay a two-second IPv6 timeout per request.
+
+If a preview ever still looks stale, the browser is holding a copy keyed
+by path, and a query string will not shake it loose. Change the port.

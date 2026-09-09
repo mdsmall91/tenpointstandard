@@ -10,7 +10,7 @@ AI layer can be tested today.
 
     python tools/dev-proxy.py
 
-Then open the site at http://localhost:4173. config.js points at this
+Then open the site at http://localhost:4174. config.js points at this
 proxy automatically when the page is served from localhost, so nothing
 else needs changing.
 
@@ -50,7 +50,12 @@ PRICE_IN = 2.00
 PRICE_OUT = 10.00
 PRICE_CACHE_READ = 0.20
 
-ALLOWED_ORIGINS = ['http://localhost:4173', 'http://127.0.0.1:4173']
+# Any local preview port, because the preview has moved ports once
+# already and a hard-coded one fails as a silent CORS error with no
+# hint that the port is the reason. This proxy binds to localhost
+# and holds a key, so it stays closed to everything else.
+ALLOWED_ORIGIN_RE = re.compile(r'^http://(?:localhost|127\.0\.0\.1)(?::\d+)?$')
+FALLBACK_ORIGIN = 'http://localhost:4174'
 
 _spent = {'usd': 0.0, 'calls': 0}
 _lock = threading.Lock()
@@ -127,9 +132,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
 
     def _cors(self):
-        origin = self.headers.get('Origin') or ALLOWED_ORIGINS[0]
-        if origin not in ALLOWED_ORIGINS:
-            origin = ALLOWED_ORIGINS[0]
+        origin = self.headers.get('Origin') or FALLBACK_ORIGIN
+        if not ALLOWED_ORIGIN_RE.match(origin):
+            origin = FALLBACK_ORIGIN
         self.send_header('Access-Control-Allow-Origin', origin)
         self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
@@ -264,7 +269,7 @@ if __name__ == '__main__':
     print('  key      ' + ('environment variable' if source == 'ANTHROPIC_API_KEY' else source))
     print('  model    ' + MODEL + ', effort ' + EFFORT)
     print('  serving  http://localhost:' + str(PORT))
-    print('  site     http://localhost:4173')
+    print('  site     http://localhost:4174')
     print('')
     print('Every call prints its tokens and cost. Ctrl+C to stop.')
     print('')
