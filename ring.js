@@ -3,7 +3,7 @@
 /* =============================================================
    TEN POINT — THE RING
    Ten segments, one per point. The single shared visual across both
-   lanes: The Read lights a few and greys the rest, The Full Standard
+   lanes: Quick Scan lights a few and greys the rest, Full Assessment
    fills all ten. Same component, same geometry, same order, so a
    person who did lane one recognises their own ring in lane two.
 

@@ -62,7 +62,7 @@ function renderEmpty() {
   return '<div class="sc-empty">' +
     '<h1>This scorecard link is not complete.</h1>' +
     '<p class="lede muted" style="margin: 20px auto 0;">The answers travel inside the link, so a link that was cut in half on the way here cannot be rebuilt. Ask whoever sent it for the whole thing, or take the assessment yourself.</p>' +
-    '<p style="margin-top: 32px;"><a class="btn accent lg" href="/standard/">Take the Full Standard</a></p>' +
+    '<p style="margin-top: 32px;"><a class="btn accent lg" href="/standard/">Start the Full Assessment</a></p>' +
   '</div>';
 }
 

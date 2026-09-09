@@ -3,7 +3,7 @@
 /* =============================================================
    TEN POINT — SHARED CONFIG
    The only values that need editing after launch. Loaded by every
-   page: the Field Journal, The Read, The Full Standard, the
+   page: the Field Journal, Quick Scan, Full Assessment, the
    scorecard, and the show page. Load this BEFORE any other script.
 
    CACHE-BUSTING: this file is shared, so every page must pin the
@@ -99,17 +99,22 @@ var CONFIG = {
      email with every merge field empty, which is a bad first
      impression from a contractor.
 
-     BLANK ON PURPOSE until somebody adds the option in Mailchimp:
-     Audience > Contacts > "..." > Groups > the hidden "Subscriptions"
-     category (70477) > add "Consultation request", then read the bit
-     off the HOSTED signup form, not the admin URL. Set it here as
-     group[70477][3]=1 or whatever bit it lands on.
+     Created Sep 9 2026 as "Consultation request" in the hidden
+     "Subscriptions" category (70477), alongside Field Notes (bit 1)
+     and AGA Resort Reality Game (bit 2).
 
-     While this is blank, consult.js does NOT post to Mailchimp. It
-     falls back to opening the visitor's mail client addressed to
-     Kenny, so the page works today and nobody gets a broken welcome
-     email. Setting this value is what switches the form over. */
-  MAILCHIMP_GROUP_CONSULT: '',
+     THE BIT IS 4, NOT 3. Mailchimp numbers these as powers of two,
+     not sequentially, and the value below was read off the HOSTED
+     signup form rather than guessed:
+     tenpointservicestx.us4.list-manage.com/subscribe?u=..&id=..
+     The interest id shown in the admin URL does not work here. A
+     wrong bit is accepted, answered with success, and silently
+     dropped, which is the whole reason this is read and not assumed.
+
+     Journey 694's trigger filter excludes this group, so a
+     consultation request does not receive the Field Guide scorecard
+     email with every merge field empty. */
+  MAILCHIMP_GROUP_CONSULT: 'group[70477][4]=1',
 
   /* Merge tag carrying the optional note from the show form. A note
      sent to a tag Mailchimp does not know is accepted, answered with

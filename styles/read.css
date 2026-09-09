@@ -243,3 +243,111 @@ body[data-rd-step]:not([data-rd-step="0"]):not([data-rd-step="10"]) .tp-masthead
   .rd-slider-stops .rd-stop:last-child { display: block; flex: 0 0 auto; max-width: 45%; }
   .rd-slider-stops { justify-content: space-between; }
 }
+
+/* =============================================================
+   PHASES, SNAPSHOT, AND FIELD NOTES
+   The Quick Scan reads as a workspace being assembled rather than a
+   form being filled. Three parts do that: a progress line that names
+   phases instead of counting questions, a snapshot that grows as the
+   visitor answers, and a short note explaining why the last answer
+   mattered.
+   ============================================================= */
+
+/* Visible to a screen reader only. The dotted phase rail is decoration
+   to one, so the position is said once, in a sentence, instead. */
+.rd-sr {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.rd-progress { flex-wrap: wrap; align-items: flex-start; }
+.rd-progress-track { flex: 1 1 100%; }
+.rd-progress-phases {
+  flex: 1 1 100%;
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: var(--s-2); margin-top: var(--s-3);
+}
+.rd-progress-phase {
+  display: flex; align-items: center; gap: 7px;
+  color: var(--text-faint);
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.rd-progress-dot {
+  width: 7px; height: 7px; flex: none;
+  border: 1px solid currentColor; border-radius: 50%;
+}
+/* State is carried by the fill AND by the weight of the label, never
+   by colour alone. */
+.rd-progress-phase.is-current { color: var(--text-strong); font-weight: 500; }
+.rd-progress-phase.is-done { color: var(--stone-400); }
+.rd-progress-phase.is-current .rd-progress-dot,
+.rd-progress-phase.is-done .rd-progress-dot {
+  background: var(--accent); border-color: var(--accent);
+}
+
+/* ---------- WORKSPACE ---------- */
+.rd-workspace {
+  display: grid; grid-template-columns: minmax(0, 1fr) 250px;
+  gap: var(--s-10); align-items: start;
+}
+.rd-question-pane { min-width: 0; }
+
+/* ---------- SNAPSHOT ----------
+   Shows only what has been answered. It never implies that a point
+   has been evaluated, and it carries no score, because the Quick Scan
+   does not produce one. */
+.rd-snapshot {
+  position: sticky; top: var(--s-6);
+  border: var(--hairline); background: var(--surface);
+  padding: var(--s-5);
+}
+.rd-snapshot-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: var(--s-3); padding-bottom: var(--s-3);
+  border-bottom: var(--hairline);
+}
+.rd-snapshot-head .mono { color: var(--text-faint); font-size: 9px; letter-spacing: 0.12em; }
+.rd-snapshot dl { margin: 0; }
+.rd-snapshot dl > div {
+  display: grid; grid-template-columns: 72px 1fr;
+  gap: var(--s-3); padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.rd-snapshot dl > div:last-child { border-bottom: 0; }
+.rd-snapshot dt {
+  color: var(--text-faint); font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.rd-snapshot dd {
+  margin: 0; color: var(--text-strong);
+  font-size: var(--fs-small); line-height: 1.35;
+}
+
+/* ---------- FIELD NOTE ---------- */
+.rd-note {
+  margin-bottom: var(--s-6);
+  border-left: 2px solid var(--accent);
+  background: var(--surface);
+  padding: var(--s-4) var(--s-5);
+}
+.rd-note p {
+  max-width: 58ch; margin: var(--s-2) 0 0;
+  font-size: var(--fs-small); line-height: var(--lh-relaxed);
+  color: var(--text);
+}
+
+@media (max-width: 860px) {
+  .rd-workspace { grid-template-columns: 1fr; gap: var(--s-6); }
+  /* The snapshot leads on a phone. Seeing the project assemble is the
+     reason to answer the next question, so it should not be buried
+     under one. */
+  .rd-snapshot { position: static; order: -1; }
+  .rd-snapshot dl { display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--s-5); }
+}
+@media (max-width: 640px) {
+  .rd-progress-phases { grid-template-columns: repeat(5, auto); overflow-x: auto; }
+  .rd-progress-phase { white-space: nowrap; font-size: 9px; }
+  .rd-snapshot dl { grid-template-columns: 1fr; }
+}

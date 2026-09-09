@@ -183,7 +183,7 @@
        site. Asserted as an exact list: a link quietly dropped from the
        header is exactly the kind of drift this file exists to catch. */
     eq('index: nav is the full site', JSON.stringify(navLinks),
-      JSON.stringify(['Field Journal', 'The Read', 'The Standard', 'About']));
+      JSON.stringify(['Field Journal', 'Quick Scan', 'Full Assessment', 'About']));
     check('index: nav sits with the CTA',
       !!doc.querySelector('.jr-header-right .tp-nav') && !!doc.querySelector('.jr-header-right .jr-header-cta'));
   }
@@ -266,7 +266,7 @@
 
     /* The lead-gen surface is on every article, no exceptions. */
     check(s + 'assessment CTA present', !!doc.querySelector('.tp-cta a.btn'));
-    eq(s + 'CTA points at The Read',
+    eq(s + 'CTA points at Quick Scan',
       doc.querySelector('.tp-cta a.btn').getAttribute('href'), '/read/');
     /* Same words in the same block on every article and on the index.
        Repetition is the whole point, so drift in the wording fails. */

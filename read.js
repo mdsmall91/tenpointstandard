@@ -1,7 +1,7 @@
 'use strict';
 
 /* =============================================================
-   THE READ — lane one
+   QUICK SCAN — lane one
    Ten interactions, no email, no account. The visitor taps or drags.
    They never type unless they choose to.
 
@@ -9,7 +9,7 @@
    readmodel.js, and the ring is TPRing. This file renders and
    listens.
 
-   Storage is tp-read-v1. The Full Standard reads the same key to
+   Storage is tp-read-v1. Full Assessment reads the same key to
    carry answers forward, so the shape below is a contract between
    the two lanes. Do not rename a field without updating carry() in
    readmodel.js and the confirmation screen in app.js.
@@ -123,9 +123,22 @@ function navRow(backable, nextLabel, nextAction, disabled) {
 function progress() {
   if (S.step < 1 || S.step > LAST_Q) return '';
   var pct = Math.round((S.step / LAST_Q) * 100);
+  var active = currentPhase(S.step);
   return '<div class="rd-progress">' +
-    '<div class="rd-progress-track"><div class="rd-progress-fill" style="width:' + pct + '%"></div></div>' +
-    '<div class="rd-progress-label mono">' + S.step + ' of ' + LAST_Q + '</div>' +
+    '<div class="rd-progress-track" aria-hidden="true">' +
+      '<div class="rd-progress-fill" style="width:' + pct + '%"></div>' +
+    '</div>' +
+    '<div class="rd-progress-phases" aria-hidden="true">' +
+      PHASES.map(function (phase) {
+        var state = S.step > phase.to ? ' is-done' : active.id === phase.id ? ' is-current' : '';
+        return '<span class="rd-progress-phase' + state + '">' +
+          '<span class="rd-progress-dot"></span>' + esc(phase.label) + '</span>';
+      }).join('') +
+    '</div>' +
+    /* The phases are decoration to a screen reader, which needs the
+       position said once, in words, rather than five dotted labels. */
+    '<p class="rd-sr" aria-live="polite">' + esc(active.label) +
+      ', question ' + S.step + ' of ' + LAST_Q + '</p>' +
   '</div>';
 }
 
@@ -136,13 +149,107 @@ function prefillNote(field) {
   return '<p class="rd-prefill">We picked this up from what you wrote. Change it if it is not right.</p>';
 }
 
+
+/* =============================================================
+   PHASES
+   The progress line counts phases, not questions. "3 of 9" tells
+   somebody how much homework is left; "Land, then Position" tells
+   them what the thing is doing and roughly how far in they are. The
+   bar still moves per question underneath.
+   ============================================================= */
+var PHASES = [
+  { id: 'project',  label: 'Project',  from: 1, to: 1 },
+  { id: 'land',     label: 'Land',     from: 2, to: 2 },
+  { id: 'position', label: 'Position', from: 3, to: 5 },
+  { id: 'delivery', label: 'Delivery', from: 6, to: 8 },
+  { id: 'priority', label: 'Priority', from: 9, to: 9 }
+];
+
+function currentPhase(step) {
+  for (var i = 0; i < PHASES.length; i++) {
+    if (step >= PHASES[i].from && step <= PHASES[i].to) return PHASES[i];
+  }
+  return PHASES[0];
+}
+
+function findById(list, id) {
+  for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+  return null;
+}
+
+/* =============================================================
+   THE PROJECT SNAPSHOT
+   Builds visibly as the visitor answers. It is the difference
+   between filling in a form and watching something get assembled.
+
+   It shows ONLY what has actually been answered. It never implies
+   that a point has been evaluated, and it carries no score, because
+   the Quick Scan does not produce one.
+   ============================================================= */
+function projectSnapshot() {
+  var type = findById(M.TYPES, S.type);
+  var land = findById(M.LAND, S.land);
+  var stage = findById(M.STAGES, S.stage);
+  var money = findById(M.MONEY, S.money);
+
+  var items = [];
+  if (type) items.push({ label: 'Project', value: type.label });
+  if (land) items.push({ label: 'Land', value: land.label });
+  if (stage) items.push({ label: 'Position', value: stage.label });
+  if (S.size && S.step >= 5) {
+    items.push({ label: 'Scale', value: (S.size >= 200 ? '200 or more' : String(S.size)) +
+      ' ' + (type ? type.unit : 'sites') });
+  }
+  if (money) items.push({ label: 'Money', value: money.label });
+  if (S.team && S.team.length) {
+    var names = S.team.map(function (id) {
+      var t = findById(M.TEAM, id); return t ? t.label : id;
+    });
+    items.push({ label: 'Team', value: names.join(', ') });
+  }
+  if (!items.length) return '';
+
+  return '<aside class="rd-snapshot" aria-label="Your project so far">' +
+    '<div class="rd-snapshot-head">' +
+      '<span class="eyebrow">Your project</span>' +
+      '<span class="mono">SO FAR</span>' +
+    '</div>' +
+    '<dl>' + items.map(function (item) {
+      return '<div><dt>' + esc(item.label) + '</dt><dd>' + esc(item.value) + '</dd></div>';
+    }).join('') + '</dl>' +
+  '</aside>';
+}
+
+/* One short paragraph on why the previous answer matters. Rendered on
+   the screen AFTER the answer, because the photo and slider screens
+   advance on tap and a note on the answering screen is never seen. */
+function scanNote(group, value) {
+  var notes = M.SCAN_NOTES && M.SCAN_NOTES[group];
+  var copy = notes && notes[value];
+  if (!copy) return '';
+  TPA.track('quick_scan_field_note_viewed', { group: group, value: value });
+  return '<aside class="rd-note" aria-live="polite">' +
+    '<span class="eyebrow">Field note</span>' +
+    '<p>' + esc(copy) + '</p>' +
+  '</aside>';
+}
+
+/* The question pane and the snapshot, side by side on a desktop and
+   stacked with the snapshot first on a phone. */
+function workspace(inner) {
+  return '<div class="rd-workspace">' +
+    '<div class="rd-question-pane">' + inner + '</div>' +
+    projectSnapshot() +
+  '</div>';
+}
+
 /* ---------------------------------------------------------------
    SCREENS
    --------------------------------------------------------------- */
 
 function scr0() {
   return '<section class="rd-screen">' +
-    screenHead('The Read', 'Tell us about your project.',
+    screenHead('Quick Scan', 'Tell us about your project.',
       'A sentence or two is plenty. Skip this if you would rather just tap through.') +
     '<textarea class="textarea rd-intake" id="rd-intake" rows="4" maxlength="600" ' +
       'placeholder="We have 40 acres outside Fredericksburg under contract, and we want about 25 glamping units.">' +
@@ -157,7 +264,7 @@ function scr0() {
 
 function scr1() {
   return '<section class="rd-screen">' + progress() +
-    screenHead('Question 1', 'What are you building?') +
+    screenHead('Project', 'What are you building?') +
     prefillNote('type') +
     '<div class="rd-grid rd-grid-4">' +
       M.TYPES.map(function (t) { return photoCard(t, 'type', S.type === t.id); }).join('') +
@@ -167,7 +274,7 @@ function scr1() {
 
 function scr2() {
   return '<section class="rd-screen">' + progress() +
-    screenHead('Question 2', 'Which of these looks most like your land?') +
+    screenHead('Land', 'Which of these looks most like your land?') +
     prefillNote('land') +
     '<div class="rd-grid rd-grid-4">' +
       M.LAND.map(function (t) { return photoCard(t, 'land', S.land === t.id); }).join('') +
@@ -177,10 +284,15 @@ function scr2() {
 
 function scr3() {
   return '<section class="rd-screen">' + progress() +
-    screenHead('Question 3', 'Where are you today?') +
-    prefillNote('stage') +
-    stopSlider('stage', M.STAGES, S.stage || M.STAGES[0].id, true) +
-    navRow(true, 'Next', 'next') +
+    screenHead('Position', 'Where are you today?') +
+    /* The land answer landed on the previous screen, which advances
+       on tap. This is the first chance to say why it mattered. */
+    workspace(
+      scanNote('land', S.land) +
+      prefillNote('stage') +
+      stopSlider('stage', M.STAGES, S.stage || M.STAGES[0].id, true) +
+      navRow(true, 'Next', 'next')
+    ) +
   '</section>';
 }
 
@@ -190,11 +302,14 @@ function scr4() {
   var b = { id: 'b', label: 'This one', img: 'compare-b', w: 800,
     caption: 'Lagom Retreat, Dripping Springs, Texas', credit: 'Ten Point Services' };
   return '<section class="rd-screen">' + progress() +
-    screenHead('Question 4', 'Which one is closer to what you are building?') +
-    '<div class="rd-grid rd-grid-2 rd-compare">' +
-      photoCard(a, 'compare', S.compare === 'a') +
-      photoCard(b, 'compare', S.compare === 'b') +
-    '</div>' + navRow(true, '', '') +
+    screenHead('Position', 'Which one is closer to what you are building?') +
+    workspace(
+      scanNote('stage', S.stage) +
+      '<div class="rd-grid rd-grid-2 rd-compare">' +
+        photoCard(a, 'compare', S.compare === 'a') +
+        photoCard(b, 'compare', S.compare === 'b') +
+      '</div>' + navRow(true, '', '')
+    ) +
   '</section>';
 }
 
@@ -204,7 +319,8 @@ function scr5() {
   var unit = t ? t.unit : 'sites';
   var shown = S.size >= 200 ? '200 or more' : String(S.size);
   return '<section class="rd-screen">' + progress() +
-    screenHead('Question 5', 'About how many ' + unit + '?') +
+    screenHead('Position', 'About how many ' + unit + '?') +
+    workspace(
     prefillNote('size') +
     '<div class="rd-slider rd-size">' +
       '<div class="rd-size-value">' + esc(shown) + ' <span class="rd-size-unit">' + esc(unit) + '</span></div>' +
@@ -213,7 +329,8 @@ function scr5() {
         ' data-size aria-label="Number of ' + esc(unit) + '" aria-valuetext="' + esc(shown) + ' ' + esc(unit) + '">' +
       '<div class="rd-slider-stops"><span class="rd-stop">1</span><span class="rd-stop">50</span>' +
       '<span class="rd-stop">100</span><span class="rd-stop">150</span><span class="rd-stop">200 or more</span></div>' +
-    '</div>' + navRow(true, 'Next', 'next') +
+    '</div>' + navRow(true, 'Next', 'next')
+    ) +
   '</section>';
 }
 
@@ -231,38 +348,45 @@ function sizeArt(n) {
 
 function scr6() {
   return '<section class="rd-screen">' + progress() +
-    screenHead('Question 6', 'How firm is the money?') +
-    prefillNote('money') +
-    stopSlider('money', M.MONEY, S.money || M.MONEY[0].id) +
-    navRow(true, 'Next', 'next') +
+    screenHead('Delivery', 'How firm is the money?') +
+    workspace(
+      prefillNote('money') +
+      stopSlider('money', M.MONEY, S.money || M.MONEY[0].id) +
+      navRow(true, 'Next', 'next')
+    ) +
   '</section>';
 }
 
 function scr7() {
   return '<section class="rd-screen">' + progress() +
-    screenHead('Question 7', 'How firm is the opening date?') +
-    prefillNote('date') +
-    stopSlider('date', M.DATES, S.date || M.DATES[0].id) +
-    navRow(true, 'Next', 'next') +
+    screenHead('Delivery', 'How firm is the opening date?') +
+    workspace(
+      prefillNote('date') +
+      stopSlider('date', M.DATES, S.date || M.DATES[0].id) +
+      navRow(true, 'Next', 'next')
+    ) +
   '</section>';
 }
 
 function scr8() {
   return '<section class="rd-screen">' + progress() +
-    screenHead('Question 8', 'Who is on the team so far?', 'Tap all that apply.') +
+    screenHead('Delivery', 'Who is on the team so far?', 'Tap all that apply.') +
+    workspace(
     '<div class="rd-grid rd-grid-3 rd-chips">' +
       M.TEAM.map(function (o) {
         var on = S.team.indexOf(o.id) !== -1;
         return '<button class="rd-chip' + (on ? ' is-on' : '') + '" type="button" data-team="' + esc(o.id) + '"' +
           ' aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(o.label) + '</button>';
       }).join('') +
-    '</div>' + navRow(true, 'Next', 'next') +
+    '</div>' + navRow(true, 'Next', 'next')
+    ) +
   '</section>';
 }
 
 function scr9() {
   return '<section class="rd-screen">' + progress() +
-    screenHead('Question 9', 'What is on your mind the most right now?') +
+    screenHead('Priority', 'What is on your mind the most right now?') +
+    workspace(
     '<div class="rd-grid rd-grid-3 rd-chips">' +
       M.WORRIES.map(function (o) {
         var on = S.worry === o.id;
@@ -270,7 +394,8 @@ function scr9() {
           ' data-pick="worry" data-val="' + esc(o.id) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
           esc(o.label) + '</button>';
       }).join('') +
-    '</div>' + navRow(true, '', '') +
+    '</div>' + navRow(true, '', '')
+    ) +
   '</section>';
 }
 
@@ -289,7 +414,7 @@ function scrResult() {
         }) +
       '</div>' +
       '<div class="rd-result-lead">' +
-        '<div class="eyebrow dotted">Your read</div>' +
+        '<div class="eyebrow dotted">Your Project Scan</div>' +
         '<h1 class="rd-band">Ten Point ' + esc(R.bandName) + '</h1>' +
         '<p class="rd-directional mono">DIRECTIONAL READ · ' + R.litCount + ' OF 10 POINTS</p>' +
         '<div class="rd-lines">' + lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</div>' +
@@ -306,7 +431,7 @@ function scrResult() {
       '<div class="card rd-door">' +
         '<h3>Score all ten points</h3>' +
         '<p class="muted">Forty questions. About five minutes. We will email you the full scorecard.</p>' +
-        '<a class="btn accent lg" href="/standard/" data-door="standard">Start the full Standard</a>' +
+        '<a class="btn accent lg" href="/standard/" data-door="standard">Continue to the Full Assessment</a>' +
       '</div>' +
       '<div class="card rd-door">' +
         '<h3>Talk it through with us</h3>' +
@@ -316,7 +441,7 @@ function scrResult() {
     '</div>' +
 
     '<div class="rd-result-foot">' +
-      '<p class="muted">The Read is a directional diagnostic. It is not a feasibility study, an appraisal, a cost estimate, or advice on any specific project.</p>' +
+      '<p class="muted">The Quick Scan is a directional diagnostic. It is not a feasibility study, an appraisal, a cost estimate, or advice on any specific project.</p>' +
       '<button class="rd-link" type="button" data-action="reset">Start over</button>' +
     '</div>' +
   '</section>';
@@ -338,6 +463,10 @@ function render() {
 
 function go(n) {
   var prev = S.step;
+  if (n >= 1 && n <= LAST_Q) {
+    var ph = currentPhase(n);
+    TPA.once('quick_scan_phase_viewed', { phase: ph.id }, 'phase-' + ph.id);
+  }
   S.step = Math.max(0, Math.min(RESULT, n));
   if (S.step > prev && prev >= 1 && prev <= LAST_Q) {
     TPA.once('read_screen_complete', { screen_number: prev }, 'screen-' + prev);

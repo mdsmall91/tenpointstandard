@@ -113,7 +113,7 @@ var STORE_KEY = 'tp-fieldguide-v2';
    ============================================================= */
 var state = { answers: {}, revealed: false, sentTo: '', email: '', emailError: false, step: 0,
   phone: '', fullReq: false, ctaMode: '', ctaError: false,
-  /* Carried in from The Read. `carried` is the list of questions lane
+  /* Carried in from Quick Scan. `carried` is the list of questions lane
      one answered, kept so the confirmation screen can show them back
      with an edit link and so `questions_skipped_by_carry` is a real
      number rather than an estimate. `readCtx` is the lane one context
@@ -144,7 +144,7 @@ function save() {
 }
 
 /* -------------------------------------------------------------
-   CARRY FORWARD FROM THE READ
+   CARRY FORWARD FROM QUICK SCAN
    Anything lane one already established is filled in and marked
    answered, and the count is said out loud on the first screen,
    because skipping a quarter of the questions is a real reward for
@@ -223,7 +223,7 @@ function pointYes(pi) {
 
 /* The ring, in both lanes' shared shape. Points that are finished
    are scored; points not started yet stay grey and say so, which is
-   the same grammar The Read uses. */
+   the same grammar Quick Scan uses. */
 function ringSegments() {
   var R = TPResults.evaluate(state.answers);
   var segs = [];
@@ -398,17 +398,66 @@ function renderHeader() {
   nav.innerHTML = html;
 }
 
-/* The first screen for somebody who came from The Read is not a
+/* The first screen for somebody who came from The Quick Scan is not a
    question. It is a confirmation of what lane one already captured,
    each row with a way to change it. Saying the skipped count out
    loud matters: it is the reward for having done the first lane. */
+
+/* =============================================================
+   THE TEN POINT MAP
+   The ten points as the primary navigation, not a progress bar. It
+   answers "what is this going to ask me" before the first question
+   and "where am I" during, and it is the same ten points in the same
+   order as the ring, so the two read as one system.
+
+   NOTE ON "NEEDS ATTENTION". It means a defined critical gate inside
+   that point is open. It does NOT mean the point simply scored below
+   its maximum. Those are different facts, and conflating them would
+   turn a normal early-stage answer into an alarm.
+   ============================================================= */
+function pointStatus(pi, R) {
+  var answered = 0;
+  for (var qi = 0; qi < POINTS[pi].qs.length; qi++) {
+    if (state.answers[pi + '-' + qi] !== undefined) answered++;
+  }
+  if (!answered) return { id: 'empty', label: 'Not started' };
+  if (answered < POINTS[pi].qs.length) return { id: 'active', label: 'In progress' };
+  /* The gate comes from the results engine, which is the only thing
+     that knows which of the forty questions are gates. */
+  if (R && R.ledger[pi].gateOpen) return { id: 'attention', label: 'Needs attention' };
+  return { id: 'complete', label: 'Complete' };
+}
+
+function renderPointMap(showScore) {
+  var R = TPResults.evaluate(state.answers);
+  var html = '<section class="fg-point-map" aria-labelledby="fg-map-h">' +
+    '<div class="fg-point-map-head">' +
+      '<div>' +
+        '<div class="eyebrow dotted">Your field map</div>' +
+        '<h2 id="fg-map-h">Ten points. One project.</h2>' +
+      '</div>' +
+      (showScore ? '<span class="mono fg-point-map-score">' + totalScore() + ' / 100</span>' : '') +
+    '</div>' +
+    '<div class="fg-point-map-grid">';
+  for (var pi = 0; pi < POINTS.length; pi++) {
+    var st = pointStatus(pi, R);
+    html += '<button type="button" class="fg-point-tile is-' + st.id + '" data-go="' + (pi + 1) + '">' +
+      '<span class="fg-point-number mono">' + POINTS[pi].n + '</span>' +
+      '<span class="fg-point-title">' + esc(POINTS[pi].title) + '</span>' +
+      '<span class="fg-point-state">' + st.label + '</span>' +
+      '<span class="fg-point-score mono">' + pointScore(pi) + ' / ' + POINTS[pi].max + '</span>' +
+    '</button>';
+  }
+  return html + '</div></section>';
+}
+
 function renderCarryConfirm() {
   var n = state.carried.length;
   var left = 40 - n;
   var html = '<section class="fg-cover">' +
-    '<div class="eyebrow dotted">The Full Standard</div>' +
+    '<div class="eyebrow dotted">Full Assessment</div>' +
     '<h1 style="margin-top: 16px;">Here is what we already know.</h1>' +
-    '<p class="lede" style="margin-top: 20px; max-width: 54ch;">You answered these in The Read, so they are filled in already. That leaves ' +
+    '<p class="lede" style="margin-top: 20px; max-width: 54ch;">You answered these in Quick Scan, so they are filled in already. That leaves ' +
       left + ' questions instead of forty.</p>' +
     '<ul class="fg-carry">';
   for (var i = 0; i < n; i++) {
@@ -425,7 +474,7 @@ function renderCarryConfirm() {
       '<button class="btn lg accent" data-action="confirm-carry">Looks right, keep going</button>' +
       '<span class="mono" style="font-size: 11px; color: var(--text-faint);">' + left + ' QUESTIONS LEFT</span>' +
     '</div>' +
-  '</section>';
+  '</section>' + renderPointMap(true);
   return html;
 }
 
@@ -445,10 +494,10 @@ function renderCover() {
          is the reason the old front door leaked. */
       '<div class="fg-lane-one">' +
         '<h4>Short on time?</h4>' +
-        '<p class="muted">The Read takes about ninety seconds. Ten questions, mostly pictures, and no email. It gives you a direction and names the one thing most likely to stop the project.</p>' +
-        '<a class="btn ghost" href="/read/">Take The Read instead</a>' +
+        '<p class="muted">Quick Scan takes about ninety seconds. Ten questions, mostly pictures, and no email. It gives you a direction and names the one thing most likely to stop the project.</p>' +
+        '<a class="btn ghost" href="/read/">Start the Quick Scan instead</a>' +
       '</div>' +
-    '</section>';
+    '</section>' + renderPointMap(false);
 }
 
 /* One line of result the moment a point's fourth question lands.
@@ -518,7 +567,7 @@ function renderPoint(step) {
     html += '' +
       '<div class="fg-q' + (carried ? ' is-carried' : '') + '">' +
         '<div style="display: flex; gap: 14px; align-items: baseline;"><span class="mono" style="font-size: 11px; color: var(--text-faint); flex: none;">Q' + (qi + 1) + '</span><span style="font-size: 16px; color: var(--text); max-width: 58ch;">' + p.qs[qi] +
-          (carried ? '<span class="fg-carried-tag mono">FROM THE READ</span>' : '') + '</span></div>' +
+          (carried ? '<span class="fg-carried-tag mono">FROM QUICK SCAN</span>' : '') + '</span></div>' +
         '<div class="fg-seg" style="display: flex; gap: 6px;">' +
           '<button class="fg-yn yes' + (ans === true ? ' on' : '') + '" data-key="' + key + '" data-val="1">Yes</button>' +
           '<button class="fg-yn no' + (ans === false ? ' on' : '') + '" data-key="' + key + '" data-val="0">No</button>' +
@@ -554,7 +603,7 @@ function renderLedger() {
           center: { top: R.verdict.gated ? 'GATED' : '', main: String(R.score), sub: 'of 100 · ' + R.verdict.label }
         }) + '</div>' +
         '<div class="fg-hero-read">' +
-          '<div class="eyebrow dotted">Your read</div>' +
+          '<div class="eyebrow dotted">Your Project Scan</div>' +
           '<div class="fg-read-lines">' +
             (state.modelLines || TPStandardRead.compose(R, state.readCtx)).map(function (l) {
               return '<p>' + esc(l) + '</p>';
@@ -657,7 +706,7 @@ function renderActions(R) {
 function renderCTA() {
   var html = '';
 
-  /* Two doors of equal weight, same as The Read. A funded developer
+  /* Two doors of equal weight, same as Quick Scan. A funded developer
      will not fill in another form; a first-time landowner will not
      book a call. And a phone number and an email address are visible
      either way, because making somebody fill in a form to reach a
@@ -781,7 +830,14 @@ document.addEventListener('click', function (e) {
     return;                                   // let the link navigate
   }
 
-  if (el.dataset.go !== undefined) { goStep(parseInt(el.dataset.go, 10)); return; }
+  if (el.dataset.go !== undefined) {
+    var target = parseInt(el.dataset.go, 10);
+    if (target >= 1 && target <= 10) {
+      TPA.once('full_assessment_point_opened', { point: POINTS[target - 1].n }, 'open-' + target);
+    }
+    goStep(target);
+    return;
+  }
 
   if (el.dataset.key !== undefined) {
     var v = el.dataset.val === '1' ? true : el.dataset.val === '0' ? false : 'unsure';

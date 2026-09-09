@@ -304,3 +304,66 @@ body[data-step]:not([data-step="0"]) .fg-about { display: none; }
   .fg-seg { flex-wrap: wrap; }
   .fg-yn { flex: 1 1 30%; min-height: 44px; }
 }
+
+
+/* =============================================================
+   THE TEN POINT MAP
+   The ten points as navigation. It sits on the cover, so somebody
+   sees what the assessment covers before answering anything, and on
+   the carry-forward screen, where it shows what the Quick Scan has
+   already filled in.
+
+   State is carried by the written label AND by a top rule, never by
+   colour alone, and every tile states its own score.
+   ============================================================= */
+.fg-point-map { padding: var(--s-16) 0 var(--s-10); }
+.fg-point-map-head {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: var(--s-6); flex-wrap: wrap; margin-bottom: var(--s-8);
+}
+.fg-point-map-head h2 { margin-top: var(--s-3); font-size: var(--fs-h3); }
+.fg-point-map-score { font-size: 15px; color: var(--text-strong); }
+
+.fg-point-map-grid {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-top: var(--hairline); border-left: var(--hairline);
+}
+.fg-point-tile {
+  min-height: 156px;
+  display: grid; grid-template-rows: auto 1fr auto auto;
+  gap: var(--s-2);
+  padding: var(--s-5);
+  text-align: left; cursor: pointer;
+  background: var(--paper); border: 0;
+  border-right: var(--hairline); border-bottom: var(--hairline);
+  transition: background .15s;
+}
+.fg-point-tile:hover { background: var(--surface); }
+.fg-point-tile:focus-visible {
+  outline: 0; background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.fg-point-number { font-size: 11px; letter-spacing: 0.1em; color: var(--text-faint); }
+.fg-point-title {
+  font-family: var(--font-display); font-size: var(--fs-h5);
+  line-height: 1.2; color: var(--text-strong);
+}
+.fg-point-state {
+  font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-faint);
+}
+.fg-point-score { font-size: 12px; color: var(--text-muted); }
+
+.fg-point-tile.is-complete { box-shadow: inset 0 3px 0 var(--accent); }
+.fg-point-tile.is-complete .fg-point-state { color: var(--accent-deep); }
+.fg-point-tile.is-attention { box-shadow: inset 0 3px 0 var(--bronze); }
+.fg-point-tile.is-attention .fg-point-state { color: var(--bronze-deep); font-weight: 500; }
+.fg-point-tile.is-active { box-shadow: inset 0 3px 0 var(--stone-300); }
+
+@media (max-width: 900px) {
+  .fg-point-map-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .fg-point-map-grid { grid-template-columns: 1fr; }
+  .fg-point-tile { min-height: 0; grid-template-rows: auto auto auto auto; }
+}

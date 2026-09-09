@@ -1,9 +1,9 @@
 'use strict';
 
 /* =============================================================
-   THE READ — MODEL
+   QUICK SCAN — MODEL
    Everything lane one knows, in one pure module. Screens, scoring,
-   the written read, and the carry-forward into The Full Standard.
+   the written read, and the carry-forward into Full Assessment.
    No DOM here; read.js renders what this returns.
 
    TWO HARD RULES, both from the spec and both load-bearing for a
@@ -118,6 +118,42 @@ var TPReadModel = (function () {
     { id: 'team',     label: 'Finding the right builder' },
     { id: 'schedule', label: 'Opening on time' }
   ];
+
+
+  /* ---------------------------------------------------------------
+     CONTEXTUAL NOTES
+     One short paragraph shown after an answer, explaining why that
+     answer matters. This is the thing that makes the Quick Scan feel
+     like it is reading the project back rather than collecting form
+     fields, and it is the payoff that arrives before the result.
+
+     NAMED SCAN_NOTES, not FIELD_NOTES. app.js has a global of that
+     name holding the ten point-opener lines for the Full Assessment,
+     and both files load on the same page. Two different things with
+     one name is how a later edit goes wrong.
+
+     THE BOUNDARY APPLIES HERE TOO. These explain what an answer
+     implies for the work. They never estimate cost, schedule, yield,
+     or what a jurisdiction will allow.
+
+     DRAFT, pending Kenny.
+     --------------------------------------------------------------- */
+  var SCAN_NOTES = {
+    land: {
+      wooded: 'Tree cover can create immediate guest value. Access, utility routing, fire review, and selective clearing usually become the early design constraints.',
+      open: 'Open ground can simplify visibility and circulation. Shade, wind exposure, drainage, and the cost of creating character deserve early attention.',
+      water: 'Water can anchor the guest experience. Floodplain, setbacks, bank stability, and the wastewater strategy are worth settling before the site plan hardens.',
+      rocky: 'Elevation creates views and identity. It can also concentrate the work in access, grading, foundations, and getting utilities where they need to go.'
+    },
+    stage: {
+      looking: 'At this stage, site control and a written use determination are worth more than detailed design.',
+      contract: 'The contract period is the window to test access, utilities, approvals, and the capital plan, while the land is still a decision rather than a commitment.',
+      own: 'Ownership removes one uncertainty. The next job is proving what the ground, the jurisdiction, and the budget will allow.',
+      approvals: 'Keep design, civil work, and pricing moving against the same approval assumptions, so one change does not quietly orphan the other two.',
+      drawings: 'A finished drawing set earns its keep once it has been reconciled with procurement, the schedule, and current pricing.',
+      pricing: 'The work now lives in the seams: scope to long lead items, schedule to quality control, and construction to the first day of operating.'
+    }
+  };
 
   /* Point names, in the live site's order. Lane one lights a few of
      these and greys the rest. */
@@ -430,6 +466,7 @@ var TPReadModel = (function () {
 
   return {
     TYPES: TYPES, LAND: LAND, STAGES: STAGES, STAGE_ART: STAGE_ART,
+    SCAN_NOTES: SCAN_NOTES,
     MONEY: MONEY, DATES: DATES, TEAM: TEAM, WORRIES: WORRIES,
     POINT_NAMES: POINT_NAMES, BAND_NAMES: BAND_NAMES, GATES: GATES,
     evaluate: evaluate, carry: carry, extractLocal: extractLocal,

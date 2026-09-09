@@ -29,14 +29,14 @@ import prompts from '../prompts.json';
    a model being up.
    ============================================================= */
 
-const MODEL = 'claude-opus-5';
+const MODEL = 'claude-sonnet-5';
 
-/* Low effort is the right setting here, not a cost compromise. These
-   are short, tightly specified rewrites with the facts already
-   supplied, and they sit inside a six second budget on somebody's
-   phone. Thinking stays on (adaptive, the default on this model):
-   turning it off on Opus 5 can leak reasoning into the visible text,
-   and lowering effort achieves the same saving without that risk. */
+/* Sonnet 5 at low effort. These are short, tightly specified rewrites
+   with every fact already supplied, inside a six second budget on
+   somebody's phone, so the work does not need a larger model and the
+   lower effort is a fit rather than a compromise. Thinking stays on
+   (adaptive): lowering effort gets the saving without the risk that
+   comes with switching reasoning off. */
 const EFFORT = 'low';
 
 /* Generous enough that adaptive thinking has room, tight enough that

@@ -40,15 +40,15 @@ PORT = 8788
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROMPTS_PATH = os.path.join(REPO, 'worker', 'prompts.json')
 
-MODEL = 'claude-opus-5'
+MODEL = 'claude-sonnet-5'
 EFFORT = 'low'
 MAX_TOKENS = 4000
 
-# Claude Opus 5, dollars per million tokens. Only used for the running
+# Claude Sonnet 5, dollars per million tokens. Only used for the running
 # total printed below; it changes nothing about the request.
-PRICE_IN = 5.00
-PRICE_OUT = 25.00
-PRICE_CACHE_READ = 0.50
+PRICE_IN = 2.00
+PRICE_OUT = 10.00
+PRICE_CACHE_READ = 0.20
 
 ALLOWED_ORIGINS = ['http://localhost:4173', 'http://127.0.0.1:4173']
 

@@ -11,8 +11,8 @@ Static site, no build step. Two ways in to the same readiness framework, plus th
 | URL | What it is | Indexed |
 | --- | --- | --- |
 | `/` | The Field Journal. The front door. | yes |
-| `/read/` | Lane one. `read.js` + `readmodel.js` | yes |
-| `/standard/` | Lane two. `app.js` + `results.js` | yes |
+| `/read/` | **Quick Scan.** `read.js` + `readmodel.js` | yes |
+| `/standard/` | **Full Assessment.** `app.js` + `results.js` | yes |
 | `/scorecard/` | The forwardable scorecard, answers in the URL fragment | no |
 | `/about/` | One screen on Ten Point Services | yes |
 | `/consultation/` | Kenny's direct line, plus a form | yes |
@@ -91,10 +91,10 @@ never from this repository, and prints the tokens and cost of every call.
 
 Then set the deployed URL as `CONFIG.MODEL_PROXY_URL`. Nothing else changes.
 
-Model is `claude-opus-5` at `effort: "low"` in both runtimes. Low effort is the
-right setting for a short, tightly specified rewrite inside a six second
-budget; it is not a quality compromise. Thinking stays on, because disabling it
-on this model can leak reasoning into the visible text.
+Model is `claude-sonnet-5` at `effort: "low"` in both runtimes (Matt's call: the work
+is short, tightly specified rewriting with every fact already supplied). Roughly
+0.8 cents per completed Quick Scan. Thinking stays on; lowering effort gets the
+saving without the risk that comes with switching reasoning off.
 
 ## What is still open
 
