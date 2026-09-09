@@ -43,17 +43,24 @@ const EFFORT = 'low';
    a pathological input cannot run up a bill. */
 const MAX_TOKENS = 4000;
 
+/* The two real origins, plus local preview. The preview port has moved
+   once already, and a stale entry here fails as a bare CORS error in
+   the console with nothing pointing at the port as the cause. So
+   loopback is matched on any port rather than pinned to one: it can
+   only ever be the machine running the preview. */
 const ALLOWED_ORIGINS = [
   'https://tenpointstandard.com',
   'https://www.tenpointstandard.com',
-  'http://localhost:4173',
-  'http://127.0.0.1:4173',
 ];
+const LOCAL_ORIGIN = /^http:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/;
+function originAllowed(origin) {
+  return ALLOWED_ORIGINS.includes(origin) || LOCAL_ORIGIN.test(origin);
+}
 
 const FORBIDDEN = prompts.forbidden.patterns.map((p) => new RegExp(p, 'i'));
 
 function corsHeaders(origin) {
-  const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allow = originAllowed(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
     'Access-Control-Allow-Origin': allow,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -94,7 +101,7 @@ export default {
     if (request.method !== 'POST') {
       return json({ error: 'method_not_allowed' }, 405, origin);
     }
-    if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+    if (origin && !originAllowed(origin)) {
       return json({ error: 'origin_not_allowed' }, 403, origin);
     }
 

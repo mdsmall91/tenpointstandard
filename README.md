@@ -142,6 +142,40 @@ Carry-forward from the Quick Scan still applies: anything lane one
 established is filled in, confirmed on its own screen first, and marked
 on the card with "From your Quick Scan" so it can be changed.
 
+## The model layer runs on a Worker
+
+`worker/src/index.js` is what holds the API key in production. It has been
+run for real, not just written: `python tools/worker-dev.py` starts the
+actual Worker with its rate limiter and its secret, and against it an
+intake call extracted all six fields, a read used the template for facts
+and the visitor's words for vocabulary, a prompt-injection attempt asking
+for cost, schedule, occupancy and a county's approval came back as a normal
+read carrying none of it, and a request from an unknown origin got a 403.
+
+There are two implementations of this contract on purpose:
+`tools/dev-proxy.py` is the quick one to develop against, and the Worker is
+the one that ships. They agree on the wire format — `{fields}` for intake,
+`{lines}` for read — and if that ever stops being true the page falls back
+to its template and nobody sees a failure, which is exactly why it would go
+unnoticed. Check both when the contract changes.
+
+**Do not put the key in `worker/.dev.vars` and leave it there.** This
+repository sits inside a synced OneDrive folder, so a key left in it is a
+key uploaded to Atwell's tenant. `tools/worker-dev.py` writes it from
+`~/.secrets` on start and deletes it on exit; `.gitignore` covers it either
+way. The deployed Worker never uses that path — there the key is a
+Cloudflare secret, set once with `npx wrangler secret put ANTHROPIC_API_KEY`.
+
+To deploy, from `worker/`:
+
+```
+npx wrangler login                       # opens a browser, Matt authorises
+npx wrangler secret put ANTHROPIC_API_KEY
+npx wrangler deploy
+```
+
+Then put the deployed URL in `CONFIG.MODEL_PROXY_URL` in `config.js`.
+
 ## What is still open
 
 - **Ten field notes** in `app.js` `FIELD_NOTES`, the ten card teasers in
@@ -151,8 +185,11 @@ on the card with "From your Quick Scan" so it can be changed.
 - **Four scope sentences** on `/about/`, one per project. The cards say less
   rather than inventing a condition that was solved.
 - **`CONFIG.MODEL_PROXY_URL`** is empty, so production reads come from the
-  template. Set it to the deployed Worker URL to switch the AI layer on.
-  Local testing already works through `tools/dev-proxy.py`.
+  template. It needs the Worker deployed, and deploying needs a Cloudflare
+  account and `npx wrangler login`, which only Matt can complete. Everything
+  up to that point is done: Node is installed (user profile, no admin), the
+  dependencies are in, and the Worker itself has been run and exercised — see
+  below.
 - **`CONFIG.MAILCHIMP_GROUP_CONSULT`** is empty, so the consultation form opens
   a mail client instead of posting to Mailchimp. See the comment in `config.js`.
 - **The scorecard link has not been clicked from a real send yet.** The merge
