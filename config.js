@@ -54,7 +54,12 @@ var CONFIG = {
      production URL everywhere else, so testing the AI layer needs no
      code change and cannot accidentally point production at a laptop. */
   MODEL_PROXY_URL_LOCAL: 'http://localhost:8788',
-  MODEL_PROXY_TIMEOUT_MS: 6000,
+  /* Generous on purpose. Nothing on the page waits for this: the
+     template read is already rendered before the call is made, and a
+     reply only swaps the wording. A short timeout does not protect the
+     visitor from anything, it just throws away good answers that
+     arrived a second late. */
+  MODEL_PROXY_TIMEOUT_MS: 20000,
 
   /* Marks Field Notes subscribers so they are distinguishable from
      scorecard leads inside the one audience. The "Welcome new

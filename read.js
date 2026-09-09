@@ -486,10 +486,23 @@ function go(n) {
    swaps it, a failure changes nothing. */
 function requestModelRead() {
   if (!TPModel.enabled()) return;
+  var R = M.evaluate(S);
   askModel('read', {
-    type: S.type, land: S.land, stage: S.stage, size: S.size,
-    money: S.money, date: S.date, team: S.team, worry: S.worry,
-    intake: S.intake, gate: M.evaluate(S).gateKey, band: M.evaluate(S).bandName
+    /* THE TEMPLATE IS THE SOURCE OF FACTS, and it is built from what
+       the visitor actually tapped. Without it the model was writing
+       from the free text alone, which meant somebody who typed a
+       description and then changed their answers got a read about the
+       project they described rather than the one they selected. */
+    template: R.lines,
+    band: R.bandName,
+    gate: R.gateKey,
+    /* Secondary, and labelled as such. Their own words are here for
+       vocabulary and detail, never to override an answer. */
+    their_words: S.intake,
+    answers: {
+      type: S.type, land: S.land, stage: S.stage, size: S.size,
+      money: S.money, date: S.date, team: S.team, worry: S.worry
+    }
   }, function (out) {
     var clean = TPModel.cleanLines(out, 3);
     if (!clean) return;
@@ -503,8 +516,23 @@ function applyExtract(fields) {
   var used = false;
   for (var k in fields) {
     if (!allowed[k]) continue;
-    if (fields[k] === undefined || fields[k] === null || fields[k] === '') continue;
-    S[k] = fields[k];
+    var v = fields[k];
+    if (v === undefined || v === null || v === '') continue;
+    /* The bounds live here rather than in the output schema: structured
+       outputs reject minimum and maximum on a property, so the schema
+       states the shape and the code states the range. */
+    if (k === 'size') {
+      v = parseInt(v, 10);
+      if (!v || v < 1) continue;
+      v = Math.min(200, v);
+    }
+    /* NEVER overwrite an answer the visitor gave themselves. The model
+       reply can land after they have moved on and answered the very
+       screen it is about, and their tap outranks it every time. A field
+       is safe to fill only while it is still empty, or still carrying
+       our own guess, which the tap handler clears. */
+    if (S[k] && !S.prefilled[k]) continue;
+    S[k] = v;
     S.prefilled[k] = true;
     used = true;
   }

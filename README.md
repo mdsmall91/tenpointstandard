@@ -43,8 +43,12 @@ page cannot pass its signals to the canonical target.
 
 ## Tools
 
+    python tools/dev-proxy.py            # the model proxy, locally, no cloud account
+    python tools/test-guard.py           # the boundary regex: 19 must block, 14 must pass
     python tools/build-images.py         # rebuild every photograph from the asset library
     python tools/check-links.py          # every internal link on every page, against the preview
+    python tools/set-masthead.py         # the masthead sentence, in one place
+    python tools/rename-lanes.py         # the Quick Scan / Full Assessment label map
     python tools/update-journal-pages.py # bring the articles onto the current chrome
 
 `tools/build-images.py` is the only place photographs are cropped, and it carries
@@ -73,6 +77,16 @@ ruling on what a jurisdiction will approve. It is stated in the system prompt,
 constrained by the output schema, and checked again by regex on the way out.
 A response that fails any of the three is discarded and the page keeps its
 template. Never remove one of the three because the other two look sufficient.
+
+`tools/test-guard.py` tests the third one, and it earns its keep: the first
+version of that regex let "the county will approve this use" straight through.
+Run it after any edit to the patterns. It also asserts that real template lines
+are NOT blocked, because a guard that eats its own product fails silently.
+
+**Output schemas state a shape, not a range.** `minimum`, `maximum`,
+`minLength`, `maxLength`, and `minItems` above 1 are all rejected with a 400.
+Bounds live in code: the size is clamped on intake, line counts and lengths in
+`TPModel.cleanLines`.
 
 **Testing locally, no cloud account needed:**
 

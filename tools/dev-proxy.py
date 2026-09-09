@@ -66,14 +66,47 @@ FORBIDDEN = [re.compile(p, re.I) for p in PROMPTS['forbidden']['patterns']]
 
 
 def find_key():
+    """Find the Anthropic key without caring what the file is called.
+
+    Order: the environment variable, then the conventional filename,
+    then any other file in ~/.secrets whose contents look like an
+    Anthropic key. The last rule exists because a key saved under a
+    perfectly sensible name like "TenPoint Standard API.txt" should
+    just work rather than fail with a filename lecture.
+
+    A file is only opened to test its first characters, the value is
+    never printed, and README files are skipped so a documentation
+    file can never be mistaken for a credential.
+    """
     key = os.environ.get('ANTHROPIC_API_KEY')
     if key:
         return key.strip(), 'ANTHROPIC_API_KEY'
-    path = os.path.join(os.path.expanduser('~'), '.secrets', 'anthropic_api_key.txt')
-    if os.path.isfile(path):
-        with open(path, encoding='utf-8') as f:
-            k = f.read().strip()
-        if k:
+
+    secrets = os.path.join(os.path.expanduser('~'), '.secrets')
+    if not os.path.isdir(secrets):
+        return None, None
+
+    def read(path):
+        try:
+            with open(path, encoding='utf-8') as f:
+                return f.read().strip()
+        except Exception:
+            return ''
+
+    conventional = os.path.join(secrets, 'anthropic_api_key.txt')
+    if os.path.isfile(conventional):
+        k = read(conventional)
+        if k.startswith('sk-ant-'):
+            return k, conventional
+
+    for name in sorted(os.listdir(secrets)):
+        if 'README' in name.upper():
+            continue
+        path = os.path.join(secrets, name)
+        if not os.path.isfile(path):
+            continue
+        k = read(path)
+        if k.startswith('sk-ant-'):
             return k, path
     return None, None
 

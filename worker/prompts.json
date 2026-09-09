@@ -21,6 +21,9 @@
     "Never use an em dash. Use a period, a comma, or a second sentence.",
     "One fact per sentence. Never stack two or three data points into one line.",
     "Write full conversational sentences. No clipped analyst fragments.",
+    "Never use a contraction. Write \"you are\" and not \"you're\", \"it is\" and not \"it's\". Nothing else on this site uses them, and a read that does reads as though a different person wrote it.",
+    "Keep every sentence to one idea. If a sentence needs an \"and\" or a \"so\" to carry a second fact, make it two sentences.",
+    "Keep each sentence under about twenty five words.",
     "Never be negative about the person or their project. A gap is a gap, not a mistake.",
     "Use no industry jargon and no technology jargon. Never mention that any of this was generated.",
     "",
@@ -57,7 +60,7 @@
           "type": { "type": "string", "enum": ["campground", "rv", "glamping", "parkrec", ""] },
           "land": { "type": "string", "enum": ["wooded", "open", "water", "rocky", ""] },
           "stage": { "type": "string", "enum": ["looking", "contract", "own", "approvals", "drawings", "pricing", ""] },
-          "size": { "type": "integer", "minimum": 0, "maximum": 200 },
+          "size": { "type": "integer" },
           "money": { "type": "string", "enum": ["exploring", "range", "number", "committed", ""] },
           "date": { "type": "string", "enum": ["none", "season", "month", "promised", ""] }
         },
@@ -70,7 +73,11 @@
       "system": [
         "You are rewriting a short read of somebody's outdoor hospitality project so that it sounds like it was written about their project rather than assembled from a form.",
         "",
-        "You are given a template read that is already correct. Your job is to say the same things in the person's own project language. Keep every fact in the template. Keep the same four beats, in the same order:",
+        "The payload gives you a `template`, which is already correct and is the ONLY source of facts. It was built from the answers the person selected. Keep every fact in it, add none, and drop none.",
+        "",
+        "The payload may also give you `their_words`, which is free text the person typed earlier. Use it only for vocabulary and place names. If it disagrees with the template, the template is right and their_words is out of date, because they may have changed an answer after typing it. Never take a fact from their_words that the template does not also carry.",
+        "",
+        "Say the same things in the person's own project language. Keep the same four beats, in the same order:",
         "1. Describe their project back to them. This comes first, always. People need to see that the thing was listening before they will read anything it says.",
         "2. Where they are today.",
         "3. The one thing most likely to stop the project, and what to do about it. Name the pattern and suggest looking into it. Never diagnose a cause and never rule on an outcome.",
@@ -85,9 +92,8 @@
         "properties": {
           "lines": {
             "type": "array",
-            "items": { "type": "string", "minLength": 10, "maxLength": 320 },
-            "minItems": 3,
-            "maxItems": 4
+            "items": { "type": "string" },
+            "minItems": 1
           }
         },
         "required": ["lines"],
@@ -110,9 +116,8 @@
         "properties": {
           "lines": {
             "type": "array",
-            "items": { "type": "string", "minLength": 10, "maxLength": 320 },
-            "minItems": 5,
-            "maxItems": 8
+            "items": { "type": "string" },
+            "minItems": 1
           }
         },
         "required": ["lines"],
@@ -121,13 +126,32 @@
     }
   },
 
+  "_schema_note": [
+    "Structured outputs accept a SHAPE, not a validator. All of these",
+    "are rejected with a 400, verified against claude-sonnet-5 on",
+    "2026-09-09:",
+    "  minimum / maximum on a number",
+    "  minLength / maxLength on a string",
+    "  minItems other than 0 or 1, and maxItems, on an array",
+    "So every bound lives in code instead. The size is clamped where the",
+    "intake is applied, and the line count and length are checked in",
+    "TPModel.cleanLines before anything reaches the page.",
+    "Keep enum, required and additionalProperties here. Those are what",
+    "the model actually needs, and they are accepted."
+  ],
+
   "forbidden": {
     "_readme": [
       "The third enforcement of the boundary: a regex check on the way out.",
       "A response that matches any of these is thrown away and the client",
       "falls back to its template, which is already correct. The person never",
-      "sees a failure, and no cost or schedule figure can reach the page even",
-      "if a prompt gets past the first two guards."
+      "sees a failure, and no cost, schedule, yield figure or approval ruling",
+      "can reach the page even if a prompt gets past the first two guards.",
+      "",
+      "The approval pattern is deliberately broad about the subject of the",
+      "sentence. Only the assertion matters: 'whether the county allows the",
+      "use' is a question and survives, 'the county will allow' is a ruling",
+      "and does not."
     ],
     "patterns": [
       "\\$\\s?[0-9]",
@@ -135,7 +159,8 @@
       "\\b[0-9]+\\s*(to|-|and)?\\s*[0-9]*\\s*(days|weeks|months|years)\\b",
       "\\b(20[2-9][0-9])\\b",
       "\\b(roi|irr|cap rate|occupancy rate|adr|revpar)\\b",
-      "\\b(will be approved|will not be approved|they will approve|guaranteed)\\b"
+      "\\bwill\\s+(not\\s+|never\\s+)?(be\\s+)?(approve|approves|approved|approving|allow|allows|allowed|allowing|permit|permits|permitted|permitting|deny|denies|denied|denying|reject|rejects|rejected|rejecting|grant|grants|granted|granting)\\b",
+      "\\b(guarantee[ds]?|guaranteeing)\\b"
     ]
   }
 }

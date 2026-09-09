@@ -148,7 +148,7 @@ var TPReadModel = (function () {
     stage: {
       looking: 'At this stage, site control and a written use determination are worth more than detailed design.',
       contract: 'The contract period is the window to test access, utilities, approvals, and the capital plan, while the land is still a decision rather than a commitment.',
-      own: 'Ownership removes one uncertainty. The next job is proving what the ground, the jurisdiction, and the budget will allow.',
+      own: 'Ownership removes one uncertainty. The next job is proving what the ground, the jurisdiction, and the budget can support.',
       approvals: 'Keep design, civil work, and pricing moving against the same approval assumptions, so one change does not quietly orphan the other two.',
       drawings: 'A finished drawing set earns its keep once it has been reconciled with procurement, the schedule, and current pricing.',
       pricing: 'The work now lives in the seams: scope to long lead items, schedule to quality control, and construction to the first day of operating.'
