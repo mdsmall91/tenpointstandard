@@ -31,22 +31,6 @@
 
 var TPBoard = (function () {
 
-  /* One line per point, said the way somebody would say it walking
-     the site: what this point is actually for. Front of card, above
-     the title, where it has to earn the flip. */
-  var TEASERS = [
-    'Get to know the ground beneath the idea.',
-    'Give the vision a financial foundation.',
-    'Know what it takes to move forward.',
-    'Make it worth the trip.',
-    'Bring the idea into focus.',
-    'Get the right things to the right place.',
-    'Connect the plan to opening day.',
-    'Know what is behind the numbers.',
-    'Make sure the work holds up.',
-    'Be ready for the very first guest.'
-  ];
-
   var VALUES = [true, false, 'unsure'];
   var LABELS = ['Yes', 'No', 'Not sure'];
 
@@ -100,7 +84,10 @@ var TPBoard = (function () {
       '<span class="card-number">' + esc(p.n) + '</span>' +
       '<span class="flip-icon" aria-hidden="true">' + (done(pi) ? '✓' : '↻') + '</span>' +
       '<div class="front-copy">' +
-        '<div class="teaser">' + esc(TEASERS[pi]) + '</div>' +
+        /* Nothing invented goes on the front of a card. The number,
+           the name and how far through you are is all we can say
+           without writing copy in somebody else's voice, and it is
+           enough: the photograph is doing the inviting. */
         '<h2>' + esc(p.title) + '</h2>' +
         '<div class="front-bottom"><span>' + status + '</span>' +
           '<span class="front-dots" aria-hidden="true">' + dots + '</span></div>' +
