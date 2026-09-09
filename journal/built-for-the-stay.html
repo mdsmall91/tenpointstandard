@@ -24,7 +24,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../styles/tokens.css">
 <link rel="stylesheet" href="../styles/base.css">
-<link rel="stylesheet" href="../styles/journal.css?v=9">
+<link rel="stylesheet" href="../styles/pages.css?v=13">
+<link rel="stylesheet" href="../styles/journal.css?v=13">
 
 <script type="application/ld+json">
 {
@@ -61,16 +62,25 @@
       </a>
       <div class="jr-header-right">
         <nav class="tp-nav" aria-label="Primary">
-          <a href="/journal.html" class="active">Field Journal</a>
+          <a href="/" class="active">Field Journal</a>
+          <a href="/read/">The Read</a>
+          <a href="/standard/">The Standard</a>
+          <a href="/about/">About</a>
         </nav>
-        <a class="btn accent sm jr-header-cta" href="/">Score your project</a>
+        <a class="btn accent sm jr-header-cta" href="/read/">See where you are</a>
       </div>
     </div>
   </header>
 
+  <div class="tp-masthead">
+    <div class="tp-masthead-inner">
+      <p>Published by <strong>Ten Point Services</strong>. We are a general contractor. We build campgrounds, RV resorts, glamping properties, and recreation destinations across the United States.</p>
+    </div>
+  </div>
+
   <main class="jr-main">
     <div class="jr-back-wrap">
-      <a class="jr-back" href="../journal.html">&larr; All entries</a>
+      <a class="jr-back" href="/">&larr; All entries</a>
     </div>
 
     <article>
@@ -157,6 +167,16 @@
 
         <p>The same discipline applies to small details. A shutoff in the wrong location, a condenser facing a private deck, or a cleanout under a future walkway may not affect the certificate of occupancy. It can affect every maintenance call that follows.</p>
 
+
+        <div class="tp-cta tp-cta-inline">
+          <div>
+            <div class="tp-cta-eyebrow">The Ten Point Standard</div>
+            <h3>Where does your project actually stand?</h3>
+            <p>Ninety seconds. Ten questions, mostly pictures. No email needed.</p>
+          </div>
+          <a class="btn accent" href="/read/">See where you are</a>
+        </div>
+
         <h2>The Return Is Avoided Friction</h2>
 
         <p>Hospitality-first construction should not be sold with a blanket promise of a specific rate premium or operating margin. Every market and property is different. The more defensible capital case is the friction the owner avoids and the value the property is better positioned to protect.</p>
@@ -218,13 +238,13 @@
           </div>
         </div>
 
-        <div class="jr-cta">
+        <div class="tp-cta">
           <div>
-            <div class="jr-cta-eyebrow">The Ten Point Standard</div>
-            <h3>Forty questions. One hundred points.</h3>
-            <p>See where your project is strong and where the risk is concentrated.</p>
+            <div class="tp-cta-eyebrow">The Ten Point Standard</div>
+            <h3>Where does your project actually stand?</h3>
+            <p>Ninety seconds. Ten questions, mostly pictures. No email needed.</p>
           </div>
-          <a class="btn lg accent" href="/">Take the assessment</a>
+          <a class="btn lg accent" href="/read/">See where you are</a>
         </div>
 
         <form class="jr-article-dispatch" id="jr-article-form" novalidate>
@@ -243,17 +263,24 @@
     </article>
   </main>
 
-  <footer class="tp-footer">
+    <footer class="tp-footer">
     <div class="tp-footer-inner">
-      <span>© 2026 TEN POINT SERVICES · ALL RIGHTS RESERVED</span>
-      <span>THE TEN POINT STANDARD · FIELD GUIDE</span>
+      <span>&copy; 2026 TEN POINT SERVICES &middot; ALL RIGHTS RESERVED</span>
+      <span class="tp-footer-nav">
+        <a href="/">FIELD JOURNAL</a>
+        <a href="/read/">THE READ</a>
+        <a href="/standard/">THE STANDARD</a>
+        <a href="/about/">ABOUT</a>
+      </span>
+      <span>THE TEN POINT STANDARD</span>
     </div>
   </footer>
 
 </div>
 
-<script src="../config.js?v=8"></script>
-<script src="../journal-core.js?v=8"></script>
-<script src="../journal-article.js?v=8"></script>
+<script src="../config.js?v=13"></script>
+<script src="../analytics.js?v=13"></script>
+<script src="../journal-core.js?v=13"></script>
+<script src="../journal-article.js?v=13"></script>
 </body>
 </html>

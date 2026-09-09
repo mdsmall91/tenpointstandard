@@ -1,0 +1,229 @@
+/* =============================================================
+   TEN POINT — SHARED PAGE CHROME + STANDING PAGES
+   The masthead, the header lockup, and the footer that every page
+   carries, plus About, Consultation, the show page, and the
+   forwardable scorecard.
+
+   Loaded after base.css and before any page-specific sheet.
+   tokens.css and base.css are never edited.
+   ============================================================= */
+
+body { margin: 0; background: var(--paper); }
+a { color: inherit; }
+a:hover { color: var(--accent-deep); }
+::selection { background: var(--accent-soft); }
+
+.tp-page-root { min-height: 100vh; display: flex; flex-direction: column; }
+.tp-page-main { flex: 1; }
+
+/* ---------- HEADER LOCKUP ----------
+   The same accent-tinted mark the Journal uses. Duplicated from
+   journal.css deliberately: pages that do not load journal.css still
+   need the lockup, and the two rules are identical by design. If the
+   logo file ever changes, change it in both. */
+.jr-brand { display: inline-flex; align-items: center; gap: 14px; }
+.jr-brand:hover .jr-logo { background: var(--accent-deep); }
+.jr-logo {
+  display: inline-block; height: 38px; aspect-ratio: 181 / 123;
+  background: var(--accent); transition: background .15s;
+  -webkit-mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
+  mask: url('../assets/tenpoint-logo-current.png') center / contain no-repeat;
+}
+.jr-header-right { display: flex; align-items: center; gap: var(--s-6); }
+.jr-header-cta { display: inline-flex; }
+
+/* =============================================================
+   THE MASTHEAD
+   Sits under the header on every page. A first-time visitor has to
+   know what company this is inside about three seconds, and an
+   article index does not say that on its own. A magazine solves it
+   with a masthead, so this site does too.
+
+   It is static HTML on every page, never injected, because a
+   crawler that runs no JavaScript still has to read it. That is the
+   same lesson the FAQ block on the assessment learned.
+   ============================================================= */
+.tp-masthead { border-bottom: var(--hairline); background: var(--surface); }
+.tp-masthead-inner {
+  max-width: var(--page-max); margin: 0 auto;
+  padding: var(--s-4) var(--page-pad);
+}
+.tp-masthead p {
+  margin: 0; max-width: 92ch;
+  font-size: 13px; line-height: 1.6; color: var(--text-muted);
+}
+.tp-masthead strong { color: var(--text-strong); font-weight: 600; }
+
+/* ---------- FOOTER ---------- */
+.tp-footer-nav { display: flex; gap: var(--s-5); flex-wrap: wrap; }
+.tp-footer-nav a { border-bottom: 1px solid transparent; }
+.tp-footer-nav a:hover { border-bottom-color: var(--accent); }
+
+/* =============================================================
+   THE JOURNAL CTA BLOCK
+   The same words at the end of every article, and once more inline
+   partway down the long ones. Repetition is what makes it stick, so
+   this is one class and one wording, never a per-article variant.
+   ============================================================= */
+.tp-cta {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-8); flex-wrap: wrap;
+  padding: var(--s-8);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--border));
+  margin: var(--s-12) 0;
+}
+.tp-cta-eyebrow {
+  font-family: var(--font-mono); font-size: var(--fs-eyebrow);
+  letter-spacing: var(--tr-eyebrow); text-transform: uppercase;
+  color: var(--accent-deep); margin-bottom: var(--s-3);
+}
+.tp-cta h3 { font-size: var(--fs-h3); text-wrap: pretty; }
+.tp-cta p { margin-top: var(--s-2); font-size: var(--fs-small); color: var(--text-muted); }
+.tp-cta .btn { flex: none; min-height: 44px; }
+.tp-cta-inline { margin: var(--s-10) 0; padding: var(--s-6); }
+@media (max-width: 640px) {
+  .tp-cta { flex-direction: column; align-items: flex-start; gap: var(--s-5); }
+  .tp-cta .btn { width: 100%; justify-content: center; }
+}
+
+/* =============================================================
+   STANDING PAGES — About, Consultation, the show
+   ============================================================= */
+.pg { max-width: var(--page-max); margin: 0 auto; padding: 0 var(--page-pad); }
+.pg-narrow { max-width: 780px; }
+.pg-hero { padding: var(--s-16) 0 var(--s-10); border-bottom: var(--hairline); }
+.pg-hero h1 { font-size: clamp(2.25rem, 5vw, var(--fs-h1)); text-wrap: pretty; }
+.pg-hero .lede { margin-top: var(--s-5); max-width: 60ch; }
+.pg-section { padding: var(--s-12) 0; border-top: var(--hairline); }
+.pg-section:first-of-type { border-top: 0; }
+.pg-section h2 { font-size: var(--fs-h3); }
+.pg-section > p { margin-top: var(--s-4); }
+.pg-lead-list { margin: var(--s-6) 0 0; padding: 0; list-style: none; max-width: 68ch; }
+.pg-lead-list li {
+  padding: var(--s-4) 0; border-top: 1px solid var(--border-soft);
+  display: flex; gap: var(--s-5); align-items: baseline;
+}
+.pg-lead-list li:first-child { border-top: 0; }
+.pg-lead-list b { flex: none; min-width: 190px; color: var(--text-strong); font-weight: 600; font-size: var(--fs-small); }
+.pg-lead-list span { color: var(--text-muted); font-size: var(--fs-small); }
+
+/* ---------- PROJECT CARDS (About) ---------- */
+.pg-projects { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-8); margin-top: var(--s-8); }
+.pg-project { border: var(--hairline); background: var(--surface); }
+.pg-project-media { aspect-ratio: 3 / 2; background: var(--surface-2); overflow: hidden; }
+.pg-project-media img { width: 100%; height: 100%; object-fit: cover; }
+.pg-project-body { padding: var(--s-6); }
+.pg-project-type {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--accent-deep);
+}
+.pg-project h3 { margin-top: var(--s-3); font-size: var(--fs-h4); font-family: var(--font-body); font-weight: 600; }
+.pg-project-scope {
+  margin-top: var(--s-3); font-size: 12px; color: var(--text-faint);
+  font-family: var(--font-mono); letter-spacing: 0.03em; line-height: 1.6;
+}
+.pg-project p { margin-top: var(--s-4); font-size: var(--fs-small); color: var(--text-muted); }
+.pg-credit {
+  margin-top: var(--s-6); font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.06em; color: var(--text-faint);
+}
+
+/* ---------- CONTACT ---------- */
+.pg-contact {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-8);
+  margin-top: var(--s-8);
+}
+.pg-contact-card { border: var(--hairline); background: var(--surface); padding: var(--s-8); }
+.pg-person-name { font-size: var(--fs-h4); font-family: var(--font-body); font-weight: 600; color: var(--text-strong); }
+.pg-person-title {
+  margin-top: 2px; font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint);
+}
+.pg-person-lines { margin-top: var(--s-6); display: flex; flex-direction: column; gap: var(--s-3); }
+.pg-person-lines a {
+  font-size: var(--fs-body); color: var(--text-strong);
+  border-bottom: 1px solid var(--accent); padding-bottom: 2px;
+  align-self: flex-start; word-break: break-word;
+}
+.pg-person-lines a:hover { color: var(--accent-deep); }
+.pg-form { display: flex; flex-direction: column; gap: var(--s-4); margin-top: var(--s-6); }
+.pg-form .btn { align-self: flex-start; min-height: 44px; }
+.pg-form-status { font-size: 13px; min-height: 1.2em; margin: 0; }
+.pg-form-status.is-err { color: var(--bronze-deep); }
+.pg-form-status.is-ok { color: var(--accent-deep); }
+.pg-optional {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-faint);
+}
+
+/* ---------- SHOW PAGE ---------- */
+.pg-show-hero { background: var(--ink-deep); color: var(--paper); }
+.pg-show-hero .pg-hero { border-bottom: 0; }
+.pg-show-hero h1 { color: var(--paper); }
+.pg-show-hero .lede { color: oklch(0.82 0.01 80); }
+.pg-show-hero .eyebrow { color: oklch(0.72 0.02 80); }
+.pg-show-meta {
+  display: flex; gap: var(--s-8) var(--s-12); flex-wrap: wrap;
+  margin-top: var(--s-8); padding-top: var(--s-6);
+  border-top: 1px solid oklch(0.32 0.01 70);
+}
+.pg-show-meta div { min-width: 140px; }
+.pg-show-meta dt {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: oklch(0.66 0.02 80);
+}
+.pg-show-meta dd { margin: 6px 0 0; font-size: var(--fs-body); color: var(--paper); }
+
+/* =============================================================
+   THE FORWARDABLE SCORECARD
+   Built to be sent to an engineer, a lender, or a partner, and
+   built to print. That is why the layout is a single column with a
+   masthead, and why the print rules below drop the site chrome.
+   ============================================================= */
+.sc-wrap { max-width: 860px; margin: 0 auto; padding: var(--s-12) var(--page-pad) var(--s-20); }
+.sc-top { display: grid; grid-template-columns: 280px 1fr; gap: var(--s-10); align-items: center; }
+.sc-score { font-family: var(--font-display); font-size: var(--fs-display); line-height: 1; color: var(--text-strong); }
+.sc-score span { font-family: var(--font-body); font-size: var(--fs-h4); color: var(--text-muted); }
+.sc-headline { margin-top: var(--s-4); font-size: var(--fs-h2); text-wrap: pretty; }
+.sc-sub { margin-top: var(--s-3); font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+.sc-block { margin-top: var(--s-12); padding-top: var(--s-8); border-top: var(--hairline); }
+.sc-block h2 { font-size: var(--fs-h3); }
+.sc-read { margin-top: var(--s-5); display: flex; flex-direction: column; gap: var(--s-4); }
+.sc-read p { font-size: var(--fs-lead); line-height: var(--lh-relaxed); }
+.sc-actions { margin: var(--s-5) 0 0; padding-left: 20px; }
+.sc-actions li { padding: 6px 0; font-size: var(--fs-body); }
+.sc-ledger { width: 100%; border-collapse: collapse; margin-top: var(--s-5); font-size: var(--fs-small); }
+.sc-ledger th, .sc-ledger td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border-soft); }
+.sc-ledger th {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-muted); font-weight: 400;
+}
+.sc-ledger td.num { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+.sc-ans { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+.sc-ans-yes { color: var(--accent-deep); }
+.sc-ans-no { color: var(--text-muted); }
+.sc-ans-unsure { color: var(--bronze-deep); }
+.sc-share {
+  margin-top: var(--s-12); padding: var(--s-8);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--border));
+}
+.sc-share p { font-size: var(--fs-small); }
+.sc-share-row { display: flex; gap: var(--s-3); margin-top: var(--s-5); flex-wrap: wrap; }
+.sc-empty { padding: var(--s-20) 0; text-align: center; }
+
+@media (max-width: 760px) {
+  .sc-top { grid-template-columns: 1fr; }
+  .pg-projects, .pg-contact { grid-template-columns: 1fr; }
+  .pg-lead-list li { flex-direction: column; gap: var(--s-2); }
+  .pg-lead-list b { min-width: 0; }
+}
+
+@media print {
+  .tp-header, .tp-footer, .sc-share, .tp-cta { display: none !important; }
+  .sc-wrap { padding: 0; max-width: none; }
+  .tpr-fill { fill: #333 !important; }
+  .tpr-gate { fill: #777 !important; }
+  body { background: #fff; }
+}

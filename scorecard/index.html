@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" data-accent="stone" data-type="editorial">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Ten Point scorecard</title>
+<meta name="description" content="A Ten Point Standard readiness scorecard: the score, the open gates, the read, and three priority actions.">
+
+<!-- noindex, and it is not an oversight. Every scorecard lives at this one
+     path with the answers in the fragment, so there is nothing here for a
+     search engine to index that is not somebody's own project. The page is
+     private by being unguessable, not by being locked, which is the right
+     trade for a document built to be forwarded. -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/png" href="/assets/tenpoint-logo-current.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles/tokens.css">
+<link rel="stylesheet" href="/styles/base.css">
+<link rel="stylesheet" href="/styles/pages.css?v=13">
+<link rel="stylesheet" href="/styles/ring.css?v=13">
+</head>
+<body>
+<div class="tp-page-root">
+
+  <header class="tp-header">
+    <div class="tp-header-inner">
+      <a class="jr-brand" href="/" aria-label="The Ten Point Standard">
+        <span role="img" aria-hidden="true" class="jr-logo"></span>
+      </a>
+      <div class="jr-header-right">
+        <nav class="tp-nav" aria-label="Primary">
+          <a href="/">Field Journal</a>
+          <a href="/read/">The Read</a>
+          <a href="/standard/">The Standard</a>
+          <a href="/about/">About</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- The masthead travels with the scorecard on purpose. This page gets
+       forwarded to people who have never heard of Ten Point Services, and
+       it has to say who published it. -->
+  <div class="tp-masthead">
+    <div class="tp-masthead-inner">
+      <p>Published by <strong>Ten Point Services</strong>. We are a general contractor. We build campgrounds, RV resorts, glamping properties, and recreation destinations across the United States.</p>
+    </div>
+  </div>
+
+  <main class="tp-page-main">
+    <div class="sc-wrap" id="sc-app">
+      <noscript>
+        <h1>This scorecard needs JavaScript.</h1>
+        <p class="lede" style="margin-top:20px;">The answers travel inside the link and are rebuilt in your browser, so nothing is stored on a server. With JavaScript switched off there is nothing to rebuild them with.</p>
+        <p style="margin-top:28px;"><a class="btn accent lg" href="/standard/">Take the assessment</a></p>
+      </noscript>
+    </div>
+  </main>
+
+  <footer class="tp-footer">
+    <div class="tp-footer-inner">
+      <span>&copy; 2026 TEN POINT SERVICES &middot; ALL RIGHTS RESERVED</span>
+      <span class="tp-footer-nav">
+        <a href="/">FIELD JOURNAL</a>
+        <a href="/standard/">THE STANDARD</a>
+        <a href="/consultation/">TALK TO US</a>
+      </span>
+      <span>THE TEN POINT STANDARD</span>
+    </div>
+  </footer>
+</div>
+
+<script src="/config.js?v=13"></script>
+<script src="/analytics.js?v=13"></script>
+<script src="/ring.js?v=13"></script>
+<script src="/scorecode.js?v=13"></script>
+<script src="/readmodel.js?v=13"></script>
+<script src="/results.js?v=13"></script>
+<script src="/standardread.js?v=13"></script>
+<!-- app.js is loaded for POINTS only. It boots nothing here: its boot
+     block requires an #app element, and this page does not have one. -->
+<script src="/app.js?v=13"></script>
+<script src="/scorecard.js?v=13"></script>
+</body>
+</html>

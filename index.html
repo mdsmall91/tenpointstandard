@@ -1,48 +1,57 @@
 <!DOCTYPE html>
-<html lang="en" data-accent="stone">
+<html lang="en" data-accent="stone" data-type="editorial">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Ten Point Standard | Readiness assessment for campground, RV resort, and glamping resort projects</title>
-<meta name="description" content="A free 40-question readiness assessment for campground, RV resort, and glamping resort owners. Score your project out of 100 and see where the risk sits.">
+<title>The Field Journal | Ten Point Services</title>
+<meta name="description" content="Insights from real world experience to help owners build, expand, and operate campgrounds, RV resorts, and glamping properties. Published by Ten Point Services, a general contractor building outdoor hospitality across the United States.">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 <!-- Google Search Console ownership. Keep both this tag and
      /googlec3c92888c8f523e7.html permanently: removing either un-verifies the
-     property. The Google Analytics verification method does NOT work here, as
-     the gtag snippet is injected by app.js and so is absent from the source. -->
+     property, which is a URL-prefix property on the site root. The Google
+     Analytics verification method does NOT work here, as the gtag snippet is
+     injected at runtime and so is absent from the source. -->
 <meta name="google-site-verification" content="rlYXk71NnEYzFLgDounPrYS3a1iwXMBYsSlBrgJnEtI">
 <link rel="canonical" href="https://tenpointstandard.com/">
+<link rel="alternate" type="application/rss+xml" title="Ten Point Field Journal" href="https://tenpointstandard.com/feed.xml">
 <meta property="og:site_name" content="The Ten Point Standard">
-<meta property="og:title" content="The Ten Point Standard | Readiness assessment for campground, RV resort, and glamping resort projects">
-<meta property="og:description" content="Forty questions. One hundred points. See where you are strong, where the risk is concentrated, and what to do next.">
+<meta property="og:title" content="The Field Journal | Ten Point Services">
+<meta property="og:description" content="Insights from real world experience to help owners build, expand, and operate their resorts.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://tenpointstandard.com/">
-<meta property="og:image" content="https://tenpointstandard.com/assets/tenpoint-logo-current.png">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="The Ten Point Standard | Readiness assessment for outdoor hospitality projects">
-<meta name="twitter:description" content="Forty questions. One hundred points. See where you are strong, where the risk is concentrated, and what to do next.">
-<link rel="icon" type="image/png" href="assets/tenpoint-logo-current.png">
+<meta property="og:image" content="https://tenpointstandard.com/assets/og/home-1200.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Field Journal | Ten Point Services">
+<meta name="twitter:description" content="Insights from real world experience to help owners build, expand, and operate their resorts.">
+<meta name="twitter:image" content="https://tenpointstandard.com/assets/og/home-1200.jpg">
+<link rel="icon" type="image/png" href="/assets/tenpoint-logo-current.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles/tokens.css">
-<link rel="stylesheet" href="styles/base.css">
-<link rel="stylesheet" href="styles/site.css?v=4">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles/tokens.css">
+<link rel="stylesheet" href="/styles/base.css">
+<link rel="stylesheet" href="/styles/pages.css?v=13">
+<link rel="stylesheet" href="/styles/journal.css?v=13">
 
-<!-- Structured data. The FAQ answers below must stay in sync with the visible
-     copy in #fg-about: Google requires FAQ markup to match on-page content. -->
+<!-- The Organization and WebSite nodes live here, on the site root, and every
+     other page references them by @id. Keep the ids stable: changing one
+     orphans the references on /standard/, /read/, /about/ and the articles.
+     areaServed is the structured-data half of the masthead's claim, so the
+     two have to say the same thing. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Organization",
+      "@type": "GeneralContractor",
       "@id": "https://tenpointservicestx.com/#organization",
       "name": "Ten Point Services",
       "url": "https://tenpointservicestx.com",
       "logo": "https://tenpointstandard.com/assets/tenpoint-logo-current.png",
       "email": "info@tenpointstandard.com",
-      "description": "Owner's representation and development advisory for campground, RV resort, and glamping resort projects.",
+      "telephone": "+1-512-813-1851",
+      "description": "General contractor building campgrounds, RV resorts, glamping properties, and recreation destinations across the United States.",
+      "areaServed": { "@type": "Country", "name": "United States" },
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "11581 US Highway 281 N",
@@ -60,137 +69,228 @@
       "publisher": { "@id": "https://tenpointservicestx.com/#organization" }
     },
     {
-      "@type": "FAQPage",
-      "@id": "https://tenpointstandard.com/#faq",
+      "@type": "Blog",
+      "@id": "https://tenpointstandard.com/#blog",
       "url": "https://tenpointstandard.com/",
-      "name": "The Ten Point Standard | Readiness assessment for campground, RV resort, and glamping resort projects",
+      "name": "The Field Journal",
+      "description": "Insights from real world experience to help owners build, expand, and operate their resorts.",
       "isPartOf": { "@id": "https://tenpointstandard.com/#website" },
-      "publisher": { "@id": "https://tenpointservicestx.com/#organization" },
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is the Ten Point Standard?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The Ten Point Standard is a readiness framework for outdoor hospitality development. It covers ten points: property details, capital strategy, regulatory approvals, guest experience, design, procurement, schedule, cost certainty, quality assurance, and opening readiness. Each point carries four questions and a weighted share of one hundred points."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Who should take the Field Guide assessment?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Owners and developers planning a campground, RV resort, glamping resort, or other outdoor hospitality property. It is written for people early enough to still change the plan, from raw land through pre-construction."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How long does the assessment take?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "About five minutes. Forty yes or no questions across ten screens, with no account to create."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What do I get at the end?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "A score out of one hundred, a verdict on the stage your project is actually in, a read on which critical gates are still open, the findings your answers point to, and three priority actions. You can have the scorecard emailed to you."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What does my score mean?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Zero to thirty-nine is Align: market, land, and money are still open questions. Forty to sixty-nine is Design: the idea holds, and the risk sits in entitlements, drawings, procurement, and pricing. Seventy to one hundred is Build: the seams are closed, and the work is holding schedule, budget, and quality through construction. An open critical gate can pull the verdict below the raw score."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Does the assessment cost anything?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No. The Field Guide is free. An email address is needed only if you want the scorecard sent to you."
-          }
-        }
-      ]
+      "publisher": { "@id": "https://tenpointservicestx.com/#organization" }
     }
   ]
 }
 </script>
 </head>
 <body>
-<div class="fg-root">
+<div class="jr-root">
+
   <header class="tp-header">
     <div class="tp-header-inner">
-      <a class="fg-logo-link" href="https://tenpointservicestx.com" target="_blank" rel="noopener" aria-label="Ten Point Services">
-        <span role="img" aria-hidden="true" class="fg-logo"></span>
+      <a class="jr-brand" href="/" aria-label="The Ten Point Standard">
+        <span role="img" aria-hidden="true" class="jr-logo"></span>
       </a>
-      <nav class="tp-nav" aria-label="Primary">
-        <a href="/journal.html">Field Journal</a>
-      </nav>
-      <div class="tp-meta"><span class="mono" id="hdr-score">SCORE 0 / 100</span></div>
+      <div class="jr-header-right">
+        <nav class="tp-nav" aria-label="Primary">
+          <a href="/" class="active" aria-current="page">Field Journal</a>
+          <a href="/read/">The Read</a>
+          <a href="/standard/">The Standard</a>
+          <a href="/about/">About</a>
+        </nav>
+        <a class="btn accent sm jr-header-cta" href="/read/">See where you are</a>
+      </div>
     </div>
-    <nav class="fg-step-nav" id="step-nav" aria-label="Assessment steps"></nav>
   </header>
 
-  <div class="fg-body">
-    <aside class="fg-rail" id="rail" aria-label="Assessment progress"></aside>
-    <main id="app" class="fg-main"></main>
+  <!-- THE MASTHEAD. A first-time visitor has to learn what company this is
+       inside about three seconds, and an article index does not say that on
+       its own. Two lines, on every page, static in the HTML so a crawler that
+       runs no JavaScript reads it too. The longer version is on /about/. -->
+  <div class="tp-masthead">
+    <div class="tp-masthead-inner">
+      <p>Published by <strong>Ten Point Services</strong>. We are a general contractor. We build campgrounds, RV resorts, glamping properties, and recreation destinations across the United States.</p>
+    </div>
   </div>
 
-  <!-- Static, crawlable copy. Everything above renders from JS, which leaves a
-       crawler almost no text to index. This block sits in the HTML, carries the
-       search vocabulary, and backs the FAQ schema in <head> (which is only
-       valid while the same Q&A is visible on the page). Shown with the cover;
-       app.js hides it once the assessment is underway via body[data-step]. -->
-  <section class="fg-about" id="fg-about" aria-labelledby="fg-about-h">
-    <div class="fg-about-inner">
-      <h2 id="fg-about-h">A readiness assessment for outdoor hospitality projects.</h2>
-      <p class="lede">The Ten Point Standard is the framework Ten Point Services uses to judge whether a campground, RV resort, or glamping resort is ready to move forward. The Field Guide is the self-assessment version: forty yes or no questions across ten points, scored out of one hundred.</p>
+  <main class="jr-main">
 
-      <h3>Common questions</h3>
-      <dl class="fg-faq">
-        <dt>What is the Ten Point Standard?</dt>
-        <dd>The Ten Point Standard is a readiness framework for outdoor hospitality development. It covers ten points: property details, capital strategy, regulatory approvals, guest experience, design, procurement, schedule, cost certainty, quality assurance, and opening readiness. Each point carries four questions and a weighted share of one hundred points.</dd>
+    <!-- ---------- page hero ---------- -->
+    <section class="page">
+      <div class="tp-hero jr-hero-solo">
+        <div>
+          <h1>Field Journal</h1>
+          <p class="lede muted">Insights from real world experience to help owners build, expand, and operate their resorts.</p>
+        </div>
+      </div>
+    </section>
 
-        <dt>Who should take the Field Guide assessment?</dt>
-        <dd>Owners and developers planning a campground, RV resort, glamping resort, or other outdoor hospitality property. It is written for people early enough to still change the plan, from raw land through pre-construction.</dd>
+    <!-- ---------- featured entry ---------- -->
+    <section class="jr-featured-wrap">
+      <div class="eyebrow faint" style="margin-bottom: var(--s-6);">Latest entry</div>
+      <article class="card jr-featured">
+        <div class="jr-media" style="aspect-ratio: 3 / 2;">
+          <img src="assets/journal/nature-first/hero.jpg" alt="A cabin on a Texas Hill Country ridgeline at sunrise, framed by live oaks with a valley of native brush below" width="1536" height="1024">
+        </div>
+        <div>
+          <div class="jr-tag">
+            <span class="jr-tag-dot"></span>
+            <span class="jr-tag-label">Land &amp; Entitlement</span>
+          </div>
+          <h2 class="jr-featured-title">
+            <a href="journal/nature-first.html" data-journal-link>Nature Should Be Your First Amenity</a>
+          </h2>
+          <p class="jr-featured-dek">Why the best outdoor hospitality projects start with the land.</p>
+          <div class="jr-byline">
+            <div>
+              <div class="jr-byline-name">Kenny Reed &amp; Matt Small</div>
+              <div class="jr-byline-cred">Principal &amp; Director of Outdoor Hospitality</div>
+              <div class="jr-byline-org">Ten Point Services &amp; RVi Planning &amp; Landscape Architecture</div>
+            </div>
+            <div class="jr-byline-meta">6 min read</div>
+          </div>
+        </div>
+      </article>
+    </section>
 
-        <dt>How long does the assessment take?</dt>
-        <dd>About five minutes. Forty yes or no questions across ten screens, with no account to create.</dd>
-
-        <dt>What do I get at the end?</dt>
-        <dd>A score out of one hundred, a verdict on the stage your project is actually in, a read on which critical gates are still open, the findings your answers point to, and three priority actions. You can have the scorecard emailed to you.</dd>
-
-        <dt>What does my score mean?</dt>
-        <dd>Zero to thirty-nine is Align: market, land, and money are still open questions. Forty to sixty-nine is Design: the idea holds, and the risk sits in entitlements, drawings, procurement, and pricing. Seventy to one hundred is Build: the seams are closed, and the work is holding schedule, budget, and quality through construction. An open critical gate can pull the verdict below the raw score.</dd>
-
-        <dt>Does the assessment cost anything?</dt>
-        <dd>No. The Field Guide is free. An email address is needed only if you want the scorecard sent to you.</dd>
-      </dl>
-
-      <p class="muted fg-about-note">The Field Guide is published by <a href="https://tenpointservicestx.com" rel="noopener">Ten Point Services</a>. It is a diagnostic, not a feasibility study, an appraisal, or professional advice on any specific project.</p>
+    <!-- ---------- filter ----------
+         Ships visible once more than one entry is published: a
+         seven-chip filter over a single article reads as broken, so
+         journal.js hides this (and the grid below) again if published
+         entries ever drop back to one. -->
+    <div class="jr-filter" id="jr-filter">
+      <div class="jr-filter-inner">
+        <span class="jr-filter-label">Filter</span>
+        <button class="jr-chip" data-tag="all" aria-pressed="true">All entries</button>
+        <button class="jr-chip" data-tag="feasibility" aria-pressed="false">Feasibility</button>
+        <button class="jr-chip" data-tag="capital" aria-pressed="false">Capital</button>
+        <button class="jr-chip" data-tag="land-entitlement" aria-pressed="false">Land &amp; Entitlement</button>
+        <button class="jr-chip" data-tag="construction" aria-pressed="false">Construction</button>
+        <button class="jr-chip" data-tag="operations" aria-pressed="false">Operations</button>
+        <button class="jr-chip" data-tag="guest-experience" aria-pressed="false">Guest Experience</button>
+      </div>
     </div>
-  </section>
+
+    <!-- ---------- grid ----------
+         Every published entry is in the markup, including the
+         featured one: it is hidden under "All entries" (where it
+         already shows above) and reappears when its own tag is
+         selected. The aspect ratio on each media box is the post's
+         heroAspect, set explicitly so the columns cannot reflow. -->
+    <section class="jr-grid-wrap" id="jr-grid-wrap">
+      <div class="jr-grid" id="jr-grid">
+
+        <article class="jr-tile" data-tag="land-entitlement" data-featured hidden>
+          <div class="jr-media" style="aspect-ratio: 3 / 2;">
+            <img src="assets/journal/nature-first/hero.jpg" alt="A cabin on a Texas Hill Country ridgeline at sunrise, framed by live oaks with a valley of native brush below" width="1536" height="1024" loading="lazy">
+          </div>
+          <div class="jr-tile-body">
+            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Land &amp; Entitlement</span></div>
+            <h3 class="jr-tile-title"><a href="journal/nature-first.html" data-journal-link>Nature Should Be Your First Amenity</a></h3>
+            <p class="jr-tile-dek">Why the best outdoor hospitality projects start with the land.</p>
+            <div class="jr-byline">
+              <div>
+                <div class="jr-byline-name">Kenny Reed &amp; Matt Small</div>
+                <div class="jr-byline-cred">Principal &amp; Director of Outdoor Hospitality</div>
+                <div class="jr-byline-org">Ten Point Services &amp; RVi Planning &amp; Landscape Architecture</div>
+              </div>
+              <div class="jr-byline-meta">6 min read</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="jr-tile" data-tag="construction">
+          <div class="jr-media" style="aspect-ratio: 16 / 9;">
+            <img src="assets/journal/built-for-the-stay/hero.jpg" alt="Guest cabins glowing at dusk along a lit gravel path beneath a live oak" width="1672" height="941" loading="lazy">
+          </div>
+          <div class="jr-tile-body">
+            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Construction</span></div>
+            <h3 class="jr-tile-title"><a href="journal/built-for-the-stay.html" data-journal-link>Build for the Stay, Not Just the Inspection</a></h3>
+            <p class="jr-tile-dek">Why hospitality-first construction protects the guest experience, operating budget, and the next phase of growth.</p>
+            <div class="jr-byline">
+              <div>
+                <div class="jr-byline-name">Kenny Reed</div>
+                <div class="jr-byline-cred">Principal</div>
+                <div class="jr-byline-org">Ten Point Services</div>
+              </div>
+              <div class="jr-byline-meta">7 min read</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="jr-tile" data-tag="land-entitlement">
+          <div class="jr-media" style="aspect-ratio: 16 / 9;">
+            <img src="assets/journal/entitlements/hero.jpg" alt="A lit safari tent glowing under the Milky Way in a eucalyptus clearing at night" width="2400" height="1350" loading="lazy">
+          </div>
+          <div class="jr-tile-body">
+            <div class="jr-tag"><span class="jr-tag-dot"></span><span class="jr-tag-label">Land &amp; Entitlement</span></div>
+            <h3 class="jr-tile-title"><a href="journal/entitlements.html" data-journal-link>Entitlements</a></h3>
+            <p class="jr-tile-dek">Outdoor hospitality owners should have a strategy.</p>
+            <div class="jr-byline">
+              <div>
+                <div class="jr-byline-name">Matt Small</div>
+                <div class="jr-byline-cred">Director of Outdoor Hospitality</div>
+              <div class="jr-byline-org">RVi Planning &amp; Landscape Architecture</div>
+              </div>
+              <div class="jr-byline-meta">9 min read</div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+      <p class="jr-empty" id="jr-empty" hidden>No entries under this tag yet.</p>
+    </section>
+
+    <!-- ---------- the standing call to action ----------
+         The same words in the same block at the end of every article
+         and here on the index. Repetition is what makes it stick. -->
+    <section class="page">
+      <div class="tp-cta">
+        <div>
+          <div class="tp-cta-eyebrow">The Ten Point Standard</div>
+          <h3>Where does your project actually stand?</h3>
+          <p>Ninety seconds. Ten questions, mostly pictures. No email needed.</p>
+        </div>
+        <a class="btn lg accent" href="/read/">See where you are</a>
+      </div>
+    </section>
+
+    <!-- ---------- newsletter ---------- -->
+    <section class="jr-dispatch">
+      <div class="jr-dispatch-inner">
+        <div>
+          <!-- Same .eyebrow.dotted treatment as the cover eyebrow on the
+               assessment page, so the two pages read as one site. -->
+          <div class="eyebrow dotted" style="margin-bottom: var(--s-4);">Field Notes</div>
+          <h2>Subscribe to be notified when new articles are published to the Field Notes.</h2>
+        </div>
+        <form class="jr-form" id="jr-dispatch-form" novalidate>
+          <label class="sr-only" for="jr-dispatch-email" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Email address</label>
+          <input class="input" type="email" id="jr-dispatch-email" placeholder="you@company.com" autocomplete="email" required>
+          <button class="btn accent" type="submit">Subscribe</button>
+          <p class="jr-form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+  </main>
 
   <footer class="tp-footer">
     <div class="tp-footer-inner">
-      <span>© 2026 TEN POINT SERVICES · ALL RIGHTS RESERVED</span>
-      <!-- Also in the footer because .tp-nav is hidden under 720px
-           (base.css), and this is the only route to the Journal on a phone. -->
-      <span><a href="/journal.html">FIELD JOURNAL</a></span>
-      <span>THE TEN POINT STANDARD · FIELD GUIDE</span>
+      <span>&copy; 2026 TEN POINT SERVICES &middot; ALL RIGHTS RESERVED</span>
+      <span class="tp-footer-nav">
+        <a href="/read/">THE READ</a>
+        <a href="/standard/">THE STANDARD</a>
+        <a href="/about/">ABOUT</a>
+        <a href="/consultation/">TALK TO US</a>
+      </span>
+      <span>THE TEN POINT STANDARD</span>
     </div>
   </footer>
+
 </div>
-<!-- Bump ?v= on every deploy that touches app.js or site.css. GitHub Pages
-     caches assets for 10 min; without this a visitor can get fresh HTML
-     paired with stale JS, which breaks the page rather than just aging it. -->
-<script src="config.js?v=8"></script>
-<script src="results.js?v=8"></script>
-<script src="app.js?v=8"></script>
+
+<script src="/config.js?v=13"></script>
+<script src="/analytics.js?v=13"></script>
+<script src="/journal-core.js?v=13"></script>
+<script src="/journal.js?v=13"></script>
 </body>
 </html>

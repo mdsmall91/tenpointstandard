@@ -17,7 +17,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Ten Point Field Journal</title>
-    <link>https://tenpointstandard.com/journal.html</link>
+    <link>https://tenpointstandard.com/</link>
     <atom:link href="https://tenpointstandard.com/feed.xml" rel="self" type="application/rss+xml" />
     <description>Insights from real world experience to help owners build, expand, and operate their resorts.</description>
     <language>en-us</language>

@@ -13,6 +13,12 @@ if (typeof CONFIG === 'undefined') {
 
 /* ---------- analytics ---------- */
 function agaInitGA() {
+  /* analytics.js owns the GA wiring for the whole site now. This
+     stays as the fallback for any page that has not loaded it yet,
+     and the gtag guard is what stops a page that loads both from
+     counting every hit twice. */
+  if (typeof TPA !== 'undefined') { TPA.init(); return; }
+  if (window.gtag) return;
   if (!CONFIG.GA_MEASUREMENT_ID) return;
   var s = document.createElement('script');
   s.async = true;
@@ -25,6 +31,7 @@ function agaInitGA() {
 }
 
 function agaTrack(name, params) {
+  if (typeof TPA !== 'undefined') { TPA.track(name, params); return; }
   if (window.gtag) window.gtag('event', name, params || {});
 }
 

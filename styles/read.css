@@ -1,0 +1,245 @@
+/* =============================================================
+   TEN POINT — THE READ (lane one)
+   Built for one thumb on a phone first, which is the booth tablet
+   case and the LinkedIn case at the same time. Every tap target
+   clears 44px, every screen fits a viewport without scrolling on a
+   normal phone, and nothing here needs a hover state to work.
+   ============================================================= */
+
+body { margin: 0; background: var(--paper); }
+a { color: inherit; }
+a:hover { color: var(--accent-deep); }
+
+.rd-root { min-height: 100vh; display: flex; flex-direction: column; }
+.rd-main { flex: 1; width: 100%; max-width: 880px; margin: 0 auto; padding: 0 var(--page-pad); }
+
+.rd-screen { padding: var(--s-12) 0 var(--s-16); }
+.rd-head { margin-bottom: var(--s-8); }
+.rd-head h2 { margin-top: var(--s-3); font-size: clamp(1.75rem, 4.5vw, var(--fs-h2)); text-wrap: pretty; }
+.rd-sub { margin-top: var(--s-3); font-size: var(--fs-small); }
+.rd-foot { margin-top: var(--s-6); font-size: 13px; }
+
+/* ---------- PROGRESS ---------- */
+.rd-progress { display: flex; align-items: center; gap: var(--s-4); margin-bottom: var(--s-8); }
+.rd-progress-track { flex: 1; height: 2px; background: var(--surface-2); }
+.rd-progress-fill { height: 2px; background: var(--accent); transition: width .25s ease; }
+.rd-progress-label { font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; flex: none; }
+
+/* ---------- PHOTO CARDS ----------
+   The image is never the only signal: every card carries a visible
+   text label, and the caption names the project so a stock photo
+   cannot read as Ten Point's own work. */
+.rd-grid { display: grid; gap: var(--s-4); }
+.rd-grid-4 { grid-template-columns: 1fr 1fr; }
+.rd-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.rd-grid-2 { grid-template-columns: 1fr 1fr; }
+
+.rd-card {
+  display: flex; flex-direction: column;
+  padding: 0; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 1px;
+  cursor: pointer; text-align: left; overflow: hidden;
+  transition: border-color .15s, box-shadow .15s, transform .1s;
+  min-height: 44px;
+}
+.rd-card:hover { border-color: var(--stone-300); }
+.rd-card:active { transform: translateY(1px); }
+.rd-card:focus-visible {
+  outline: 0; border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent);
+}
+.rd-card.is-on {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.rd-card-media { display: block; aspect-ratio: 4 / 3; background: var(--surface-2); }
+.rd-compare .rd-card-media { aspect-ratio: 3 / 2; }
+.rd-card-media img { width: 100%; height: 100%; object-fit: cover; }
+.rd-card-body { display: block; padding: var(--s-4); }
+.rd-card-label {
+  display: block; font-size: var(--fs-body); font-weight: 500;
+  color: var(--text-strong); line-height: 1.3;
+}
+.rd-card-credit {
+  display: block; margin-top: 4px;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.04em; color: var(--text-faint); line-height: 1.4;
+}
+.rd-card.is-on .rd-card-label { color: var(--accent-deep); }
+
+/* ---------- CHIPS ---------- */
+.rd-chips { gap: var(--s-3); }
+.rd-chip {
+  min-height: 56px; padding: var(--s-4);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 1px; cursor: pointer;
+  font-size: var(--fs-small); font-weight: 500; color: var(--text-strong);
+  line-height: 1.35; text-align: left;
+  transition: border-color .15s, background .15s;
+}
+.rd-chip-lg { min-height: 72px; }
+.rd-chip:hover { border-color: var(--stone-300); }
+.rd-chip:focus-visible {
+  outline: 0; border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent);
+}
+/* Selected state carries a check mark as well as the fill, so it is
+   not colour alone. */
+.rd-chip.is-on {
+  border-color: var(--accent); background: var(--accent-soft); color: var(--accent-deep);
+}
+.rd-chip.is-on::before { content: "\2713\00a0"; font-weight: 600; }
+
+/* ---------- SLIDERS ---------- */
+.rd-slider { padding: var(--s-6) 0 0; }
+.rd-stage-art {
+  color: var(--accent); width: 72px; height: 72px; margin-bottom: var(--s-4);
+}
+.rd-stage-art svg { width: 100%; height: 100%; }
+.rd-slider-value {
+  font-family: var(--font-display); font-size: var(--fs-h3);
+  color: var(--text-strong); line-height: 1.2; margin-bottom: var(--s-6);
+  min-height: 1.2em;
+}
+.rd-size-value { font-family: var(--font-display); font-size: var(--fs-h1); color: var(--text-strong); line-height: 1; }
+.rd-size-unit { font-family: var(--font-body); font-size: var(--fs-body); color: var(--text-muted); }
+.rd-size-art { color: var(--accent); height: 44px; margin: var(--s-4) 0; }
+.rd-size-art svg { height: 100%; width: 100%; max-width: 320px; }
+
+/* A real range input: keyboard operable and announced, with a track
+   and thumb big enough for a thumb. */
+.rd-range {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 44px; background: transparent; cursor: pointer; display: block;
+}
+.rd-range:focus { outline: 0; }
+.rd-range::-webkit-slider-runnable-track { height: 4px; background: var(--surface-2); border-radius: 2px; }
+.rd-range::-moz-range-track { height: 4px; background: var(--surface-2); border-radius: 2px; }
+.rd-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 26px; height: 26px; margin-top: -11px;
+  background: var(--accent); border: 2px solid var(--paper);
+  border-radius: 50%; box-shadow: 0 0 0 1px var(--accent);
+}
+.rd-range::-moz-range-thumb {
+  width: 26px; height: 26px;
+  background: var(--accent); border: 2px solid var(--paper);
+  border-radius: 50%; box-shadow: 0 0 0 1px var(--accent);
+}
+.rd-range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 30%, transparent); }
+.rd-range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 30%, transparent); }
+
+.rd-slider-stops {
+  display: flex; justify-content: space-between; gap: var(--s-2);
+  margin-top: var(--s-3);
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.04em; color: var(--text-faint);
+}
+.rd-stop { flex: 1; text-align: center; line-height: 1.4; }
+.rd-stop:first-child { text-align: left; }
+.rd-stop:last-child { text-align: right; }
+.rd-stop.is-on { color: var(--accent-deep); }
+
+/* ---------- INTAKE ---------- */
+.rd-intake { min-height: 128px; resize: vertical; }
+.rd-prefill {
+  margin: 0 0 var(--s-5); padding: 10px 14px;
+  background: var(--accent-soft);
+  border-left: 2px solid var(--accent);
+  font-size: 13px; color: var(--accent-deep); max-width: none;
+}
+
+/* ---------- NAV ---------- */
+.rd-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: var(--s-4); margin-top: var(--s-8);
+}
+.rd-nav .btn { min-height: 44px; }
+.rd-link {
+  background: none; border: 0; padding: 0; font-size: 13px;
+  color: var(--text-faint); text-decoration: underline;
+  text-underline-offset: 3px; cursor: pointer;
+}
+
+/* ---------- RESULT ---------- */
+.rd-result { padding: var(--s-12) 0 var(--s-16); }
+.rd-result-top {
+  display: grid; grid-template-columns: 300px 1fr;
+  gap: var(--s-12); align-items: center;
+}
+.rd-ring-wrap { display: flex; justify-content: center; }
+.rd-band { margin-top: var(--s-3); font-size: clamp(2.25rem, 6vw, var(--fs-h1)); }
+.rd-directional {
+  margin-top: var(--s-3); font-size: 11px;
+  letter-spacing: 0.14em; color: var(--text-faint);
+}
+.rd-lines { margin-top: var(--s-6); display: flex; flex-direction: column; gap: var(--s-4); }
+.rd-lines p { font-size: var(--fs-lead); line-height: var(--lh-relaxed); max-width: 54ch; }
+
+.rd-legend-wrap { margin-top: var(--s-16); padding-top: var(--s-10); border-top: var(--hairline); }
+.rd-legend-note { margin: var(--s-3) 0 var(--s-6); font-size: var(--fs-small); max-width: 60ch; }
+
+/* Two doors, equal weight. A funded developer will not sit through a
+   quiz; a first-time landowner will not book a call. Both are open
+   on the same screen at the same size, and the grid enforces it. */
+.rd-doors {
+  margin-top: var(--s-16);
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-6);
+}
+.rd-door { display: flex; flex-direction: column; gap: var(--s-3); padding: var(--s-8); }
+.rd-door h3 { font-size: var(--fs-h4); font-family: var(--font-body); font-weight: 600; }
+.rd-door .muted { font-size: var(--fs-small); flex: 1; }
+.rd-door .btn { align-self: flex-start; margin-top: var(--s-2); min-height: 44px; }
+
+.rd-result-foot {
+  margin-top: var(--s-16); padding-top: var(--s-8); border-top: var(--hairline);
+}
+.rd-result-foot p { font-size: 12px; max-width: 64ch; }
+.rd-result-foot .rd-link { margin-top: var(--s-4); display: inline-block; }
+
+/* ---------- PHONE ---------- */
+@media (max-width: 860px) {
+  .rd-result-top { grid-template-columns: 1fr; gap: var(--s-8); }
+  .rd-doors { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .rd-screen { padding: var(--s-8) 0 var(--s-12); }
+  .rd-grid-3 { grid-template-columns: 1fr 1fr; }
+  .rd-card-body { padding: var(--s-3); }
+  .rd-card-label { font-size: var(--fs-small); }
+  .rd-slider-value { font-size: var(--fs-h4); }
+  .rd-slider-stops { font-size: 9px; }
+  .rd-nav { flex-wrap: wrap; }
+  .rd-nav .btn { flex: 1; justify-content: center; }
+}
+@media (max-width: 380px) {
+  .rd-grid-3 { grid-template-columns: 1fr; }
+}
+
+/* =============================================================
+   THE MASTHEAD INSIDE THE FLOW
+   It earns its place on the opening screen and on the result, which
+   is the screen people screenshot and send on. In between it is four
+   lines of company description sitting above a question, and on a
+   phone that pushes the first tap target below the fold. The whole
+   design target is one thumb and ninety seconds, so it steps out of
+   the way while the questions are running.
+   ============================================================= */
+body[data-rd-step]:not([data-rd-step="0"]):not([data-rd-step="10"]) .tp-masthead {
+  display: none;
+}
+@media (max-width: 640px) {
+  .tp-masthead-inner { padding-top: var(--s-3); padding-bottom: var(--s-3); }
+  .tp-masthead p { font-size: 12px; line-height: 1.5; }
+}
+
+/* On a phone the six stop labels stack into a wall of three-line
+   fragments under the slider. The selected stop is already stated in
+   full, in display type, directly above the track, so the rail only
+   needs its two ends to give the range a shape. */
+@media (max-width: 640px) {
+  .rd-slider-stops .rd-stop { display: none; }
+  .rd-slider-stops .rd-stop:first-child,
+  .rd-slider-stops .rd-stop:last-child { display: block; flex: 0 0 auto; max-width: 45%; }
+  .rd-slider-stops { justify-content: space-between; }
+}

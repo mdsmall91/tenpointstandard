@@ -168,3 +168,139 @@ body[data-step]:not([data-step="0"]) .fg-about { display: none; }
   h2, .h2 { font-size: 1.9rem; }
   .fg-band { padding: var(--s-4); }
 }
+
+/* =============================================================
+   STANDARD v3 — the ring, the point openers, the field notes, the
+   per-point payout, the carry-forward confirmation, and the two
+   doors. Everything below is additive: nothing above it changed.
+   ============================================================= */
+
+/* ---------- POINT OPENER ----------
+   A full-width real project photograph with the point name over it.
+   The credit line sits under the frame rather than on it, so a
+   photograph never has to fight text for contrast. */
+.fg-opener { margin: 40px 0 0; position: relative; }
+.fg-opener img {
+  width: 100%; height: auto; aspect-ratio: 16 / 9;
+  object-fit: cover; display: block; background: var(--surface-2);
+}
+.fg-opener figcaption {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: var(--s-12) var(--s-6) var(--s-5);
+  background: linear-gradient(to top, oklch(0.11 0.012 50 / 0.9) 35%, transparent);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.fg-opener-n { font-size: 10px; letter-spacing: 0.18em; color: oklch(0.82 0.01 80); }
+.fg-opener-title {
+  font-family: var(--font-display); font-size: clamp(1.6rem, 4vw, var(--fs-h2));
+  color: var(--paper); line-height: 1.1;
+}
+.fg-opener-credit {
+  display: block; margin-top: 8px;
+  font-size: 10px; letter-spacing: 0.06em;
+  color: oklch(0.74 0.01 80);
+}
+
+/* ---------- FIELD NOTE ----------
+   One line of plain language from a real project. This is the thing
+   that makes a form read like a person, so it gets real emphasis. */
+.fg-note {
+  margin-top: var(--s-5);
+  padding-left: var(--s-5);
+  border-left: 2px solid var(--accent);
+  font-family: var(--font-display); font-size: var(--fs-lead);
+  line-height: 1.45; color: var(--text-strong); max-width: 56ch;
+}
+
+/* ---------- NOT SURE ----------
+   Scores as no, tracked on its own, and never styled as a failure.
+   It is the most useful answer in the product. */
+.fg-yn.unsure.on { background: var(--bronze-soft); border-color: var(--bronze); color: var(--bronze-deep); }
+.fg-q.is-carried { background: color-mix(in oklab, var(--accent-soft) 55%, transparent); }
+.fg-carried-tag {
+  display: inline-block; margin-left: 10px; vertical-align: middle;
+  font-size: 9px; letter-spacing: 0.1em; color: var(--accent-deep);
+  border: 1px solid color-mix(in oklab, var(--accent) 35%, var(--border));
+  padding: 1px 5px; border-radius: 1px; white-space: nowrap;
+}
+
+/* ---------- PER-POINT PAYOUT ----------
+   The old assessment paid out once, at the very end. This one pays
+   out ten times, the moment a point's fourth answer lands. */
+.fg-payout {
+  display: flex; align-items: center; gap: var(--s-8);
+  margin-top: var(--s-10); padding: var(--s-6);
+  border: 1px solid color-mix(in oklab, var(--accent) 28%, var(--border));
+  background: var(--accent-soft);
+}
+.fg-payout-ring { flex: none; width: 150px; }
+.fg-payout-body h4 { font-size: var(--fs-h5); }
+.fg-payout-body p { margin-top: 8px; font-size: var(--fs-small); }
+
+/* ---------- CARRY FORWARD ---------- */
+.fg-carry { list-style: none; margin: var(--s-8) 0 0; padding: 0; max-width: 640px; }
+.fg-carry li {
+  padding: var(--s-4) 0; border-top: 1px solid var(--border-soft);
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start;
+}
+.fg-carry li:first-child { border-top: 0; }
+.fg-carry-label { font-size: var(--fs-body); font-weight: 500; color: var(--text-strong); }
+.fg-carry-q { font-size: 13px; }
+
+/* ---------- LANE ONE OFFER ON THE COVER ---------- */
+.fg-lane-one {
+  margin-top: var(--s-16); padding: var(--s-6);
+  border: 1px solid var(--border); background: var(--surface); max-width: 560px;
+}
+.fg-lane-one p { margin: 8px 0 var(--s-5); font-size: var(--fs-small); }
+
+/* ---------- RESULT HERO ---------- */
+.fg-hero-ring {
+  display: grid; grid-template-columns: 300px 1fr;
+  gap: var(--s-10); align-items: center; margin-bottom: var(--s-12);
+}
+.fg-read-lines { margin-top: var(--s-5); display: flex; flex-direction: column; gap: var(--s-4); }
+.fg-read-lines p { font-size: var(--fs-body); line-height: var(--lh-relaxed); max-width: 56ch; }
+
+/* ---------- TWO DOORS ---------- */
+.fg-doors { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-6); padding: 0 0 var(--s-10); }
+.fg-door { display: flex; flex-direction: column; gap: var(--s-3); padding: var(--s-8); }
+.fg-door p.muted { font-size: var(--fs-small); }
+.fg-door .btn { align-self: flex-start; min-height: 44px; }
+.fg-sent { font-size: var(--fs-small); font-weight: 500; color: var(--accent-deep); }
+.fg-direct {
+  margin-top: auto; padding-top: var(--s-5);
+  border-top: 1px solid var(--border-soft);
+  font-size: 13px; color: var(--text-muted); line-height: 1.8;
+}
+.fg-direct a { border-bottom: 1px solid var(--accent); }
+.fg-inline-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.fg-inline-form .input { flex: 1; min-width: 180px; }
+.fg-inline-form .btn { min-height: 44px; }
+.fg-err { font-size: 12px; color: var(--bronze-deep); }
+.fg-fineprint { font-size: 12px; }
+
+/* ---------- SHARE ---------- */
+.fg-share { padding: 0 0 var(--s-10); max-width: 720px; }
+.fg-share p { font-size: var(--fs-small); margin-top: 8px; }
+.fg-share-row { display: flex; gap: 8px; margin-top: var(--s-5); flex-wrap: wrap; }
+.fg-share-row .input { flex: 1; min-width: 240px; font-size: 12px; }
+.fg-share-row .btn { min-height: 44px; }
+.fg-share-note { font-size: 12px; margin-top: 8px; }
+.fg-full { padding: 0 0 var(--s-16); }
+.fg-full .card { max-width: 640px; padding: var(--s-8); display: flex; flex-direction: column; gap: var(--s-4); }
+.fg-full .card p { font-size: var(--fs-small); }
+.fg-full .btn { align-self: flex-start; min-height: 44px; }
+
+@media (max-width: 860px) {
+  .fg-hero-ring, .fg-doors { grid-template-columns: 1fr; }
+  .fg-payout { flex-direction: column; align-items: flex-start; gap: var(--s-5); }
+  .fg-payout-ring { align-self: center; }
+}
+@media (max-width: 640px) {
+  .fg-opener { margin-top: 24px; }
+  .fg-opener figcaption { padding: var(--s-6) var(--s-4) var(--s-4); }
+  .fg-note { font-size: var(--fs-body); }
+  .fg-seg { flex-wrap: wrap; }
+  .fg-yn { flex: 1 1 30%; min-height: 44px; }
+}

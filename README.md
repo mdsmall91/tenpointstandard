@@ -1,16 +1,75 @@
-# tenpointstandard.com — The Field Guide
+# tenpointstandard.com
 
-Single-page static site: the Ten Point Standard self-assessment (40 yes/no questions, weighted score out of 100, three service bands: Align / Design / Build) behind a soft email gate.
+Static site, no build step. Two ways in to the same readiness framework, plus the Field Journal that feeds both.
+
+**Lane one is The Read.** Ninety seconds, ten questions, mostly pictures, no email. It gives a directional position and names the one thing most likely to stop the project.
+
+**Lane two is The Full Standard.** All ten points, forty questions, scored out of one hundred. The email ask sits here, after the person has already been given something.
+
+## Routes
+
+| URL | What it is | Indexed |
+| --- | --- | --- |
+| `/` | The Field Journal. The front door. | yes |
+| `/read/` | Lane one. `read.js` + `readmodel.js` | yes |
+| `/standard/` | Lane two. `app.js` + `results.js` | yes |
+| `/scorecard/` | The forwardable scorecard, answers in the URL fragment | no |
+| `/about/` | One screen on Ten Point Services | yes |
+| `/consultation/` | Kenny's direct line, plus a form | yes |
+| `/glamping-show/` | Show landing page and QR destination | unlisted |
+| `/journal/<slug>.html` | Articles | yes |
+| `/journal.html` | Redirects to `/`. Kept because it was indexed. | no |
+| `/aga.html` | Redirects to `/glamping-show/`. Kept for links already shared. | no |
+
+GitHub Pages cannot issue a 301, so both redirects are a canonical tag plus a
+zero-second meta refresh plus `location.replace`. Neither is noindex: a noindex
+page cannot pass its signals to the canonical target.
 
 ## Stack
 - Plain HTML/CSS/JS, no build step. Edit, commit, push — GitHub Pages redeploys automatically.
-- `index.html` — page shell (header, nav strip, footer).
-- `app.js` — all data (POINTS/BANDS), state, rendering, Mailchimp + GA4 wiring.
+- `config.js` — **every shared setting.** Mailchimp, GA4, Kenny's contact details, the model proxy URL. **Load it before any other script.**
+- `analytics.js` — one GA4 wiring for the whole site, with a once-per-session guard on milestones and a hard block on localhost.
+- `ring.js` + `styles/ring.css` — the ten point ring, shared by both lanes and the scorecard.
+- `readmodel.js` — lane one: screens, band mapping, the written read, the carry-forward, and the local intake extraction.
+- `read.js` + `styles/read.css` — lane one state machine.
+- `app.js` + `results.js` + `standardread.js` + `styles/site.css` — lane two.
+- `scorecode.js` — packs the forty answers into sixteen characters for the scorecard URL.
+- `scorecard.js` — renders the forwardable page from that code.
+- `consult.js` — the consultation form.
+- `posts.js`, `journal-core.js`, `journal.js`, `journal-article.js`, `styles/journal.css`, `feed.xml` — the Field Journal.
 - `styles/tokens.css`, `styles/base.css` — design system (portable, from the design handoff, do not hand-edit casually).
-- `styles/site.css` — page-specific styles (stepper flow).
-- `journal.html`, `journal/<slug>.html`, `posts.js`, `journal-core.js`, `journal.js`,
-  `journal-article.js`, `styles/journal.css`, `feed.xml` — the Field Journal (see below).
+- `styles/pages.css` — the masthead, the standing CTA block, and the standing pages.
 - `CNAME` — custom domain for GitHub Pages.
+
+## Tools
+
+    python tools/build-images.py         # rebuild every photograph from the asset library
+    python tools/check-links.py          # every internal link on every page, against the preview
+    python tools/update-journal-pages.py # bring the articles onto the current chrome
+
+`tools/build-images.py` is the only place photographs are cropped, and it carries
+the provenance for every one. Re-picking a photo is a one-line edit and one command.
+
+## Cache-busting
+
+Every page pins the same `?v=N` on every shared asset. `config.js` is loaded by
+all of them, so two different values give a visitor two cache entries for one
+file and fresh HTML can then pair with stale config. Bump them all together:
+
+    grep -rl "?v=13" --include=*.html --include=*.js . | xargs sed -i 's|?v=13|?v=14|g'
+
+## What is still open
+
+- **Ten field notes** in `app.js` `FIELD_NOTES`, and the template reads in
+  `readmodel.js` and `standardread.js`, are DRAFT pending Kenny's pass.
+- **Four scope sentences** on `/about/`, one per project. The cards say less
+  rather than inventing a condition that was solved.
+- **`CONFIG.MODEL_PROXY_URL`** is empty, so every read comes from the template.
+  Setting it switches the AI layer on; nothing else changes.
+- **`CONFIG.MAILCHIMP_GROUP_CONSULT`** is empty, so the consultation form opens
+  a mail client instead of posting to Mailchimp. See the comment in `config.js`.
+- **A `SCORECARD` merge field** does not exist in Mailchimp yet. The site sends
+  it and Mailchimp silently drops it, exactly like `FINDINGS`.
 
 ## Configuration (top of `app.js`)
 ```js
