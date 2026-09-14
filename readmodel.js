@@ -363,113 +363,60 @@ var TPReadModel = (function () {
 
      Keys are app.js's answer keys: "<pointIndex>-<questionIndex>".
      --------------------------------------------------------------- */
-  function carry(a) {
-    var out = [];
-    var s = idx(STAGES, a.stage);
+  /* CARRY IS RETIRED.
+     The Quick Scan used to hand its answers to the Full Assessment,
+     which filled them in and tagged them "From your Quick Scan".
 
-    if (s >= 1) {
-      out.push({ key: '1-1', value: true,
-        label: 'You control the land.',
-        question: 'Do you control the land, and do you know what is time-critical about your position?' });
-    }
-    if (a.money === 'committed') {
-      out.push({ key: '1-0', value: true,
-        label: 'Your equity is committed.',
-        question: 'Do you know whether you need outside investment, and do you have the required equity?' });
-    }
-    if (hasTeam(a, 'lender')) {
-      out.push({ key: '1-3', value: true,
-        label: 'A lender has looked at the plan.',
-        question: 'Have lending partners or outside financial representatives reviewed the plan?' });
-    }
-    if (hasTeam(a, 'civil') || hasTeam(a, 'designer')) {
-      out.push({ key: '4-0', value: true,
-        label: 'You know which design professionals you need.',
-        question: 'Do you know which design professionals you need for regulatory compliance?' });
-    }
-    if (s >= 4) {
-      out.push({ key: '4-2', value: true,
-        label: 'Your drawings are done.',
-        question: 'Are the drawings detailed enough to build from, and to hold construction to?' });
-    }
-    return out;
+     The Quick Scan is six experience questions now — who this is for,
+     what longing it answers, what the land does — and none of that
+     maps onto the forty delivery questions. "Who are you building
+     for" is not evidence about a legal boundary or a stress-tested
+     cash flow, and pretending otherwise would put answers into a
+     scored assessment that nobody gave.
+
+     It returns an empty list rather than being deleted, so app.js's
+     loadCarry() keeps working and the tag, the confirmation screen
+     and the skipped-question count simply never fire.
+
+     The old body mapped stage/money/team onto keys 1-1, 1-2, 7-3 and
+     others; it is in git history at 8717b17 if the lane ever needs to
+     feed the assessment again. */
+  function carry() {
+    return [];
   }
 
-  /* ---------------------------------------------------------------
-     INTAKE EXTRACTION, LOCAL FALLBACK
-     Screen 0 works with no model behind it. These patterns only fire
-     on unambiguous phrasing, and every hit is shown to the visitor as
-     a confirmation they can change, never as a silent assumption.
+  /* extractLocal() stood here.
 
-     When CONFIG.MODEL_PROXY_URL is set, read.js prefers the model's
-     structured answer and uses this only if the call fails.
-     --------------------------------------------------------------- */
-  function extractLocal(text) {
-    var t = ' ' + String(text || '').toLowerCase().replace(/\s+/g, ' ') + ' ';
-    var out = {};
+     It took the free sentence somebody typed on the old intake screen
+     and tried to pull a project type, a land type, a stage, a unit
+     count, an acreage, a budget posture and a state out of it — with
+     about thirty regexes and no model behind them in production
+     (CONFIG.MODEL_PROXY_URL is empty). The land test alone needed one
+     of sixteen specific words: "wooded", "waterfront", "mesa",
+     "prairie" and so on. Type "rolling hill country with a creek
+     through the middle" and it matched nothing.
 
-    if (/\bglamp/.test(t) || /safari tent|yurt|airstream suite/.test(t)) out.type = 'glamping';
-    else if (/\brv (resort|park)\b|\bmotorhome|\bfifth wheel/.test(t)) out.type = 'rv';
-    else if (/\bcampground|\bcamp ground|\bcabins?\b|\bkoa\b/.test(t)) out.type = 'campground';
-    else if (/\bpark and rec|\bmunicipal park|\btrail(head)? park/.test(t)) out.type = 'parkrec';
+     That would have been fine if the screen had said so. It did not.
+     It pre-filled what it hit, printed "We picked this up from what
+     you wrote" over those fields, and for everything it missed showed
+     its own default silently — so the same answer came back no matter
+     what anybody typed, while the page implied it had read them.
 
-    if (/\balready building|\bunder construction|\bbreaking ground|\bwe are pricing|\bout to bid/.test(t)) out.stage = 'pricing';
-    else if (/\bdrawings are (done|complete)|\bconstruction documents|\bpermit set\b/.test(t)) out.stage = 'drawings';
-    else if (/\bentitle|\brezon|\bin for approval|\bapprovals? (are )?underway|\bpre-?application/.test(t)) out.stage = 'approvals';
-    else if (/\bwe own\b|\bi own\b|\bwe bought\b|\bclosed on\b|\bowned? the (land|property)/.test(t)) out.stage = 'own';
-    else if (/\bunder contract\b|\bunder option\b|\bin escrow\b/.test(t)) out.stage = 'contract';
-    else if (/\blooking (for|at) land\b|\bsearching for (a )?(site|land)\b|\bhave not found\b/.test(t)) out.stage = 'looking';
+     The intake box is gone, so this is gone. Nothing on the Quick
+     Scan interprets what a person writes any more. If reading a
+     sentence comes back, it reads it with a model, says that it did,
+     and shows what it understood before anything counts.
+     Removed 2026-09-10; body at 8717b17. */
 
-    if (/\bwooded\b|\btrees\b|\bforest/.test(t)) out.land = 'wooded';
-    else if (/\bwaterfront\b|\bon the (lake|river|water)\b|\blakefront\b|\briverfront\b/.test(t)) out.land = 'water';
-    else if (/\bridge\b|\brocky\b|\bbluff\b|\bmesa\b|\bhillside\b|\bcanyon\b/.test(t)) out.land = 'rocky';
-    else if (/\bpasture\b|\bopen (ground|field|land)\b|\bmeadow\b|\bprairie\b/.test(t)) out.land = 'open';
-
-    // One optional descriptor is allowed between the number and the
-    // unit word, because "25 glamping units" is how people write it.
-    var units = /\b(\d{1,3})\s*(?:\+)?\s*(?:[a-z]+\s+)?(units?|sites?|pads?|cabins?|tents?|keys?)\b/.exec(t);
-    if (units) {
-      var n = parseInt(units[1], 10);
-      if (n >= 1 && n <= 500) out.size = Math.min(200, n);
-    }
-
-    var acres = /\b(\d{1,5}(?:\.\d+)?)\s*(?:\+)?\s*(acres?|ac\b)/.exec(t);
-    if (acres) out.acreage = parseFloat(acres[1]);
-
-    if (/\bmoney is committed\b|\bfully funded\b|\bequity is in\b|\bfunding (is )?closed\b/.test(t)) out.money = 'committed';
-    else if (/\bstill exploring\b|\bno idea what\b|\bnot sure (how|what) (much|we)/.test(t)) out.money = 'exploring';
-
-    if (/\bpromised\b|\bcommitted to opening\b|\bhave to open by\b|\binvestors expect\b/.test(t)) out.date = 'promised';
-
-    var state = matchState(t);
-    if (state) out.state = state;
-
-    return out;
-  }
-
-  var STATE_NAMES = ['alabama', 'alaska', 'arizona', 'arkansas', 'california', 'colorado',
-    'connecticut', 'delaware', 'florida', 'georgia', 'hawaii', 'idaho', 'illinois', 'indiana',
-    'iowa', 'kansas', 'kentucky', 'louisiana', 'maine', 'maryland', 'massachusetts', 'michigan',
-    'minnesota', 'mississippi', 'missouri', 'montana', 'nebraska', 'nevada', 'new hampshire',
-    'new jersey', 'new mexico', 'new york', 'north carolina', 'north dakota', 'ohio', 'oklahoma',
-    'oregon', 'pennsylvania', 'rhode island', 'south carolina', 'south dakota', 'tennessee',
-    'texas', 'utah', 'vermont', 'virginia', 'washington', 'west virginia', 'wisconsin', 'wyoming'];
-
-  function matchState(t) {
-    for (var i = 0; i < STATE_NAMES.length; i++) {
-      if (t.indexOf(' ' + STATE_NAMES[i] + ' ') !== -1 || t.indexOf(' ' + STATE_NAMES[i] + ',') !== -1) {
-        return STATE_NAMES[i].replace(/\b[a-z]/g, function (c) { return c.toUpperCase(); });
-      }
-    }
-    return null;
-  }
+  /* STATE_NAMES and matchState() went with extractLocal: they only
+     existed to guess a state out of the retired intake sentence. */
 
   return {
     TYPES: TYPES, LAND: LAND, STAGES: STAGES, STAGE_ART: STAGE_ART,
     SCAN_NOTES: SCAN_NOTES,
     MONEY: MONEY, DATES: DATES, TEAM: TEAM, WORRIES: WORRIES,
     POINT_NAMES: POINT_NAMES, BAND_NAMES: BAND_NAMES, GATES: GATES,
-    evaluate: evaluate, carry: carry, extractLocal: extractLocal,
+    evaluate: evaluate, carry: carry,
     bandOf: bandOf, chooseGate: chooseGate
   };
 })();

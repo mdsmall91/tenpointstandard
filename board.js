@@ -123,7 +123,15 @@ var TPBoard = (function () {
     var carried = api.isCarried(key(pi, qi))
       ? '<span class="carried-tag">From your Quick Scan</span>' : '';
 
+    /* An open card is a wide panel, not a column-width sliver: the
+       photograph runs full bleed down one side and the four questions
+       sit on the other, so nobody has to scroll to answer one. */
     return '' +
+      '<div class="back-photo" aria-hidden="true">' +
+        '<img src="' + api.image(pi) + '" alt="" decoding="async">' +
+        '<span class="back-photo-title">' + esc(p.n) + '<em>' + esc(p.title) + '</em></span>' +
+      '</div>' +
+      '<div class="back-body">' +
       '<div class="back-top"><span class="eyebrow">' + esc(p.n) + ' / ' + esc(p.title) + '</span>' +
         '<button class="close" data-close aria-label="Flip back to ' + esc(p.title) + '">×</button></div>' +
       '<nav class="q-nav" aria-label="' + esc(p.title) + ' questions">' + nav + '</nav>' +
@@ -142,28 +150,27 @@ var TPBoard = (function () {
         '<span class="question-count">' + count(pi) + ' of ' + p.qs.length + ' answered</span>' +
         '<button class="primary" data-next' + (a === undefined ? ' disabled' : '') + '>' +
           (done(pi) ? 'Done · flip back ↻' : 'Next question →') + '</button>' +
+      '</div>' +
       '</div>';
   }
 
   /* ---------- mounting ---------- */
+  /* The board is cards and nothing else. There was a heading, a lede,
+     a progress bar and a footer note here; all of it competed with the
+     photographs for the same glance and none of it told somebody
+     anything a card does not. The eleventh card is the ledger, so the
+     way out of the board is also a card. */
   function boardHtml() {
-    return '' +
-      '<section class="board-intro">' +
-        '<div class="eyebrow dotted">The Ten Point Standard</div>' +
-        '<h1>Big plans. Start anywhere.</h1>' +
-        '<p>Flip a card to see what is behind it. Answer in any order, ' +
-        'come back to anything, and stop whenever you like. Your answers stay in this browser until you send them.</p>' +
-      '</section>' +
-      '<div class="board-bar">' +
-        '<span class="mono">Ten points &middot; forty questions &middot; no required order</span>' +
-        '<div class="progress"><span id="board-progress-label" aria-live="polite"></span>' +
-        '<progress id="board-progress" max="' + api.points.length + '" aria-label="Cards answered"></progress></div>' +
-      '</div>' +
-      '<section id="board-grid" class="board" aria-label="The ten points"></section>' +
-      '<div class="board-foot">' +
-        '<span id="board-foot-note"></span>' +
-        '<button class="btn" data-board-ledger>See the ledger</button>' +
-      '</div>';
+    return '<section id="board-grid" class="board" aria-label="The ten points"></section>' +
+      '<button class="board-backdrop" id="board-backdrop" tabindex="-1" aria-hidden="true"></button>';
+  }
+
+  /* The open panel is fixed and centred, so the board behind it needs
+     to stop competing for the eye and stop scrolling under it. */
+  function setBackdrop(on) {
+    var b = $('#board-backdrop');
+    if (b) b.classList.toggle('on', !!on);
+    document.body.classList.toggle('board-card-open', !!on);
   }
 
   function mount(el, theApi) {
@@ -173,6 +180,7 @@ var TPBoard = (function () {
     var grid = $('#board-grid');
     var cards = '';
     for (var pi = 0; pi < api.points.length; pi++) cards += cardShell(pi);
+    cards += ledgerShell();
     grid.innerHTML = cards;
     root.addEventListener('click', onClick);
     root.addEventListener('keydown', onKey);
@@ -191,16 +199,32 @@ var TPBoard = (function () {
       '</div></article>';
   }
 
+  /* The eleventh card. The board is cards only, so the way to the
+     ledger is a card too — it carries the running score and nothing
+     else, and it never flips. */
+  function ledgerShell() {
+    return '<article class="card card-ledger" id="card-ledger">' +
+      '<div class="card-inner">' +
+        '<button class="face front ledger-front" data-board-ledger ' +
+          'aria-label="See the ledger">' +
+          '<span class="ledger-score" id="board-ledger-score">0</span>' +
+          '<span class="ledger-of">of 100</span>' +
+          '<span class="ledger-go">See the ledger &rarr;</span>' +
+          '<span class="ledger-count" id="board-ledger-count"></span>' +
+        '</button>' +
+      '</div></article>';
+  }
+
   function isMounted(el) { return root === el && !!root.querySelector('#board-grid'); }
 
   /* ---------- painting ---------- */
   function updateChrome() {
-    var n = totalAnswered(), cards = doneCards(), all = api.points.length * 4;
-    $('#board-progress-label').textContent = cards + ' of ' + api.points.length + ' cards answered';
-    $('#board-progress').value = cards;
-    $('#board-foot-note').textContent = n === all
-      ? 'All forty answered. The ledger is ready.'
-      : n + ' of ' + all + ' questions answered. The ledger works before you finish.';
+    var n = totalAnswered(), all = api.points.length * 4;
+    var score = $('#board-ledger-score'), cnt = $('#board-ledger-count');
+    if (score) score.textContent = api.score();
+    if (cnt) cnt.textContent = n === all
+      ? 'All forty answered'
+      : n + ' of ' + all + ' answered';
     api.chromeChanged();
   }
 
@@ -234,6 +258,7 @@ var TPBoard = (function () {
     }
     var front = root.querySelector('#front-' + pi), back = root.querySelector('#back-' + pi);
     root.querySelector('#card-' + pi).classList.add('open');
+    setBackdrop(true);
     front.setAttribute('aria-expanded', 'true');
     front.inert = true;
     front.setAttribute('aria-hidden', 'true');
@@ -250,6 +275,7 @@ var TPBoard = (function () {
     var pi = active;
     var front = root.querySelector('#front-' + pi), back = root.querySelector('#back-' + pi);
     root.querySelector('#card-' + pi).classList.remove('open');
+    setBackdrop(false);
     back.inert = true;
     back.setAttribute('aria-hidden', 'true');
     front.inert = false;
@@ -262,6 +288,10 @@ var TPBoard = (function () {
 
   /* ---------- events ---------- */
   function onClick(e) {
+    /* Clicking the dimmed page behind an open panel closes it, which
+       is what a panel that covers the page has to do. */
+    if (e.target.id === 'board-backdrop') { closeCard(); return; }
+
     var el = e.target.closest('[data-flip], [data-close], [data-question], [data-answer], [data-next], [data-board-ledger]');
     if (!el || !root.contains(el)) return;
 

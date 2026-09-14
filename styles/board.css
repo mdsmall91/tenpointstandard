@@ -17,59 +17,69 @@
    else.
    ============================================================= */
 
-/* ---------- the board's own chrome, inside #app ---------- */
-.board-intro { margin: 0 0 8px; }
-.board-intro h1 { margin: 10px 0 14px; }
-.board-intro p { max-width: 62ch; color: var(--text-soft, #5a6356); }
-
-.board-bar {
-  display: flex; justify-content: space-between; align-items: center;
-  gap: 12px 24px; flex-wrap: wrap;
-  margin: 35px 0 21px; font-size: 13px; color: #65725e;
-}
-.board-bar .progress { display: flex; align-items: center; gap: 14px; }
-.board-bar progress {
-  width: 95px; height: 5px; appearance: none; border: 0;
-  border-radius: 5px; background: #dde3d6;
-}
-.board-bar progress::-webkit-progress-bar { background: #dde3d6; border-radius: 5px; }
-.board-bar progress::-webkit-progress-value { background: #577147; border-radius: 5px; }
-.board-bar progress::-moz-progress-bar { background: #577147; border-radius: 5px; }
-
-.board-foot {
-  display: flex; justify-content: space-between; align-items: center;
-  gap: 16px; flex-wrap: wrap;
-  padding: 28px 0 72px; border-top: 1px solid #dfe3da; margin-top: 8px;
-}
-#board-foot-note { font-size: 13px; color: #65725e; }
-
 /* ---------- the grid ----------
    CSS multi-column with varied card heights, which is what gives the
    board its stagger. Card order runs down each column. */
-.board { columns: 4; column-gap: 20px; }
+/* The column count follows the board's own width, never the viewport.
+   Keyed to the viewport it was always four columns inside an ~810px
+   board, which made 188px cards and clipped nine of the ten titles.
+   A column-width lets the browser fit as many real cards as the space
+   holds and no more. */
+.board { columns: 330px; column-gap: 22px; }
 
-.card {
+/* base.css gives every .card a surface, a hairline border and
+   var(--s-6) of padding. On the board that framed each photograph in
+   a box and inset it from its own card. A board card is the
+   photograph: no frame, no padding, full bleed. */
+.board .card {
   break-inside: avoid; position: relative; display: inline-block;
-  width: 100%; height: 375px; margin: 0 0 20px;
-  perspective: 1200px; vertical-align: top;
+  width: 100%; height: 420px; margin: 0 0 22px;
+  perspective: 1600px; vertical-align: top;
+  background: none; border: 0; padding: 0;
 }
-.card:nth-child(3n+2) { height: 440px; }
-.card:nth-child(3n)   { height: 400px; }
+/* Different sizes, on purpose. A five-step cycle over eleven cards
+   never lines the rows up, which is the whole point of the layout. */
+.board .card:nth-child(5n+2) { height: 530px; }
+.board .card:nth-child(5n+3) { height: 370px; }
+.board .card:nth-child(5n+4) { height: 480px; }
+.board .card:nth-child(5n+5) { height: 400px; }
 
-/* An open card must not resize its own box. Growing one card from
-   375px to 510px makes the browser rebalance every column, and cards
-   jump position while somebody is reading one. The box stays put and
-   only the flipped face grows, over the card below it, which comes
-   back untouched on flip close. */
-.card.open { z-index: 20; }
-.card.open .card-inner { position: absolute; top: 0; left: 0; width: 100%; height: 510px; }
+/* An open card leaves the column entirely. It is a wide panel, fixed
+   and centred, deliberately wider than the page's own measure, so the
+   photograph can run full bleed and all four questions are on screen
+   at once. Nobody should scroll to answer a question. */
+/* `perspective` on .card makes it a containing block, which would
+   anchor the fixed panel to the card's own corner instead of to the
+   viewport. So the open card drops its perspective and the panel
+   carries its own inside the transform. */
+/* Above the backdrop's 50, not below it. `.card.open` opens a stacking
+   context, so the panel's own z-index is measured inside this one —
+   at 20 the whole panel sat under the backdrop and got dimmed and
+   blurred along with the board it was supposed to be sitting on. */
+.card.open { z-index: 61; perspective: none; }
+.card.open .card-inner {
+  position: fixed; top: 50%; left: 50%;
+  width: min(1120px, 94vw); height: min(660px, 88vh);
+  transform: perspective(1600px) translate(-50%, -50%) rotateY(180deg);
+  z-index: 60; box-shadow: 0 32px 80px #10180f4d;
+  border-radius: 18px;
+}
+.board-backdrop {
+  position: fixed; inset: 0; z-index: 50; border: 0; padding: 0;
+  background: #101a1226; backdrop-filter: blur(3px);
+  opacity: 0; pointer-events: none; transition: opacity .3s;
+}
+.board-backdrop.on { opacity: 1; pointer-events: auto; }
 
 .card-inner {
   position: relative; width: 100%; height: 100%;
   transform-style: preserve-3d;
   transition: transform .55s cubic-bezier(.2, .7, .2, 1);
 }
-.card.open .card-inner { transform: rotateY(180deg); }
+/* The flip transform for the open state lives with the panel geometry
+   above, which sets perspective, centring and rotation in one
+   declaration. A second `transform` here would silently win on source
+   order and drop the centring. */
 
 .card .face {
   position: absolute; inset: 0; border-radius: 16px; overflow: hidden;
@@ -86,14 +96,17 @@
   transition: transform .6s, filter .5s, opacity .5s;
 }
 .card .front:hover img { transform: scale(1.045); }
+/* Only as much scrim as the words need. The photograph is the card. */
 .card .front::after {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, #1320161c, transparent 30%, #132016c9 100%);
+  background: linear-gradient(180deg, #13201614, transparent 42%, #131f15b8 100%);
 }
 .card .front h2 {
   font-family: var(--font-display, 'Source Serif 4', Georgia, serif);
-  font-size: 30px; font-weight: 400; letter-spacing: -.5px;
+  font-size: clamp(24px, 2vw, 32px); font-weight: 400; letter-spacing: -.5px;
   line-height: 1.12; margin: 0 0 14px; color: #fff;
+  /* A long name wraps. It never clips. */
+  overflow-wrap: break-word; hyphens: auto;
 }
 .card-number {
   position: absolute; top: 17px; left: 18px; z-index: 1; font-size: 13px;
@@ -125,11 +138,35 @@
 .card.complete .flip-icon { background: #e3e6df; color: #53614d; border-color: transparent; }
 
 /* ---------- the back ---------- */
+/* Two panes: the photograph full bleed on the left, the questions on
+   the right. The photo pane only exists once the card is open — at
+   card size there is no room for it. */
 .card .back {
   transform: rotateY(180deg); background: #fff; border: 1px solid #d7dfce;
-  padding: 22px; display: flex; flex-direction: column;
-  box-shadow: 0 4px 12px #2036240b; overflow-y: auto;
+  display: grid; grid-template-columns: 1fr; border-radius: 18px;
+  box-shadow: 0 4px 12px #2036240b; overflow: hidden;
 }
+.card .back-photo { display: none; }
+.card .back-body {
+  padding: 22px; display: flex; flex-direction: column; overflow-y: auto;
+}
+
+.card.open .back { grid-template-columns: 42% 1fr; }
+.card.open .back-photo { display: block; position: relative; overflow: hidden; }
+.card.open .back-photo img { width: 100%; height: 100%; object-fit: cover; }
+.card.open .back-photo::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, #13201600, transparent 40%, #131f15cc 100%);
+}
+.card.open .back-photo-title {
+  position: absolute; left: 30px; right: 26px; bottom: 26px; z-index: 1;
+  color: #fff; font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em;
+}
+.card.open .back-photo-title em {
+  display: block; margin-top: 8px; font-style: normal; letter-spacing: -.5px;
+  font-family: var(--font-display, 'Source Serif 4', Georgia, serif); font-size: 34px;
+}
+.card.open .back-body { padding: 34px 38px 30px; }
 .card .back-top { display: flex; justify-content: space-between; align-items: center; gap: 5px; }
 .card .back-top .eyebrow { font-size: 11px; letter-spacing: 1px; }
 .card .close {
@@ -187,16 +224,71 @@
   text-transform: uppercase; vertical-align: middle; white-space: nowrap;
 }
 
+/* ---------- the ledger card ---------- */
+.card-ledger .ledger-front {
+  background: #253c2c; color: #fff; border: 0; width: 100%;
+  display: flex; flex-direction: column; align-items: flex-start;
+  justify-content: flex-end; padding: 26px 24px; text-align: left; gap: 2px;
+}
+.card-ledger .ledger-front::after { content: none; }
+.ledger-score {
+  font-family: var(--font-display, 'Source Serif 4', Georgia, serif);
+  font-size: 76px; line-height: 1; letter-spacing: -2px;
+}
+.ledger-of { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; color: #b9c9ad; }
+.ledger-go { margin-top: 18px; font-size: 15px; border-bottom: 1px solid #ffffff5c; padding-bottom: 3px; }
+.ledger-count { margin-top: 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; color: #93a889; }
+.card-ledger .ledger-front:hover .ledger-go { border-bottom-color: #fff; }
+
 /* ---------- responsive ---------- */
-@media (max-width: 1400px) { .board { columns: 4; column-gap: 24px; } .card { margin-bottom: 24px; } }
-@media (max-width: 1100px) { .board { columns: 3; } }
-@media (max-width: 820px)  { .board { columns: 2; column-gap: 16px; } .card { margin-bottom: 16px; } }
-@media (max-width: 620px)  { .board-bar { margin-top: 26px; font-size: 11px; } }
+/* No column counts here. `columns: 330px` already fits what fits; the
+   only thing worth changing is the gap and the open panel's shape. */
+@media (max-width: 820px) { .board { column-gap: 16px; } .card { margin-bottom: 16px; } }
+@media (max-width: 900px) {
+  /* Too narrow for two panes: the photograph becomes a band across
+     the top and the questions run beneath it, still without scrolling
+     to reach the answers. */
+  .card.open .card-inner { width: 94vw; height: 88vh; }
+  .card.open .back { grid-template-columns: 1fr; grid-template-rows: 190px 1fr; }
+  .card.open .back-photo-title em { font-size: 26px; }
+  .card.open .back-body { padding: 22px 22px 20px; }
+}
+/* PHONE TAP TARGETS.
+   This gets used at a trade show, on a phone, standing up. The panel
+   shipped with 30px question circles, a 32px close and 44px answer
+   rows — 44px is the accessibility floor, not a size to aim for when
+   somebody is holding a coffee and not looking closely. The open
+   panel is full screen on a phone, so the room is there. */
+@media (max-width: 900px) {
+  .card.open .answer { min-height: 56px; font-size: 16px; padding: 14px 16px; }
+  .card.open .q-nav { gap: 10px; margin: 20px 0 18px; }
+  .card.open .q-nav button { width: 44px; height: 44px; font-size: 15px; }
+  .card.open .close { width: 44px; height: 44px; font-size: 26px; }
+  .card.open .primary { min-height: 48px; padding: 12px 20px; font-size: 15px; }
+  .card.open .question { font-size: 20px; }
+}
+
 @media (max-width: 520px) {
-  .board { columns: 1; }
-  .card { height: 360px !important; }
-  .card:nth-child(3n+2) { height: 410px !important; }
-  .card.open .card-inner { height: 510px !important; }
+  .board .card { height: 340px !important; }
+  .board .card:nth-child(5n+2) { height: 420px !important; }
+  .board .card:nth-child(5n+4) { height: 380px !important; }
+  /* Keeps perspective() in the transform: without it the panel loses
+     the centring and depth the desktop rule sets up. */
+  .card.open .card-inner { width: 100vw; height: 100vh; height: 100dvh; top: 0; left: 0;
+    transform: perspective(1600px) rotateY(180deg); border-radius: 0; }
+  /* The photo band is sized off the screen, not fixed. At 150px on a
+     667px phone the question, four nav circles, three 56px answers,
+     the field note and the Next row came to 60px more than the panel
+     held, and the whole point of the panel is that nothing scrolls. */
+  .card.open .back {
+    border-radius: 0;
+    grid-template-rows: clamp(88px, 15vh, 150px) 1fr;
+  }
+  .card.open .back-body { padding: 16px 18px 14px; }
+  .card.open .back-photo-title { left: 18px; bottom: 14px; }
+  .card.open .back-photo-title em { font-size: 21px; margin-top: 4px; }
+  .card.open .board-note { margin-top: 14px; padding: 11px 13px; font-size: 13px; }
+  .card.open .back-bottom { padding-top: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

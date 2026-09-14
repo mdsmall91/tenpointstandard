@@ -122,7 +122,10 @@ a:hover { color: var(--accent-deep); }
 .fg-faq dt:first-of-type { border-top: 0; }
 .fg-faq dd { margin: 8px 0 20px; font-size: 14px; color: var(--text-muted); line-height: 1.65; }
 .fg-about-note { margin-top: 32px; font-size: 12px; max-width: 68ch; }
-body[data-step]:not([data-step="0"]) .fg-about { display: none; }
+/* Visible on the landing (now the board, step 1) and on the retired
+   cover, hidden once the ledger is up. The FAQPage schema in the
+   page head is only valid while this copy is on screen. */
+body[data-step]:not([data-step="0"]):not([data-step="1"]) .fg-about { display: none; }
 
 @media (max-width: 640px) {
   .fg-about-inner { padding: 40px var(--page-pad) 48px; }
@@ -290,3 +293,20 @@ body[data-step]:not([data-step="0"]) .fg-about { display: none; }
   .fg-point-map-grid { grid-template-columns: 1fr; }
   .fg-point-tile { min-height: 0; grid-template-rows: auto auto auto auto; }
 }
+
+
+/* =============================================================
+   THE BOARD IS THE PAGE
+   On the card board there is no rail and no measure: the cards get
+   the full width, which is what makes them read as cards rather than
+   as four columns of clipped text.
+   ============================================================= */
+body[data-step="1"] .fg-rail { display: none; }
+/* The horizontal 01..10 / LEDGER strip is the rail's narrow-width
+   twin. It is chrome above the cards, so it goes with the rail. */
+body[data-step="1"] .fg-step-nav { display: none; }
+body[data-step="1"] .fg-main { max-width: none; }
+body[data-step="1"] .fg-body { display: block; }
+
+/* While a card is open the page behind it must not scroll. */
+body.board-card-open { overflow: hidden; }

@@ -446,7 +446,7 @@ function renderCover() {
          is the reason the old front door leaked. */
       '<div class="fg-lane-one">' +
         '<h4>Short on time?</h4>' +
-        '<p class="muted">Quick Scan takes about ninety seconds. Ten questions, mostly pictures, and no email. It gives you a direction and names the one thing most likely to stop the project.</p>' +
+        '<p class="muted">Quick Scan takes about ninety seconds. Six questions about who the project is for and what it is meant to do, and no email. Nothing is scored.</p>' +
         '<a class="btn ghost" href="/read/">Start the Quick Scan instead</a>' +
       '</div>' +
     '</section>' + renderPointMap(false);
@@ -727,6 +727,8 @@ function boardApi() {
       return false;
     },
     note: function (pi) { return FIELD_NOTES[pi]; },
+    /* The ledger card on the board carries the running score. */
+    score: function () { return totalScore(); },
     /* Paid out the moment the fourth answer lands, not at the end. */
     payout: function (pi) { return payoutLine(pi); },
     image: function (pi) {
@@ -848,7 +850,7 @@ document.addEventListener('click', function (e) {
       goStep(state.step === 0 ? 1 : 11);
       break;
     case 'prev':
-      goStep(state.step === 11 ? 1 : 0);
+      goStep(1);
       break;
     case 'submit-email': {
       var em = (document.getElementById('gate-email').value || '').trim();
@@ -936,7 +938,7 @@ document.addEventListener('click', function (e) {
       state.sentTo = '';
       state.email = '';
       state.emailError = false;
-      state.step = 0;
+      state.step = 1;
       state.phone = '';
       state.fullReq = false;
       state.ctaMode = '';
@@ -986,6 +988,17 @@ document.addEventListener('input', function (e) {
 if (document.getElementById('app')) {
   load();
   loadCarry();
+  /* THE LANDING IS THE CARDS. The Full Assessment used to open on a
+     cover with a heading and a Begin button; the board is the page
+     now, and the cards say what the cover was saying.
+
+     The one exception is somebody arriving from the Quick Scan with
+     answers we filled in for them. Those get confirmed on their own
+     screen first, because an answer put in on somebody's behalf has
+     to be seen before it counts. */
+  if (state.step === 0) {
+    state.step = (state.carried.length && !state.carryConfirmed) ? 0 : 1;
+  }
   initGA();
   render();
 }

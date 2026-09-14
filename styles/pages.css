@@ -48,8 +48,14 @@ a:hover { color: var(--accent-deep); }
   max-width: var(--page-max); margin: 0 auto;
   padding: var(--s-4) var(--page-pad);
 }
+/* No measure on the masthead. It is a banner, not body copy, and it
+   sits in a container that is already held to --page-max with
+   --page-pad either side. Capping it at 92ch left ~185px of dead
+   space on the right at 968px and about 470px of it at full width,
+   which read as broken padding rather than as a measure. The
+   container does the width; this paragraph fills it. */
 .tp-masthead p {
-  margin: 0; max-width: 92ch;
+  margin: 0; max-width: none;
   font-size: 13px; line-height: 1.6; color: var(--text-muted);
 }
 .tp-masthead strong { color: var(--text-strong); font-weight: 600; }

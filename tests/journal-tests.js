@@ -190,8 +190,13 @@
        header is exactly the kind of drift this file exists to catch. */
     eq('index: nav is the full site', JSON.stringify(navLinks),
       JSON.stringify(['Field Journal', 'Quick Scan', 'Full Assessment', 'About']));
-    check('index: nav sits with the CTA',
-      !!doc.querySelector('.jr-header-right .tp-nav') && !!doc.querySelector('.jr-header-right .jr-header-cta'));
+    /* The header used to carry a "See where you are" button beside the
+       nav. It went to /read/, which the "Quick Scan" link next to it
+       already did, so two controls competed to say the same thing and
+       the button's label named neither. The header is nav only now,
+       and this asserts the button stays gone. */
+    check('index: the header is nav only, no second CTA',
+      !!doc.querySelector('.jr-header-right .tp-nav') && !doc.querySelector('.jr-header-cta'));
   }
 
   /* ---------- feed ----------

@@ -1,41 +1,63 @@
 'use strict';
 
 /* =============================================================
-   QUICK SCAN — lane one
-   Ten interactions, no email, no account. The visitor taps or drags.
-   They never type unless they choose to.
+   THE QUICK SCAN — six cards on the way in
+   =============================================================
 
-   State machine only: every word and every rule lives in
-   readmodel.js, and the ring is TPRing. This file renders and
-   listens.
+   Rebuilt September 2026. What it was: nine screens asking what
+   somebody was building — project type, land type, unit count,
+   stage, budget, date, team, worry — scored into a band and a gate,
+   with answers carried forward into the Full Assessment.
 
-   Storage is tp-read-v1. Full Assessment reads the same key to
-   carry answers forward, so the shape below is a contract between
-   the two lanes. Do not rename a field without updating carry() in
-   readmodel.js and the confirmation screen in app.js.
+   Three things were wrong with it.
+
+   1. It opened by asking what you are building, which implies the
+      work starts with a product decision. It does not, and it is not
+      how Ten Point approaches a project. That screen is gone, and
+      Park and Recreation with it.
+
+   2. It claimed to read what you typed. An intake box took a free
+      sentence and said "We picked this up from what you wrote" over
+      the fields it filled. Behind it was a regex over about thirty
+      keywords with no model in production — the land question alone
+      needed one of sixteen specific words — and when it missed, the
+      screen showed its default with no indication anything had
+      failed. So the same answer came back whatever you typed. The
+      box is gone and the claim with it. Nothing on this lane now
+      interprets anything: what a person types is quoted back, never
+      read.
+
+   3. It fed the Full Assessment. Experience questions do not map
+      onto forty delivery questions, and the carry is what kept
+      dragging this lane back toward units and types. It is gone;
+      readmodel.carry() returns nothing.
+
+   What it is now: six cards from the RVi Experience Builder deck,
+   asking who this is for and what it is meant to do. It scores
+   nothing. It ends in the visitor's own six answers read back, and
+   in whichever of the six they could not answer, named.
+
+   PHONE FIRST. This runs at a trade show, on a phone, standing up,
+   one-handed. One card per screen, one tap per card, targets at
+   56px, nothing to type unless somebody wants to. The old lane had
+   a drag slider on it, which is the worst control there is to use
+   while holding a coffee.
    ============================================================= */
 
-var STORE = 'tp-read-v1';
-var M = TPReadModel;
+/* v2: the answer shape changed completely, so a v1 payload cannot be
+   read and must not be half-read. The key bump discards it. */
+var STORE = 'tp-scan-v2';
+var C = TPScanCards;
 
 var S = {
   step: 0,
-  intake: '',
-  intakeUsed: false,
-  prefilled: {},          // field -> true, drives the "we read this" confirmation
-  type: '', land: '', stage: '', compare: '',
-  size: 20, money: '', date: '', team: [], worry: '',
-  /* Size is the only field with a non-empty default, so emptiness
-     cannot tell "they have not answered" from "they answered 20".
-     Only a hand on the slider does. */
-  sizeTouched: false,
+  answers: {},     // card id -> option id
+  note: '',        // one optional note, on the reflection screen
   done: false
 };
 
-/* Screens 1 to 9 are the ten interactions the spec counts; screen 0
-   is the optional prompt and screen 10 is the payoff. */
-var LAST_Q = 9;
-var RESULT = 10;
+var CARD_COUNT = C.CARDS.length;   // 6
+var RESULT = CARD_COUNT + 1;       // step 7
 
 /* ---------------------------------------------------------------
    STORAGE
@@ -45,7 +67,10 @@ function load() {
     var raw = localStorage.getItem(STORE);
     if (!raw) return;
     var d = JSON.parse(raw);
-    for (var k in d) if (S.hasOwnProperty(k)) S[k] = d[k];
+    S.step = d.step || 0;
+    S.answers = d.answers || {};
+    S.note = d.note || '';
+    S.done = !!d.done;
   } catch (e) {}
 }
 function save() {
@@ -53,628 +78,229 @@ function save() {
 }
 
 function esc(s) {
-  return String(s).replace(/[&<>"']/g, function (c) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-  });
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-/* The model layer lives in modelproxy.js and is optional everywhere.
-   Every read below is already correct before a call is made. */
-function askModel(task, payload, cb) { TPModel.ask(task, payload, cb); }
-
-/* ---------------------------------------------------------------
-   RENDER HELPERS
-   --------------------------------------------------------------- */
-
-/* Every photo card carries a visible text label. The image is never
-   the only signal, and the caption always says whose project it is
-   so a stock photograph cannot read as Ten Point's work. */
-function photoCard(item, group, selected) {
-  return '<button class="rd-card' + (selected ? ' is-on' : '') + '" type="button"' +
-    ' data-pick="' + group + '" data-val="' + esc(item.id) + '" aria-pressed="' + (selected ? 'true' : 'false') + '">' +
-    '<span class="rd-card-media">' +
-      '<img src="/assets/read/' + item.img + '-' + item.w + '.webp" alt="" loading="lazy" decoding="async">' +
-    '</span>' +
-    '<span class="rd-card-body">' +
-      '<span class="rd-card-label">' + esc(item.label) + '</span>' +
-      '<span class="rd-card-credit">' + esc(item.caption) + '</span>' +
-    '</span>' +
-  '</button>';
-}
-
-function screenHead(eyebrow, title, sub) {
-  return '<div class="rd-head">' +
-    '<div class="eyebrow dotted">' + esc(eyebrow) + '</div>' +
-    '<h2>' + esc(title) + '</h2>' +
-    (sub ? '<p class="rd-sub muted">' + esc(sub) + '</p>' : '') +
-  '</div>';
-}
-
-/* A stop slider: a real range input so it is keyboard operable and
-   announced properly, with the stop labels drawn beneath it. */
-function stopSlider(group, list, valueId, artIndex) {
-  var i = 0;
-  for (var k = 0; k < list.length; k++) if (list[k].id === valueId) i = k;
-  var cur = list[i];
-  var art = '';
-  if (artIndex) {
-    art = '<div class="rd-stage-art" aria-hidden="true">' +
-      '<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
-      M.STAGE_ART[i] + '</svg></div>';
-  }
-  return '<div class="rd-slider">' +
-    art +
-    '<div class="rd-slider-value">' + esc(cur.label) + '</div>' +
-    '<input class="rd-range" type="range" min="0" max="' + (list.length - 1) + '" step="1" value="' + i + '"' +
-      ' data-slider="' + group + '" aria-label="' + esc(group) + '"' +
-      ' aria-valuetext="' + esc(cur.label) + '">' +
-    '<div class="rd-slider-stops">' +
-      list.map(function (o, n) {
-        return '<span class="rd-stop' + (n === i ? ' is-on' : '') + '">' + esc(o.label) + '</span>';
-      }).join('') +
-    '</div>' +
-  '</div>';
-}
-
-function navRow(backable, nextLabel, nextAction, disabled) {
-  return '<div class="rd-nav">' +
-    (backable ? '<button class="btn ghost" type="button" data-action="prev">Back</button>' : '<span></span>') +
-    (nextLabel ? '<button class="btn accent" type="button" data-action="' + nextAction + '"' +
-      (disabled ? ' disabled' : '') + '>' + esc(nextLabel) + '</button>' : '') +
-  '</div>';
-}
-
-function progress() {
-  if (S.step < 1 || S.step > LAST_Q) return '';
-  var pct = Math.round((S.step / LAST_Q) * 100);
-  var active = currentPhase(S.step);
-  return '<div class="rd-progress">' +
-    '<div class="rd-progress-track" aria-hidden="true">' +
-      '<div class="rd-progress-fill" style="width:' + pct + '%"></div>' +
-    '</div>' +
-    '<div class="rd-progress-phases" aria-hidden="true">' +
-      PHASES.map(function (phase) {
-        var state = S.step > phase.to ? ' is-done' : active.id === phase.id ? ' is-current' : '';
-        return '<span class="rd-progress-phase' + state + '">' +
-          '<span class="rd-progress-dot"></span>' + esc(phase.label) + '</span>';
-      }).join('') +
-    '</div>' +
-    /* The phases are decoration to a screen reader, which needs the
-       position said once, in words, rather than five dotted labels. */
-    '<p class="rd-sr" aria-live="polite">' + esc(active.label) +
-      ', question ' + S.step + ' of ' + LAST_Q + '</p>' +
-  '</div>';
-}
-
-/* A pre-filled answer is shown as a confirmation, never as a silent
-   assumption. That is the whole rule for the intake step. */
-function prefillNote(field) {
-  if (!S.prefilled[field]) return '';
-  return '<p class="rd-prefill">We picked this up from what you wrote. Change it if it is not right.</p>';
-}
-
-
-/* =============================================================
-   PHASES
-   The progress line counts phases, not questions. "3 of 9" tells
-   somebody how much homework is left; "Land, then Position" tells
-   them what the thing is doing and roughly how far in they are. The
-   bar still moves per question underneath.
-   ============================================================= */
-var PHASES = [
-  { id: 'project',  label: 'Project',  from: 1, to: 1 },
-  { id: 'land',     label: 'Land',     from: 2, to: 2 },
-  { id: 'position', label: 'Position', from: 3, to: 5 },
-  { id: 'delivery', label: 'Delivery', from: 6, to: 8 },
-  { id: 'priority', label: 'Priority', from: 9, to: 9 }
-];
-
-function currentPhase(step) {
-  for (var i = 0; i < PHASES.length; i++) {
-    if (step >= PHASES[i].from && step <= PHASES[i].to) return PHASES[i];
-  }
-  return PHASES[0];
-}
-
-function findById(list, id) {
-  for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
-  return null;
-}
-
-/* =============================================================
-   THE PROJECT SNAPSHOT
-   Builds visibly as the visitor answers. It is the difference
-   between filling in a form and watching something get assembled.
-
-   It shows ONLY what has actually been answered. It never implies
-   that a point has been evaluated, and it carries no score, because
-   the Quick Scan does not produce one.
-   ============================================================= */
-function projectSnapshot() {
-  var type = findById(M.TYPES, S.type);
-  var land = findById(M.LAND, S.land);
-  var stage = findById(M.STAGES, S.stage);
-  var money = findById(M.MONEY, S.money);
-
-  var items = [];
-  if (type) items.push({ label: 'Project', value: type.label });
-  if (land) items.push({ label: 'Land', value: land.label });
-  if (stage) items.push({ label: 'Position', value: stage.label });
-  if (S.size && S.step >= 5) {
-    items.push({ label: 'Scale', value: (S.size >= 200 ? '200 or more' : String(S.size)) +
-      ' ' + (type ? type.unit : 'sites') });
-  }
-  if (money) items.push({ label: 'Money', value: money.label });
-  if (S.team && S.team.length) {
-    var names = S.team.map(function (id) {
-      var t = findById(M.TEAM, id); return t ? t.label : id;
-    });
-    items.push({ label: 'Team', value: names.join(', ') });
-  }
-  if (!items.length) return '';
-
-  return '<aside class="rd-snapshot" aria-label="Your project so far">' +
-    '<div class="rd-snapshot-head">' +
-      '<span class="eyebrow">Your project</span>' +
-      '<span class="mono">SO FAR</span>' +
-    '</div>' +
-    '<dl>' + items.map(function (item) {
-      return '<div><dt>' + esc(item.label) + '</dt><dd>' + esc(item.value) + '</dd></div>';
-    }).join('') + '</dl>' +
-  '</aside>';
-}
-
-/* One short paragraph on why the previous answer matters. Rendered on
-   the screen AFTER the answer, because the photo and slider screens
-   advance on tap and a note on the answering screen is never seen. */
-function scanNote(group, value) {
-  var notes = M.SCAN_NOTES && M.SCAN_NOTES[group];
-  var copy = notes && notes[value];
-  if (!copy) return '';
-  TPA.track('quick_scan_field_note_viewed', { group: group, value: value });
-  return '<aside class="rd-note" aria-live="polite">' +
-    '<span class="eyebrow">Field note</span>' +
-    '<p>' + esc(copy) + '</p>' +
-  '</aside>';
-}
-
-/* The question pane and the snapshot, side by side on a desktop and
-   stacked with the snapshot first on a phone. */
-function workspace(inner) {
-  return '<div class="rd-workspace">' +
-    '<div class="rd-question-pane">' + inner + '</div>' +
-    projectSnapshot() +
-  '</div>';
+function answeredCount() {
+  var n = 0;
+  for (var i = 0; i < C.CARDS.length; i++) if (S.answers[C.CARDS[i].id]) n++;
+  return n;
 }
 
 /* ---------------------------------------------------------------
    SCREENS
    --------------------------------------------------------------- */
 
-function scr0() {
-  return '<section class="rd-screen">' +
-    screenHead('Quick Scan', 'Tell us about your project.',
-      'A sentence or two is plenty. Skip this if you would rather just tap through.') +
-    '<textarea class="textarea rd-intake" id="rd-intake" rows="4" maxlength="600" ' +
-      'placeholder="We have 40 acres outside Fredericksburg under contract, and we want about 25 glamping units.">' +
-      esc(S.intake) + '</textarea>' +
-    '<div class="rd-nav">' +
-      '<button class="btn ghost" type="button" data-action="skip-intake">Skip this</button>' +
-      '<button class="btn accent" type="button" data-action="use-intake">Start</button>' +
-    '</div>' +
-    '<p class="rd-foot muted">Ten questions, mostly pictures. About ninety seconds. No email needed.</p>' +
-  '</section>';
-}
-
-function scr1() {
-  return '<section class="rd-screen">' + progress() +
-    screenHead('Project', 'What are you building?') +
-    prefillNote('type') +
-    '<div class="rd-grid rd-grid-4">' +
-      M.TYPES.map(function (t) { return photoCard(t, 'type', S.type === t.id); }).join('') +
-    '</div>' + navRow(true, '', '') +
-  '</section>';
-}
-
-function scr2() {
-  return '<section class="rd-screen">' + progress() +
-    screenHead('Land', 'Which of these looks most like your land?') +
-    prefillNote('land') +
-    '<div class="rd-grid rd-grid-4">' +
-      M.LAND.map(function (t) { return photoCard(t, 'land', S.land === t.id); }).join('') +
-    '</div>' + navRow(true, '', '') +
-  '</section>';
-}
-
-function scr3() {
-  return '<section class="rd-screen">' + progress() +
-    screenHead('Position', 'Where are you today?') +
-    /* The land answer landed on the previous screen, which advances
-       on tap. This is the first chance to say why it mattered. */
-    workspace(
-      scanNote('land', S.land) +
-      prefillNote('stage') +
-      stopSlider('stage', M.STAGES, S.stage || M.STAGES[0].id, true) +
-      navRow(true, 'Next', 'next')
-    ) +
-  '</section>';
-}
-
-function scr4() {
-  var a = { id: 'a', label: 'This one', img: 'compare-a', w: 800,
-    caption: 'Austin Moto Adventures, Texas', credit: 'Ten Point Services' };
-  var b = { id: 'b', label: 'This one', img: 'compare-b', w: 800,
-    caption: 'Lagom Retreat, Dripping Springs, Texas', credit: 'Ten Point Services' };
-  return '<section class="rd-screen">' + progress() +
-    screenHead('Position', 'Which one is closer to what you are building?') +
-    workspace(
-      scanNote('stage', S.stage) +
-      '<div class="rd-grid rd-grid-2 rd-compare">' +
-        photoCard(a, 'compare', S.compare === 'a') +
-        photoCard(b, 'compare', S.compare === 'b') +
-      '</div>' + navRow(true, '', '')
-    ) +
-  '</section>';
-}
-
-function scr5() {
-  var t = null;
-  for (var i = 0; i < M.TYPES.length; i++) if (M.TYPES[i].id === S.type) t = M.TYPES[i];
-  var unit = t ? t.unit : 'sites';
-  var shown = S.size >= 200 ? '200 or more' : String(S.size);
-  return '<section class="rd-screen">' + progress() +
-    screenHead('Position', 'About how many ' + unit + '?') +
-    workspace(
-    prefillNote('size') +
-    '<div class="rd-slider rd-size">' +
-      '<div class="rd-size-value">' + esc(shown) + ' <span class="rd-size-unit">' + esc(unit) + '</span></div>' +
-      '<div class="rd-size-art" aria-hidden="true">' + sizeArt(S.size) + '</div>' +
-      '<input class="rd-range" type="range" min="1" max="200" step="1" value="' + S.size + '"' +
-        ' data-size aria-label="Number of ' + esc(unit) + '" aria-valuetext="' + esc(shown) + ' ' + esc(unit) + '">' +
-      '<div class="rd-slider-stops"><span class="rd-stop">1</span><span class="rd-stop">50</span>' +
-      '<span class="rd-stop">100</span><span class="rd-stop">150</span><span class="rd-stop">200 or more</span></div>' +
-    '</div>' + navRow(true, 'Next', 'next')
-    ) +
-  '</section>';
-}
-
-/* The illustration above the size slider changes as the number
-   moves: a row of unit marks that fills out with the count. */
-function sizeArt(n) {
-  var marks = Math.max(1, Math.min(24, Math.round(n / 9) + 1));
-  var out = '<svg viewBox="0 0 240 44" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">';
-  for (var i = 0; i < marks; i++) {
-    var x = 6 + i * 9.6;
-    out += '<path d="M' + x + ' 32 l4-6 4 6z"></path><path d="M' + x + ' 32h8"></path>';
+/* Six dots. No numbers, no percentage, no "question 4 of 9" — the
+   old progress line said nine while every page on the site promised
+   ten, and a dot count cannot drift from the card count because it
+   is generated from it. */
+function dots(active) {
+  var out = '<div class="qs-dots" aria-hidden="true">';
+  for (var i = 0; i < CARD_COUNT; i++) {
+    var cls = i + 1 === active ? 'on' : (S.answers[C.CARDS[i].id] ? 'done' : '');
+    out += '<i class="' + cls + '"></i>';
   }
-  return out + '</svg>';
+  return out + '</div>';
 }
 
-function scr6() {
-  return '<section class="rd-screen">' + progress() +
-    screenHead('Delivery', 'How firm is the money?') +
-    workspace(
-      prefillNote('money') +
-      stopSlider('money', M.MONEY, S.money || M.MONEY[0].id) +
-      navRow(true, 'Next', 'next')
-    ) +
+function opener() {
+  return '<section class="qs-screen qs-opener">' +
+    '<div class="eyebrow dotted">The Quick Scan</div>' +
+    '<h1>Six questions about the people, not the plan.</h1>' +
+    '<p class="lede">Before a site plan or a budget, a project needs to know who ' +
+    'it is for and what it is meant to do. These are six of the questions we ask ' +
+    'at the start of one. There are no right answers and nothing is scored.</p>' +
+    '<p class="qs-meta mono">Six cards &middot; about ninety seconds &middot; no email</p>' +
+    '<button class="btn accent lg" data-go="1">Start</button>' +
+    '<p class="qs-alt">Further along than this? ' +
+    '<a href="/standard/">Take the Full Assessment</a> instead — forty questions ' +
+    'on whether the project is ready to build.</p>' +
   '</section>';
 }
 
-function scr7() {
-  return '<section class="rd-screen">' + progress() +
-    screenHead('Delivery', 'How firm is the opening date?') +
-    workspace(
-      prefillNote('date') +
-      stopSlider('date', M.DATES, S.date || M.DATES[0].id) +
-      navRow(true, 'Next', 'next')
-    ) +
-  '</section>';
-}
+function cardScreen(n) {
+  var card = C.CARDS[n - 1];
+  var picked = S.answers[card.id];
+  var opts = '';
+  for (var i = 0; i < card.options.length; i++) {
+    var o = card.options[i], on = picked === o.id;
+    opts += '<button class="qs-option' + (on ? ' picked' : '') +
+      (o.id === 'unknown' ? ' qs-unknown' : '') + '"' +
+      ' data-pick="' + esc(o.id) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
+      '<span>' + esc(o.label) + '</span>' +
+      '<i aria-hidden="true">' + (on ? '&#10003;' : '') + '</i>' +
+    '</button>';
+  }
 
-function scr8() {
-  return '<section class="rd-screen">' + progress() +
-    screenHead('Delivery', 'Who is on the team so far?', 'Tap all that apply.') +
-    workspace(
-    '<div class="rd-grid rd-grid-3 rd-chips">' +
-      M.TEAM.map(function (o) {
-        var on = S.team.indexOf(o.id) !== -1;
-        return '<button class="rd-chip' + (on ? ' is-on' : '') + '" type="button" data-team="' + esc(o.id) + '"' +
-          ' aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(o.label) + '</button>';
-      }).join('') +
-    '</div>' + navRow(true, 'Next', 'next')
-    ) +
-  '</section>';
-}
-
-function scr9() {
-  return '<section class="rd-screen">' + progress() +
-    screenHead('Priority', 'What is on your mind the most right now?') +
-    workspace(
-    '<div class="rd-grid rd-grid-3 rd-chips">' +
-      M.WORRIES.map(function (o) {
-        var on = S.worry === o.id;
-        return '<button class="rd-chip rd-chip-lg' + (on ? ' is-on' : '') + '" type="button"' +
-          ' data-pick="worry" data-val="' + esc(o.id) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
-          esc(o.label) + '</button>';
-      }).join('') +
-    '</div>' + navRow(true, '', '')
-    ) +
-  '</section>';
-}
-
-/* The payoff. Ring, position, written read, two doors of equal
-   weight. No number anywhere on this screen. */
-function scrResult() {
-  var R = M.evaluate(S);
-  var lines = (S.modelLines && S.modelLines.length) ? S.modelLines : R.lines;
-
-  var html = '<section class="rd-result">' +
-    '<div class="rd-result-top">' +
-      '<div class="rd-ring-wrap">' +
-        TPRing.svg({
-          segments: R.segments, size: 300,
-          center: { top: 'DIRECTIONAL', main: R.bandName, sub: R.greyCount + ' not yet scored' }
-        }) +
-      '</div>' +
-      '<div class="rd-result-lead">' +
-        '<div class="eyebrow dotted">Your Project Scan</div>' +
-        '<h1 class="rd-band">Ten Point ' + esc(R.bandName) + '</h1>' +
-        '<p class="rd-directional mono">DIRECTIONAL READ · ' + R.litCount + ' OF 10 POINTS</p>' +
-        '<div class="rd-lines">' + lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('') + '</div>' +
-      '</div>' +
+  return '<section class="qs-screen qs-card-screen">' +
+    dots(n) +
+    '<figure class="qs-photo">' +
+      '<img src="' + esc(card.img) + '" alt="" ' +
+        (n > 1 ? 'loading="lazy" ' : '') + 'decoding="async">' +
+      '<figcaption>' +
+        '<span class="eyebrow">' + esc(card.eyebrow) + '</span>' +
+        '<h2>' + esc(card.question) + '</h2>' +
+      '</figcaption>' +
+    '</figure>' +
+    '<div class="qs-options" role="group" aria-label="' + esc(card.question) + '">' +
+      opts +
     '</div>' +
-
-    '<div class="rd-legend-wrap">' +
-      '<h3>The ten points.</h3>' +
-      '<p class="muted rd-legend-note">Four to six of these have a direction from what you just told us. The rest need the full questions before anyone can say anything honest about them.</p>' +
-      TPRing.legend(R.segments) +
-    '</div>' +
-
-    '<div class="rd-doors">' +
-      '<div class="card rd-door">' +
-        '<h3>Score all ten points</h3>' +
-        '<p class="muted">Forty questions. About five minutes. We will email you the full scorecard.</p>' +
-        '<a class="btn accent lg" href="/standard/" data-door="standard">Continue to the Full Assessment</a>' +
-      '</div>' +
-      '<div class="card rd-door">' +
-        '<h3>Talk it through with us</h3>' +
-        '<p class="muted">Twenty minutes with the team that builds these.</p>' +
-        '<a class="btn lg" href="/consultation/" data-door="consultation">Set up a conversation</a>' +
-      '</div>' +
-    '</div>' +
-
-    '<div class="rd-result-foot">' +
-      '<p class="muted">The Quick Scan is a directional diagnostic. It is not a feasibility study, an appraisal, a cost estimate, or advice on any specific project.</p>' +
-      '<button class="rd-link" type="button" data-action="reset">Start over</button>' +
+    '<div class="qs-nav">' +
+      '<button class="qs-back" data-go="' + (n - 1) + '">&larr; Back</button>' +
+      (picked
+        ? '<button class="btn accent" data-go="' + (n + 1) + '">' +
+            (n === CARD_COUNT ? 'See what you said' : 'Next') + '</button>'
+        : '<span class="qs-hint">Pick one to carry on</span>') +
     '</div>' +
   '</section>';
-  return html;
 }
 
-var SCREENS = [scr0, scr1, scr2, scr3, scr4, scr5, scr6, scr7, scr8, scr9, scrResult];
+function resultScreen() {
+  var R = C.reflect(S.answers);
+
+  var lines = '';
+  for (var i = 0; i < R.lines.length; i++) {
+    lines += '<p>' + esc(R.lines[i]) + '</p>';
+  }
+
+  /* Every card, with what they chose, and changeable. An answer we
+     show back has to be one they can correct. */
+  var rows = '';
+  for (var j = 0; j < C.CARDS.length; j++) {
+    var card = C.CARDS[j], picked = S.answers[card.id];
+    var o = picked ? C.option(card.id, picked) : null;
+    var unresolved = !o || o.id === 'unknown';
+    rows += '<li class="' + (unresolved ? 'qs-open' : '') + '">' +
+      '<span class="qs-row-q">' + esc(card.eyebrow) + '</span>' +
+      '<span class="qs-row-a">' + esc(o ? o.label : 'Not answered') + '</span>' +
+      '<button class="qs-change" data-go="' + (j + 1) + '" ' +
+        'aria-label="Change your answer to ' + esc(card.question) + '">Change</button>' +
+    '</li>';
+  }
+
+  return '<section class="qs-screen qs-result">' +
+    '<div class="eyebrow dotted">What you said</div>' +
+    '<h1>' + (R.unknown.length === 0
+      ? 'Six for six.'
+      : R.known.length === 0
+        ? 'Six questions, still open.'
+        : 'Here it is, in your words.') + '</h1>' +
+
+    '<div class="qs-read">' + lines + '</div>' +
+
+    /* Said plainly, because a written read that looks generated and
+       does not say so is the thing people stop trusting. */
+    '<p class="qs-provenance">This is your six answers read back in order. ' +
+    'Nothing here is scored, and nothing was written about your project ' +
+    'that you did not choose above.</p>' +
+
+    '<h2 class="qs-h2">Your six</h2>' +
+    '<ul class="qs-rows">' + rows + '</ul>' +
+
+    '<div class="qs-note-block">' +
+      '<label for="qs-note">Anything you want to add? (optional)</label>' +
+      '<textarea id="qs-note" rows="3" placeholder="Whatever the six did not ' +
+        'have a box for.">' + esc(S.note) + '</textarea>' +
+      '<p class="qs-note-help">This stays in your browser. It is not sent ' +
+      'anywhere and nothing reads it.</p>' +
+    '</div>' +
+
+    '<div class="qs-doors">' +
+      '<a class="btn accent lg" href="/consultation/">Talk this through with us</a>' +
+      '<a class="btn lg" href="/standard/">Take the Full Assessment</a>' +
+    '</div>' +
+    '<p class="qs-alt">The Full Assessment is the other half: forty questions on ' +
+    'whether the project is ready to build, scored out of a hundred.</p>' +
+
+    '<button class="qs-restart" data-restart>Start the six again</button>' +
+  '</section>';
+}
+
+function screenFor(step) {
+  if (step <= 0) return opener();
+  if (step >= RESULT) return resultScreen();
+  return cardScreen(step);
+}
 
 /* ---------------------------------------------------------------
    FLOW
    --------------------------------------------------------------- */
 function render() {
-  document.getElementById('rd-app').innerHTML = SCREENS[S.step]();
+  document.getElementById('rd-app').innerHTML = screenFor(S.step);
   document.body.setAttribute('data-rd-step', S.step);
   window.scrollTo(0, 0);
-  var ta = document.getElementById('rd-intake');
-  if (ta) ta.focus();
+  /* Move the reader to the top of the new card, not just the page:
+     on a phone a screen reader would otherwise stay where it was. */
+  var h = document.querySelector('#rd-app h1, #rd-app h2');
+  if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
 }
 
 function go(n) {
   var prev = S.step;
-  if (n >= 1 && n <= LAST_Q) {
-    var ph = currentPhase(n);
-    TPA.once('quick_scan_phase_viewed', { phase: ph.id }, 'phase-' + ph.id);
-  }
   S.step = Math.max(0, Math.min(RESULT, n));
-  if (S.step > prev && prev >= 1 && prev <= LAST_Q) {
-    TPA.once('read_screen_complete', { screen_number: prev }, 'screen-' + prev);
+
+  if (S.step > prev && prev >= 1 && prev <= CARD_COUNT) {
+    TPA.once('quick_scan_card_complete',
+      { card: C.CARDS[prev - 1].id }, 'card-' + C.CARDS[prev - 1].id);
   }
   if (S.step === RESULT && !S.done) {
     S.done = true;
-    var R = M.evaluate(S);
-    TPA.once('read_complete', { band: R.bandName.toLowerCase(), worry: S.worry || 'none' });
-    requestModelRead();
+    TPA.once('quick_scan_complete', {
+      answered: answeredCount(),
+      unresolved: CARD_COUNT - answeredCount()
+    });
   }
   save();
   render();
-}
-
-/* Ask the model to say the same thing in the visitor's own project
-   language. The template is already on screen; a successful reply
-   swaps it, a failure changes nothing. */
-function requestModelRead() {
-  if (!TPModel.enabled()) return;
-  var R = M.evaluate(S);
-  askModel('read', {
-    /* THE TEMPLATE IS THE SOURCE OF FACTS, and it is built from what
-       the visitor actually tapped. Without it the model was writing
-       from the free text alone, which meant somebody who typed a
-       description and then changed their answers got a read about the
-       project they described rather than the one they selected. */
-    template: R.lines,
-    band: R.bandName,
-    gate: R.gateKey,
-    /* Secondary, and labelled as such. Their own words are here for
-       vocabulary and detail, never to override an answer. */
-    their_words: S.intake,
-    answers: {
-      type: S.type, land: S.land, stage: S.stage, size: S.size,
-      money: S.money, date: S.date, team: S.team, worry: S.worry
-    }
-  }, function (out) {
-    var clean = TPModel.cleanLines(out, 3);
-    if (!clean) return;
-    S.modelLines = clean;
-    if (S.step === RESULT) render();
-  });
-}
-
-function applyExtract(fields) {
-  var allowed = { type: 1, land: 1, stage: 1, size: 1, money: 1, date: 1 };
-  var used = false;
-  for (var k in fields) {
-    if (!allowed[k]) continue;
-    var v = fields[k];
-    if (v === undefined || v === null || v === '') continue;
-    /* The bounds live here rather than in the output schema: structured
-       outputs reject minimum and maximum on a property, so the schema
-       states the shape and the code states the range. */
-    if (k === 'size') {
-      v = parseInt(v, 10);
-      if (!v || v < 1) continue;
-      v = Math.min(200, v);
-    }
-    /* NEVER overwrite an answer the visitor gave themselves. The model
-       reply can land after they have moved on and answered the very
-       screen it is about, and their tap outranks it every time. A field
-       is safe to fill only while it is still empty, or still carrying
-       our own guess, which the tap handler clears. */
-    var theirs = (k === 'size') ? S.sizeTouched : (S[k] && !S.prefilled[k]);
-    if (theirs) continue;
-    S[k] = v;
-    S.prefilled[k] = true;
-    used = true;
-  }
-  return used;
 }
 
 /* ---------------------------------------------------------------
    EVENTS
    --------------------------------------------------------------- */
 document.addEventListener('click', function (e) {
-  var el = e.target.closest('[data-action],[data-pick],[data-team],[data-door]');
+  var el = e.target.closest('[data-pick], [data-go], [data-restart]');
   if (!el) return;
 
-  if (el.dataset.door) {
-    TPA.track('consultation_cta_clicked', { placement: 'read_result' });
-    if (el.dataset.door === 'standard') TPA.track('cta_click', { cta: 'full_standard' });
-    return;                                   // let the link navigate
-  }
-
-  if (el.dataset.pick) {
-    startOnce();
-    var g = el.dataset.pick;
-    S[g] = el.dataset.val;
-    delete S.prefilled[g];
-    save();
-    // A photo tap is the answer and the Next button at once.
-    go(S.step + 1);
+  if (el.hasAttribute('data-restart')) {
+    S.answers = {}; S.note = ''; S.done = false;
+    TPA.once('quick_scan_restart', {});
+    go(0);
     return;
   }
 
-  if (el.dataset.team) {
-    startOnce();
-    var id = el.dataset.team;
-    var at = S.team.indexOf(id);
-    if (id === 'none') {
-      S.team = at === -1 ? ['none'] : [];
-    } else {
-      var none = S.team.indexOf('none');
-      if (none !== -1) S.team.splice(none, 1);
-      if (at === -1) S.team.push(id); else S.team.splice(at, 1);
-    }
+  if (el.hasAttribute('data-pick')) {
+    var card = C.CARDS[S.step - 1];
+    if (!card) return;
+    S.answers[card.id] = el.getAttribute('data-pick');
+    TPA.once('read_start', {});
     save();
+    /* Tap to answer, tap to move on. Auto-advancing on the first tap
+       is faster but takes the choice away from somebody who wants to
+       change their mind, and on a phone a mis-tap then costs a Back. */
     render();
     return;
   }
 
-  switch (el.dataset.action) {
-    case 'use-intake': {
-      var ta = document.getElementById('rd-intake');
-      S.intake = ta ? (ta.value || '').trim() : '';
-      startOnce();
-      if (S.intake) {
-        var local = M.extractLocal(S.intake);
-        var used = applyExtract(local);
-        S.intakeUsed = true;
-        TPA.once('read_intake_used', { fields_filled: Object.keys(S.prefilled).length });
-        // The model, when it is wired, gets the same job and wins if
-        // it answers in time. Nothing waits on it.
-        askModel('intake', { text: S.intake }, function (out) {
-          if (out && out.fields) {
-            if (applyExtract(out.fields) && S.step >= 1 && S.step <= LAST_Q) render();
-          }
-        });
-        if (used) { /* fall through to screen 1 as a confirmation */ }
-      }
-      save();
-      go(1);
-      break;
-    }
-    case 'skip-intake':
-      startOnce();
-      go(1);
-      break;
-    case 'next':
-      // Sliders default to their first stop, which is a real answer.
-      if (S.step === 3 && !S.stage) S.stage = M.STAGES[0].id;
-      if (S.step === 6 && !S.money) S.money = M.MONEY[0].id;
-      if (S.step === 7 && !S.date) S.date = M.DATES[0].id;
-      go(S.step + 1);
-      break;
-    case 'prev':
-      go(S.step - 1);
-      break;
-    case 'reset':
-      TPA.reset('read_');
-      S = { step: 0, intake: '', intakeUsed: false, prefilled: {}, type: '', land: '', stage: '',
-        compare: '', size: 20, money: '', date: '', team: [], worry: '',
-        sizeTouched: false, done: false };
-      save();
-      render();
-      break;
+  if (el.hasAttribute('data-go')) {
+    go(parseInt(el.getAttribute('data-go'), 10));
   }
 });
 
 document.addEventListener('input', function (e) {
-  var el = e.target;
-  if (el.dataset && el.dataset.slider) {
-    var group = el.dataset.slider;
-    var list = group === 'stage' ? M.STAGES : group === 'money' ? M.MONEY : M.DATES;
-    S[group] = list[parseInt(el.value, 10)].id;
-    delete S.prefilled[group];
-    save();
-    render();
-    var again = document.querySelector('[data-slider="' + group + '"]');
-    if (again) again.focus();
-    return;
-  }
-  if (el.hasAttribute && el.hasAttribute('data-size')) {
-    S.size = parseInt(el.value, 10);
-    S.sizeTouched = true;
-    delete S.prefilled.size;
-    save();
-    var wrap = document.querySelector('.rd-size');
-    if (wrap) {
-      var t = null;
-      for (var i = 0; i < M.TYPES.length; i++) if (M.TYPES[i].id === S.type) t = M.TYPES[i];
-      var shown = S.size >= 200 ? '200 or more' : String(S.size);
-      wrap.querySelector('.rd-size-value').innerHTML =
-        esc(shown) + ' <span class="rd-size-unit">' + esc(t ? t.unit : 'sites') + '</span>';
-      wrap.querySelector('.rd-size-art').innerHTML = sizeArt(S.size);
-      el.setAttribute('aria-valuetext', shown);
-    }
-  }
+  if (e.target.id === 'qs-note') { S.note = e.target.value; save(); }
 });
 
-function startOnce() {
-  TPA.once('read_start', {});
-}
-
-/* Abandonment is the number that tells us whether ninety seconds is
-   short enough, so it has to fire on the way out, not on a button. */
+/* Abandonment is the number that says whether ninety seconds is short
+   enough, so it fires on the way out rather than on a button. */
 function armAbandon() {
   var sent = false;
   function fire() {
     if (sent || S.done || S.step < 1) return;
     sent = true;
-    TPA.once('read_abandon', { last_screen: S.step });
+    TPA.once('quick_scan_abandon', { last_card: S.step });
   }
   window.addEventListener('pagehide', fire);
   document.addEventListener('visibilitychange', function () {

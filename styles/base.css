@@ -181,8 +181,27 @@ p { margin: 0; max-width: var(--measure); }
 }
 .tp-meta .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
 
+/* The nav used to be hidden outright below 720px, which left a phone
+   with a logo and nothing else — the only way between the Journal,
+   the Quick Scan and the Full Assessment was the footer, at the
+   bottom of a long page. That is the wrong trade when most of the
+   traffic is a phone at a trade show.
+
+   So it stays, on its own row under the logo: smaller, scrollable
+   sideways if it ever needs to be, and still 44px to tap. */
 @media (max-width: 720px) {
-  .tp-nav { display: none; }
+  .tp-header-inner { flex-wrap: wrap; row-gap: 2px; }
+  .jr-header-right { width: 100%; }
+  .tp-nav {
+    display: flex; gap: var(--s-5); width: 100%;
+    overflow-x: auto; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tp-nav::-webkit-scrollbar { display: none; }
+  .tp-nav a {
+    font-size: 13px; white-space: nowrap;
+    padding: 10px 0; min-height: 44px; display: flex; align-items: center;
+  }
 }
 
 /* ---------- HERO BLOCK (page header) ---------- */
