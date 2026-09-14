@@ -49,6 +49,10 @@ OPENER_W = [1400, 2000]
 # The board's cards are portrait, and so is the photo pane on an open
 # card. The booth set is 2:3 already, so these crop to nothing.
 BOARD_W = [760, 1200]
+# The list variant of the assessment runs a wide opener above the four
+# questions. Same photograph as the board, cropped landscape, so the
+# A/B test compares two interfaces and not two sets of pictures.
+WIDE_W = [900, 1400]
 
 # ---------------------------------------------------------------------------
 # The picks. Matt's calls, September 9 2026:
@@ -109,6 +113,29 @@ PICKS = [
     ("points/09-qa", U + "Booth Images/Backup/Fredericksburg.jpg", "2/3", BOARD_W,
      "KOA Fredericksburg, Texas", "Ten Point Services"),
     ("points/10-opening", U + "Booth Images/Backup/Lagom4.jpg", "2/3", BOARD_W,
+     "Lagom Retreat, Dripping Springs, Texas", "Ten Point Services"),
+
+
+    # ---- The same ten, cropped wide for the list variant --------------
+    ("points-wide/01-property", U + "Outdoorsy Hill Country/356-web-or-mls-33-3777.jpg", "3/2", WIDE_W,
+     "Outdoorsy Hill Country, Texas", "Ten Point Services"),
+    ("points-wide/02-capital", U + "Booth Images/Backup/Moto.jpg", "3/2", WIDE_W,
+     "Austin Moto Adventures, Texas", "Ten Point Services"),
+    ("points-wide/03-regulatory", U + "KOA-Fredricksburg.jpg", "3/2", WIDE_W,
+     "KOA Fredericksburg, Texas", "Ten Point Services"),
+    ("points-wide/04-guests", U + "Booth Images/Backup/Hill Country Night.jpg", "3/2", WIDE_W,
+     "Outdoorsy Hill Country, Texas", "Ten Point Services"),
+    ("points-wide/05-design", U + "Booth Images/Lagom3.jpg", "3/2", WIDE_W,
+     "Lagom Retreat, Dripping Springs, Texas", "Ten Point Services"),
+    ("points-wide/06-procurement", U + "Booth Images/Backup/Lagom5.jpg", "3/2", WIDE_W,
+     "Lagom Retreat, Dripping Springs, Texas", "Ten Point Services"),
+    ("points-wide/07-schedule", U + "Booth Images/Backup/Hill Country2.jpg", "3/2", WIDE_W,
+     "Outdoorsy Hill Country, Texas", "Ten Point Services"),
+    ("points-wide/08-cost", U + "Booth Images/Backup/Lagom3.jpg", "3/2", WIDE_W,
+     "Lagom Retreat, Dripping Springs, Texas", "Ten Point Services"),
+    ("points-wide/09-qa", U + "Booth Images/Backup/Fredericksburg.jpg", "3/2", WIDE_W,
+     "KOA Fredericksburg, Texas", "Ten Point Services"),
+    ("points-wide/10-opening", U + "Booth Images/Backup/Lagom4.jpg", "3/2", WIDE_W,
      "Lagom Retreat, Dripping Springs, Texas", "Ten Point Services"),
 
     # ---- About: four projects -------------------------------------------

@@ -43,6 +43,9 @@ var POINT_IMG = ['01-property', '02-capital', '03-regulatory', '04-guests', '05-
    copy what it prints; a number that does not match is a 404 and a
    card with no photograph on it. */
 var POINT_IMG_W = [1400, 660, 1400, 760, 760, 760, 760, 760, 760, 760];
+/* The same ten photographs cropped landscape, for the list variant's
+   wide opener. Widths are again whatever each source could give. */
+var POINT_IMG_WIDE_W = [900, 661, 900, 900, 900, 900, 900, 900, 900, 900];
 /* Provenance is part of the data, not decoration. "Ten Point Services"
    on a photograph means Ten Point built it, and a credit that implies
    otherwise is a licensing problem for a licensed general contractor.
@@ -157,6 +160,18 @@ function totalScore() {
 function answeredCount() {
   var n = 0;
   for (var k in state.answers) if (state.answers[k] === true || state.answers[k] === false) n++;
+  return n;
+}
+/* Every question that has an answer of any kind, "Not sure" included.
+   answeredCount() deliberately excludes "Not sure" because the ledger
+   says "you answered 27 of the 40", which is a claim about how much is
+   known. Completion is a different question: somebody who answered all
+   forty and was unsure of thirteen finished the assessment. Measuring
+   the A/B test on answeredCount would undercount exactly the careful
+   people, and would tilt if one arm nudged harder toward "Not sure". */
+function respondedCount() {
+  var n = 0;
+  for (var k in state.answers) if (state.answers[k] !== undefined) n++;
   return n;
 }
 function notSureCount() {
@@ -311,7 +326,10 @@ function esc(s) {
 }
 
 function goTop() { document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }
-function goStep(i) { state.step = i; save(); render(); goTop(); }
+function goStep(i) {
+  if (typeof Dwell !== 'undefined') Dwell.step(i);
+  state.step = i; save(); render(); goTop();
+}
 
 /* Cover = 0, ledger = 100, and in between the rail tracks answers.
    The board has no sequence to measure, so counting screens would
@@ -473,6 +491,22 @@ function renderCover() {
    A card is complete when four questions are answered, whatever the
    answers were. Nothing on the board may read as readiness, so the
    verdict this pays out is a sentence about the point, never a grade. */
+/* The board prints the payout as a sentence on the card back; the list
+   variant prints it as a block with the ring beside it. Same sentence
+   either way — the A/B test changes the interface, never the words. */
+function payoutBlock(pi) {
+  return '<div class="fg-payout">' +
+      '<div class="fg-payout-ring">' + TPRing.svg({
+        segments: ringSegments(), size: 150, band: 13,
+        center: { main: String(totalScore()), sub: 'of 100' }
+      }) + '</div>' +
+      '<div class="fg-payout-body">' +
+        '<h4>' + POINTS[pi].title + ': ' + pointYes(pi) + ' of 4.</h4>' +
+        '<p class="muted">' + esc(payoutLine(pi)) + '</p>' +
+      '</div>' +
+    '</div>';
+}
+
 function payoutLine(pi) {
   var R = TPResults.evaluate(state.answers);
   var yes = pointYes(pi);
@@ -705,6 +739,78 @@ function requestModelRead() {
   });
 }
 
+/* =============================================================
+   THE LIST VARIANT  (A/B test, ends 2026-10-31)
+   =============================================================
+   One point per screen, ten screens, the shape the board replaced.
+   Restored from f5691e4^ and reachable only when a visitor is
+   assigned the list arm.
+
+   It renders the SAME questions from the SAME questions.js, writes
+   the SAME answers into the SAME state, and is scored by the SAME
+   engine. The interface is the only difference, which is the whole
+   point of the test: anything else that varies makes the result
+   unreadable.
+
+   Delete this, the CSS block in site.css, and assets/points-wide
+   when the test is called.
+   ============================================================= */
+function renderPoint(step) {
+  var pi = step - 1, p = POINTS[pi], score = pointScore(pi);
+  var img = '/assets/points-wide/' + POINT_IMG[pi] + '-' + POINT_IMG_WIDE_W[pi] + '.webp';
+  var html = '' +
+    /* The opener runs full width of the column, with the point name
+       over it. Every one is a real Ten Point project and the caption
+       says which. */
+    '<figure class="fg-opener">' +
+      '<img src="' + img + '" alt="" loading="lazy" decoding="async" width="' + POINT_IMG_WIDE_W[pi] + '" height="' + Math.round(POINT_IMG_WIDE_W[pi] * 2 / 3) + '">' +
+      /* The credit sits inside the caption rather than under the frame.
+         Below the image it has to clear an absolutely positioned
+         overlay to avoid colliding with the title, and that is a
+         layout that breaks quietly the first time a photograph
+         changes aspect. Inside, it cannot collide with anything. */
+      '<figcaption>' +
+        '<span class="fg-opener-n mono">POINT ' + p.n + ' / 10</span>' +
+        '<span class="fg-opener-title">' + p.title + '</span>' +
+        '<span class="fg-opener-credit mono">' + esc(POINT_IMG_CAP[pi]) + ' &middot; Ten Point Services</span>' +
+      '</figcaption>' +
+    '</figure>' +
+    '<section class="fg-pstep">' +
+      '<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap;">' +
+        '<div class="eyebrow dotted">Point ' + p.n + ' / 10</div>' +
+        '<div class="mono" style="font-size: 11px; color: var(--text-faint);">EACH YES = ' + p.pts + ' PTS · ' + score + ' / ' + p.max + '</div>' +
+      '</div>' +
+      '<h2 style="margin-top: 28px;">' + p.title + '.</h2>' +
+      /* The field note. One line of plain language from a real
+         project, and the thing that makes this read like a person. */
+      '<p class="fg-note">' + esc(FIELD_NOTES[pi]) + '</p>' +
+      '<div style="margin-top: 24px;">';
+  for (var qi = 0; qi < p.qs.length; qi++) {
+    var key = pi + '-' + qi, ans = state.answers[key];
+    var carried = false;
+    for (var c = 0; c < state.carried.length; c++) if (state.carried[c].key === key) carried = true;
+    html += '' +
+      '<div class="fg-q' + (carried ? ' is-carried' : '') + '">' +
+        '<div style="display: flex; gap: 14px; align-items: baseline;"><span class="mono" style="font-size: 11px; color: var(--text-faint); flex: none;">Q' + (qi + 1) + '</span><span style="font-size: 16px; color: var(--text); max-width: 58ch;">' + p.qs[qi] +
+          (carried ? '<span class="fg-carried-tag mono">FROM QUICK SCAN</span>' : '') + '</span></div>' +
+        '<div class="fg-seg" style="display: flex; gap: 6px;">' +
+          '<button class="fg-yn yes' + (ans === true ? ' on' : '') + '" data-key="' + key + '" data-val="1">Yes</button>' +
+          '<button class="fg-yn no' + (ans === false ? ' on' : '') + '" data-key="' + key + '" data-val="0">No</button>' +
+          '<button class="fg-yn unsure' + (ans === 'unsure' ? ' on' : '') + '" data-key="' + key + '" data-val="u">Not sure</button>' +
+        '</div>' +
+      '</div>';
+  }
+  html += '</div>';
+  /* Pay out the moment the fourth answer lands, not at the end. */
+  if (pointDone(pi)) html += payoutBlock(pi);
+  html += '</section>' +
+    '<div style="display: flex; justify-content: space-between; padding: 24px 0 64px;">' +
+      '<button class="btn ghost" data-action="prev">Back</button>' +
+      '<button class="btn" data-action="next">' + (step === 10 ? 'See the ledger' : 'Next point') + '</button>' +
+    '</div>';
+  return html;
+}
+
 /* The board owns its own DOM once mounted. Rebuilding #app from a
    string on every answer is how the rest of this file works, and it
    is exactly what the board cannot survive: it would throw away the
@@ -766,13 +872,24 @@ function render() {
   renderHeader();
   renderRail();
   var app = document.getElementById('app');
-  if (state.step === 1) {
+  if (state.step === 0) { app.innerHTML = renderCover(); return; }
+
+  /* The two arms of the interface test diverge here and nowhere else.
+     The list walks ten screens; the board is one screen of ten cards
+     and mounts itself. Both write the same answers to the same state. */
+  if (state.step >= 1 && state.step <= 10) {
+    if (TPAB.isList()) { app.innerHTML = renderPoint(state.step); return; }
+    /* The board has no steps 2 to 10. A step saved in the other arm,
+       or an old bookmark, lands here and is corrected rather than
+       rendering an empty screen. */
+    if (state.step !== 1) { state.step = 1; save(); }
     if (!TPBoard.isMounted(app)) TPBoard.mount(app, boardApi());
     else TPBoard.repaint();
     return;
   }
-  if (state.step === 0) app.innerHTML = renderCover();
-  else { app.innerHTML = renderLedger(); requestModelRead(); }
+
+  app.innerHTML = renderLedger();
+  requestModelRead();
 }
 
 /* =============================================================
@@ -789,8 +906,13 @@ document.addEventListener('click', function (e) {
 
   if (el.dataset.go !== undefined) {
     var target = parseInt(el.dataset.go, 10);
-    /* 1 through 10 used to be ten screens. They are now ten cards on
-       one screen, so the rail goes to the board and opens the card. */
+    /* 1 through 10 are ten screens in the list arm and ten cards on one
+       screen in the board arm. The rail addresses the point either way. */
+    if (target >= 1 && target <= 10 && TPAB.isList()) {
+      TPA.once('full_assessment_point_opened', { point: POINTS[target - 1].n }, 'open-' + target);
+      goStep(target);
+      return;
+    }
     if (target >= 1 && target <= 10) {
       var wasBoard = state.step === 1;
       if (!wasBoard) goStep(1);
@@ -854,11 +976,17 @@ document.addEventListener('click', function (e) {
       break;
     }
     case 'next':
+      if (TPAB.isList()) {
+        if (state.step === 10) track('fg_view_ledger', { score: totalScore() });
+        goStep(Math.min(11, state.step + 1));
+        break;
+      }
       /* Cover to board, board to ledger. */
       if (state.step === 1) track('fg_view_ledger', { score: totalScore() });
       goStep(state.step === 0 ? 1 : 11);
       break;
     case 'prev':
+      if (TPAB.isList()) { goStep(Math.max(0, state.step - 1)); break; }
       goStep(1);
       break;
     case 'submit-email': {
@@ -990,6 +1118,83 @@ document.addEventListener('input', function (e) {
 });
 
 /* =============================================================
+   DWELL  (interface A/B test, ends 2026-10-31)
+   =============================================================
+   GA4's own engagement time is per-page and hard to compare across
+   two interfaces that occupy the same URL, so the assessment times
+   itself and reports a number that means one thing: how long this
+   person spent answering.
+
+   The clock starts when they enter the assessment, not when the
+   page loads, so reading the cover does not count as answering. It
+   pauses when the tab is hidden, because a tab left open over lunch
+   is not ninety minutes of engagement and would quietly become the
+   largest number in the dataset.
+
+   Two events come out of it. `standard_dwell` on reaching the
+   ledger, which is the number for people who finished. And
+   `standard_abandon` when they leave without finishing, which is
+   the number that stops a high dwell from looking like a win when
+   it is really people stuck. Both carry the arm, the questions
+   answered, and whether they got there.
+   ============================================================= */
+var Dwell = (function () {
+  var total = 0;        // ms accumulated while visible and answering
+  var since = null;     // when the current visible stretch began
+  var sent = false;
+
+  function running() { return since !== null; }
+
+  function start() {
+    if (running()) return;
+    since = Date.now();
+  }
+  function pause() {
+    if (!running()) return;
+    total += Date.now() - since;
+    since = null;
+  }
+  function ms() {
+    return Math.round(total + (running() ? Date.now() - since : 0));
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') pause(); else if (state.step >= 1 && state.step <= 10) start();
+  });
+
+  /* pagehide is the one that fires reliably on mobile; unload does
+     not. Sending on both would double count, so `sent` guards it. */
+  function leaving() {
+    pause();
+    if (sent || state.step > 10 || ms() < 1500) return;
+    sent = true;
+    track('standard_abandon', {
+      dwell_ms: ms(),
+      responded: respondedCount(),
+      furthest_point: state.step
+    });
+  }
+  window.addEventListener('pagehide', leaving);
+
+  return {
+    /* Called from goStep, which is the one place the step changes. */
+    step: function (to) {
+      if (to >= 1 && to <= 10) { start(); return; }
+      pause();
+      if (to === 11 && !sent) {
+        sent = true;
+        track('standard_dwell', {
+          dwell_ms: ms(),
+          responded: respondedCount(),
+          completed: respondedCount() === 40 ? 'yes' : 'no'
+        });
+      }
+    },
+    ms: ms
+  };
+})();
+
+/* =============================================================
    BOOT
    ============================================================= */
 /* Boot only on the real page; the test harness loads this file for its
@@ -1009,5 +1214,11 @@ if (document.getElementById('app')) {
     state.step = (state.carried.length && !state.carryConfirmed) ? 0 : 1;
   }
   initGA();
+  /* Both arms land straight in the assessment, so the only thing that
+     differs between them is the interface. Giving the list arm back its
+     old cover screen would test a landing page and an interface at once
+     and the result would not say which moved the number. */
+  track('standard_arm_assigned', { step: state.step });
+  if (typeof Dwell !== 'undefined') Dwell.step(state.step);
   render();
 }
