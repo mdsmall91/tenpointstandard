@@ -35,9 +35,24 @@ function agaTrack(name, params) {
   if (window.gtag) window.gtag('event', name, params || {});
 }
 
-/* ---------- the one field the note lives in ----------
-   CONFIG.MAILCHIMP_FIELD_NOTE holds the merge tag, e.g. 'NOTE'. */
-var AGA_NOTE_MAX = 255; // merge fields truncate here
+/* ---------- one name box, two merge fields ----------
+   The form asks for a name, not a first name and a last name: it is a
+   seat request, and two boxes to sit at a table is two boxes too many.
+   Mailchimp still wants FNAME and LNAME, and the confirmation email
+   greets somebody by FNAME, so the split happens here.
+
+   Split on the FIRST space, not the last. "Mary Anne Villanueva" then
+   greets as "Mary", which is right, and puts the rest in LNAME. Split
+   on the last space and a compound surname breaks instead, which is
+   the worse failure: a greeting can read a little formal, a mangled
+   surname is just wrong. A single word goes to FNAME and LNAME is
+   left empty rather than guessed at. */
+function agaSplitName(full) {
+  var name = (full || '').trim().replace(/\s+/g, ' ');
+  var cut = name.indexOf(' ');
+  if (cut === -1) return { first: name, last: '' };
+  return { first: name.slice(0, cut), last: name.slice(cut + 1) };
+}
 
 /* ---------- submit ----------
    JSONP against /subscribe/post-json, the same path app.js and
@@ -54,7 +69,7 @@ function agaSubmit(data, statusEl, button) {
     statusEl.className = 'aga-status' + (isError ? ' error' : '');
   }
 
-  if (!data.first) { say('Enter your first name.', true); return false; }
+  if (!data.first) { say('Enter your name.', true); return false; }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(data.email)) {
     say('Enter a valid email address.', true);
     return false;
@@ -62,11 +77,10 @@ function agaSubmit(data, statusEl, button) {
 
   /* Refuse rather than half-work. Without the group the signup drops
      into the Field Guide welcome journey and gets a scorecard email
-     with empty merge fields; without the note field the note is
-     accepted and silently thrown away. Both are worse than a visible
-     error, because both look fine from the reader's side. */
-  if (!CONFIG.MAILCHIMP_FORM_ACTION || !CONFIG.MAILCHIMP_GROUP_AGA || !CONFIG.MAILCHIMP_FIELD_NOTE) {
-    console.warn('aga.js: set MAILCHIMP_GROUP_AGA and MAILCHIMP_FIELD_NOTE in config.js before this page goes live');
+     with empty merge fields, which looks fine from the reader's side
+     and is completely wrong. A visible error is better. */
+  if (!CONFIG.MAILCHIMP_FORM_ACTION || !CONFIG.MAILCHIMP_GROUP_AGA) {
+    console.warn('aga.js: set MAILCHIMP_GROUP_AGA in config.js before this page goes live');
     say('Signup is not switched on yet. Email info@tenpointstandard.com and we will hold you a seat.', true);
     return false;
   }
@@ -74,9 +88,7 @@ function agaSubmit(data, statusEl, button) {
   var params = [
     'EMAIL=' + encodeURIComponent(data.email),
     'FNAME=' + encodeURIComponent(data.first),
-    'LNAME=' + encodeURIComponent(data.last),
-    encodeURIComponent(CONFIG.MAILCHIMP_FIELD_NOTE) + '=' +
-      encodeURIComponent(data.note.slice(0, AGA_NOTE_MAX))
+    'LNAME=' + encodeURIComponent(data.last)
   ];
 
   /* Encode the brackets in group[70477][2] but not the = that
@@ -96,10 +108,10 @@ function agaSubmit(data, statusEl, button) {
     if (resp && resp.result === 'error') {
       /* Mailchimp reports an existing contact as an error. For a
          seat request it is not one, and a second submit does update
-         the profile, so the note and name still land. */
+         the profile, so the name still lands. */
       var already = /already subscribed/i.test(resp.msg || '');
       if (already) {
-        say('You are already on our list, and your seat request is in. See you Tuesday.', false);
+        say('You are already on our list, and your seat request is in. See you Wednesday.', false);
         agaTrack('aga_signup', { existing_contact: true });
         return;
       }
@@ -140,25 +152,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var status = form.querySelector('.aga-status');
   var button = form.querySelector('button[type="submit"]');
-  var note = document.getElementById('aga-note');
-  var count = document.getElementById('aga-note-count');
-
-  /* maxlength already stops typing past the cap; this just tells the
-     reader where the ceiling is, since a note is the one field where
-     someone will want to say more than fits. */
-  function updateCount() {
-    count.textContent = (AGA_NOTE_MAX - note.value.length) + ' characters left';
-  }
-  note.addEventListener('input', updateCount);
-  updateCount();
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
+    var name = agaSplitName(document.getElementById('aga-name').value);
     agaSubmit({
-      first: document.getElementById('aga-first').value.trim(),
-      last: document.getElementById('aga-last').value.trim(),
-      email: document.getElementById('aga-email').value.trim(),
-      note: note.value.trim()
+      first: name.first,
+      last: name.last,
+      email: document.getElementById('aga-email').value.trim()
     }, status, button);
   });
 });

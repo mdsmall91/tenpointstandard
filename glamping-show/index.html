@@ -29,7 +29,7 @@
 <link rel="stylesheet" href="/styles/base.css?v=1">
 <link rel="stylesheet" href="/styles/pages.css?v=19">
 <link rel="stylesheet" href="/styles/site.css?v=19">
-<link rel="stylesheet" href="/styles/aga.css?v=18">
+<link rel="stylesheet" href="/styles/aga.css?v=20">
 </head>
 <body>
 <div class="aga-root">
@@ -62,17 +62,48 @@
         <p class="aga-hosts">Co-hosted by <strong>Matt Small</strong>, RVi Planning &amp; Landscape Architecture, and <strong>Kenny Reed</strong>, Ten Point Services.</p>
       </section>
 
+      <!-- ---------- signup ----------
+           Directly under the hosts line, because this is what the page
+           is for. Everything else on it is the reason to say yes, and
+           somebody who already knows they want the seat should not have
+           to scroll past all of it to say so. The session's when and
+           where is repeated here so the form can be read on its own. -->
+      <section class="aga-signup" id="signup">
+        <div>
+          <div class="eyebrow dotted" style="margin-bottom: var(--s-4);">Save your seat</div>
+          <h2>Tell us you are coming.</h2>
+          <p class="aga-when">Wednesday, September 30, 2026 &middot; 9:40 AM &middot; American Glamping Association booth</p>
+          <p class="lede">Seats are limited, so we hold them in the order requests come in. There is nothing to pay and nothing to bring.</p>
+          <p class="aga-fineprint" style="margin-top: var(--s-6);">We will email you straight away to confirm the seat is held, with the session details. Questions before the show go to <a href="mailto:info@tenpointstandard.com">info@tenpointstandard.com</a>.</p>
+        </div>
+
+        <form class="aga-form" id="aga-form" novalidate>
+          <div class="field">
+            <label for="aga-name">Name</label>
+            <input class="input" type="text" id="aga-name" name="name" autocomplete="name" required>
+          </div>
+
+          <div class="field">
+            <label for="aga-email">Email</label>
+            <input class="input" type="email" id="aga-email" name="email" placeholder="you@company.com" autocomplete="email" required>
+          </div>
+
+          <button class="btn accent lg" type="submit">Save my seat</button>
+          <p class="aga-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
       <!-- Booth number is left out on purpose: it is printed in the show
            guide and on the floor signage, and a number that changes after
            this page is shared is worse than no number at all. -->
       <dl class="aga-details">
         <div class="aga-detail">
           <dt>Date</dt>
-          <dd>Tuesday, September 29<span class="sub">2026</span></dd>
+          <dd>Wednesday, September 30<span class="sub">2026</span></dd>
         </div>
         <div class="aga-detail">
           <dt>Time</dt>
-          <dd>10:30 AM<span class="sub">Runs 45 minutes</span></dd>
+          <dd>9:40 AM<span class="sub">Runs 45 minutes</span></dd>
         </div>
         <div class="aga-detail">
           <dt>Where</dt>
@@ -124,55 +155,21 @@
           </div>
           <div class="card">
             <h3>Find us at the show</h3>
-            <p class="muted" style="font-size: var(--fs-small);">Kenny Reed is at the show for the run of it. If you would rather talk about your own project than sit through a session, that works too.</p>
+            <p class="muted" style="font-size: var(--fs-small);">Both of us are at the show for the run of it. If you would rather talk about your own project than sit through a session, that works too.</p>
             <p class="fg-direct" style="margin-top: var(--s-4);">
+              <strong>Kenny Reed</strong>, Ten Point Services<br>
               <a href="tel:+15125578762">512.557.8762</a><br>
               <a href="mailto:kenny@tenpointservicestx.com">kenny@tenpointservicestx.com</a>
+            </p>
+            <p class="fg-direct" style="margin-top: var(--s-4);">
+              <strong>Matt Small</strong>, RVi Planning &amp; Landscape Architecture<br>
+              <a href="tel:+13037284694">303.728.4694</a><br>
+              <a href="mailto:msmall@rviplanning.com">msmall@rviplanning.com</a>
             </p>
           </div>
         </aside>
       </div>
 
-      <!-- ---------- signup ---------- -->
-      <section class="aga-signup" id="signup">
-        <div>
-          <div class="eyebrow dotted" style="margin-bottom: var(--s-4);">Save your seat</div>
-          <h2>Tell us you are coming.</h2>
-          <p class="lede">Seats are limited, so we hold them in the order requests come in. There is nothing to pay and nothing to bring.</p>
-          <p class="aga-fineprint" style="margin-top: var(--s-6);">We will email you a confirmation and the session details. Questions before the show go to <a href="mailto:info@tenpointstandard.com">info@tenpointstandard.com</a>.</p>
-        </div>
-
-        <form class="aga-form" id="aga-form" novalidate>
-          <div class="aga-form-row">
-            <div class="field">
-              <label for="aga-first">First name</label>
-              <input class="input" type="text" id="aga-first" name="first" autocomplete="given-name" required>
-            </div>
-            <div class="field">
-              <label for="aga-last">Last name</label>
-              <input class="input" type="text" id="aga-last" name="last" autocomplete="family-name">
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="aga-email">Email</label>
-            <input class="input" type="email" id="aga-email" name="email" placeholder="you@company.com" autocomplete="email" required>
-          </div>
-
-          <div class="field">
-            <label for="aga-note">Leave us a note <span class="aga-optional">(optional)</span></label>
-            <!-- 255 is Mailchimp's merge field ceiling, so the cap is
-                 enforced here rather than letting the field truncate
-                 someone's note without telling them. aga.js keeps the
-                 remaining count in sync. -->
-            <textarea class="textarea" id="aga-note" name="note" rows="4" maxlength="255" placeholder="Where your project stands, or anything you want us to cover."></textarea>
-            <p class="help" id="aga-note-count"></p>
-          </div>
-
-          <button class="btn accent lg" type="submit">Save my seat</button>
-          <p class="aga-status" role="status" aria-live="polite"></p>
-        </form>
-      </section>
 
     </div>
   </main>
@@ -194,6 +191,6 @@
 
 <script src="/config.js?v=18"></script>
 <script src="/analytics.js?v=18"></script>
-<script src="/aga.js?v=18"></script>
+<script src="/aga.js?v=20"></script>
 </body>
 </html>
