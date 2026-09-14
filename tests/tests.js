@@ -170,8 +170,58 @@
   R = checkInvariants('T-cap', answersFrom(gcap));
   check('cap label', R.ledger[1].label === 'In Progress' && R.ledger[1].gateOpen, JSON.stringify(R.ledger[1]));
 
+  /* ---------- one source for the forty questions ----------
+     The card board at /standard/play/ shipped with its own copied
+     snapshot of POINTS. It matched on arrival and would have gone on
+     matching until somebody edited one question in one place, at which
+     point the two interfaces would be running different assessments
+     and their scores would stop meaning the same thing. The snapshot
+     is gone; this keeps it gone. */
+  var SURFACES = ['../standard/index.html', '../scorecard/index.html'];
+  Promise.all(SURFACES.map(function (url) {
+    return fetch(url, { cache: 'no-store' }).then(function (r) {
+      check('surface ' + url + ' exists', r.ok, 'HTTP ' + r.status);
+      return r.text();
+    }).then(function (html) {
+      /* Every surface that asks the forty questions loads the shared
+         file, and does it before app.js so POINTS is defined in time. */
+      var shared = html.indexOf('questions.js');
+      check(url + ' loads the shared questions', shared !== -1);
+      var app = html.indexOf('app.js?');
+      if (app !== -1) {
+        check(url + ' loads questions before app', shared < app,
+          'questions at ' + shared + ', app at ' + app);
+      }
+      /* A relative src here would mean a second copy alongside the page. */
+      check(url + ' does not carry its own copy',
+        !/src="(?!\.\.\/|\/)[^"]*questions\.js/.test(html));
+    });
+  })).then(function () {
+    /* The board arrived as a standalone page at /standard/play/ with its
+       own copy of the questions. It is the assessment now, and both are
+       gone. A page left behind there would be an orphan running an
+       assessment nobody is maintaining. */
+    return Promise.all(['../standard/play/', '../standard/play/questions.js',
+                        '../standard/play/play.js'].map(function (u) {
+      return fetch(u, { cache: 'no-store' }).then(function (r) {
+        check('no orphan at ' + u, r.status === 404, 'HTTP ' + r.status);
+      });
+    }));
+  }).then(function () {
+    /* The board is loaded by the assessment, and it is what asks the
+       questions now. If this ever stops being true the assessment has
+       no question screen at all. */
+    return fetch('../standard/index.html', { cache: 'no-store' }).then(function (r) { return r.text(); });
+  }).then(function (html) {
+    check('assessment loads the board', html.indexOf('board.js') !== -1);
+    check('assessment loads the board stylesheet', html.indexOf('board.css') !== -1);
+  }).catch(function (e) {
+    check('question-source check', false, String(e));
+  }).then(questionsMd);
+
   /* ---------- QUESTIONS.md consistency (spec check 6) ---------- */
-  fetch('../QUESTIONS.md').then(function (r) { return r.text(); }).then(function (md) {
+  function questionsMd() {
+  fetch('../QUESTIONS.md', { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (md) {
     var rx = /^- Q(\d+)\.(\d+)( \(GATE\))?: (.+)$/gm, m, found = 0, gateIds = [];
     while ((m = rx.exec(md)) !== null) {
       found++;
@@ -194,6 +244,7 @@
     check('QUESTIONS.md fetch', false, String(e));
     sweep();
   });
+  }
 
   /* ---------- seeded random sweep ---------- */
   function sweep() {

@@ -117,12 +117,19 @@ a:hover { color: var(--accent-deep); }
 }
 .aga-note-block p { font-family: var(--font-display); font-size: var(--fs-lead); line-height: var(--lh-snug); }
 
-/* ---------- signup ---------- */
+/* ---------- signup ----------
+   It sits directly under the hosts line now, second thing on the page,
+   so it reads as the point of the page rather than as the bottom of it.
+   That means it is no longer a footer rule under a long scroll: it is a
+   panel, with its own ground, and it carries the session's when and
+   where so the form can be read without the details block below it. */
 .aga-signup {
-  margin-top: var(--s-16);
+  margin-top: var(--s-10);
   scroll-margin-top: var(--s-8);
-  border-top: 1px solid var(--border);
-  padding-top: var(--s-12);
+  background: var(--surface-sunk, #f1f2ec);
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 10px);
+  padding: var(--s-10);
   display: grid;
   grid-template-columns: 1fr 1.1fr;
   gap: var(--s-12);
@@ -130,6 +137,13 @@ a:hover { color: var(--accent-deep); }
 }
 .aga-signup h2 { font-size: var(--fs-h3); }
 .aga-signup .lede { margin-top: var(--s-4); }
+.aga-when {
+  margin-top: var(--s-4);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  letter-spacing: .04em;
+  color: var(--text-soft, #5a6356);
+}
 
 .aga-form { display: flex; flex-direction: column; gap: var(--s-5); }
 .aga-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); }

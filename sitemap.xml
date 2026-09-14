@@ -1,19 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Only indexable URLs belong here. The seven Journal entries whose copy is
-     not written yet carry noindex and are deliberately absent; add each one
-     in the same commit that adds its body text and flips its robots tag. -->
+<!-- Only indexable URLs belong here.
+
+     NOT LISTED, on purpose:
+       /journal.html      redirects to the root; a redirect in a sitemap
+                          asks Google to index a page that does not exist
+       /scorecard/        noindex, and every one of them is somebody's own
+                          project rather than a page
+       /glamping-show/    unlisted, the way /aga.html was
+       /aga.html          unlisted, redirects to the show page
+       /tests/            disallowed in robots.txt
+
+     The four Journal entries whose copy is not written yet carry noindex
+     and are deliberately absent; add each one in the same commit that adds
+     its body text and flips its robots tag. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://tenpointstandard.com/</loc>
-    <lastmod>2026-08-08</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://tenpointstandard.com/journal.html</loc>
-    <lastmod>2026-08-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://tenpointstandard.com/read/</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://tenpointstandard.com/standard/</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://tenpointstandard.com/about/</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tenpointstandard.com/consultation/</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://tenpointstandard.com/journal/nature-first.html</loc>

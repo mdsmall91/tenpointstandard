@@ -59,30 +59,9 @@ a:hover { color: var(--accent-deep); }
 .fg-rail-item.done .fg-rail-dot { background: var(--accent); }
 .fg-rail-item.cur .fg-rail-dot { background: var(--ink-strong); }
 
-.fg-yn {
-  font-family: var(--font-body); font-weight: 500; font-size: 13px;
-  letter-spacing: 0.04em; text-transform: uppercase;
-  padding: 9px 18px; cursor: pointer; border-radius: 1px;
-  background: transparent; color: var(--text-muted);
-  border: 1px solid var(--border);
-  transition: background .15s, color .15s, border-color .15s, transform .15s;
-}
-.fg-yn:hover { border-color: var(--stone-300); color: var(--text-strong); }
-.fg-yn:active { transform: translateY(1px); }
-.fg-yn.yes.on { background: var(--accent); border-color: var(--accent); color: var(--paper); }
-.fg-yn.no.on { background: var(--surface-2); border-color: var(--stone-300); color: var(--text-strong); }
-
-.fg-q {
-  display: grid; grid-template-columns: 1fr auto; gap: 12px 32px;
-  align-items: center; padding: 18px 0;
-  border-top: 1px solid var(--border-soft);
-}
-.fg-q:first-of-type { border-top: 0; }
-
 .fg-bar-row { display: grid; grid-template-columns: 200px 1fr 64px; gap: 16px; align-items: center; padding: 8px 0; }
 
 .fg-cover { padding: 96px 0 64px; }
-.fg-pstep { padding: 56px 0 32px; flex: 1; }
 
 .fg-step-nav { display: flex; gap: 2px; max-width: 860px; margin: 0 auto; padding: 0 var(--page-pad); overflow-x: auto; border-top: 1px solid var(--border-soft); scrollbar-width: none; }
 .fg-step-nav::-webkit-scrollbar { display: none; }
@@ -143,7 +122,10 @@ a:hover { color: var(--accent-deep); }
 .fg-faq dt:first-of-type { border-top: 0; }
 .fg-faq dd { margin: 8px 0 20px; font-size: 14px; color: var(--text-muted); line-height: 1.65; }
 .fg-about-note { margin-top: 32px; font-size: 12px; max-width: 68ch; }
-body[data-step]:not([data-step="0"]) .fg-about { display: none; }
+/* Visible on the landing (now the board, step 1) and on the retired
+   cover, hidden once the ledger is up. The FAQPage schema in the
+   page head is only valid while this copy is on screen. */
+body[data-step]:not([data-step="0"]):not([data-step="1"]) .fg-about { display: none; }
 
 @media (max-width: 640px) {
   .fg-about-inner { padding: 40px var(--page-pad) 48px; }
@@ -157,14 +139,174 @@ body[data-step]:not([data-step="0"]) .fg-about { display: none; }
 }
 
 @media (max-width: 640px) {
-  .fg-q { grid-template-columns: 1fr; gap: 10px; padding: 16px 0; }
-  .fg-seg { width: 100%; }
-  .fg-seg .fg-yn { flex: 1; min-height: 44px; }
   .fg-bar-row { grid-template-columns: 1fr 56px; gap: 8px 12px; padding: 10px 0; }
   .fg-bar-label { grid-column: 1 / -1; }
   .fg-cover { padding: 48px 0 40px; }
-  .fg-pstep { padding: 32px 0 24px; }
   .fg-step-item { padding: 12px 9px; }
   h2, .h2 { font-size: 1.9rem; }
   .fg-band { padding: var(--s-4); }
 }
+
+/* =============================================================
+   STANDARD v3 — the ring, the point openers, the field notes, the
+   per-point payout, the carry-forward confirmation, and the two
+   doors. Everything below is additive: nothing above it changed.
+   ============================================================= */
+
+/* ---------- POINT OPENER ----------
+   A full-width real project photograph with the point name over it.
+   The credit line sits under the frame rather than on it, so a
+   photograph never has to fight text for contrast. */
+
+/* ---------- FIELD NOTE ----------
+   One line of plain language from a real project. This is the thing
+   that makes a form read like a person, so it gets real emphasis. */
+
+/* ---------- NOT SURE ----------
+   Scores as no, tracked on its own, and never styled as a failure.
+   It is the most useful answer in the product. */
+
+/* ---------- PER-POINT PAYOUT ----------
+   The old assessment paid out once, at the very end. This one pays
+   out ten times, the moment a point's fourth answer lands. */
+
+/* ---------- CARRY FORWARD ---------- */
+.fg-carry { list-style: none; margin: var(--s-8) 0 0; padding: 0; max-width: 640px; }
+.fg-carry li {
+  padding: var(--s-4) 0; border-top: 1px solid var(--border-soft);
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start;
+}
+.fg-carry li:first-child { border-top: 0; }
+.fg-carry-label { font-size: var(--fs-body); font-weight: 500; color: var(--text-strong); }
+.fg-carry-q { font-size: 13px; }
+
+/* ---------- LANE ONE OFFER ON THE COVER ---------- */
+.fg-lane-one {
+  margin-top: var(--s-16); padding: var(--s-6);
+  border: 1px solid var(--border); background: var(--surface); max-width: 560px;
+}
+.fg-lane-one p { margin: 8px 0 var(--s-5); font-size: var(--fs-small); }
+
+/* ---------- RESULT HERO ---------- */
+.fg-hero-ring {
+  display: grid; grid-template-columns: 300px 1fr;
+  gap: var(--s-10); align-items: center; margin-bottom: var(--s-12);
+}
+.fg-read-lines { margin-top: var(--s-5); display: flex; flex-direction: column; gap: var(--s-4); }
+.fg-read-lines p { font-size: var(--fs-body); line-height: var(--lh-relaxed); max-width: 56ch; }
+
+/* ---------- TWO DOORS ---------- */
+.fg-doors { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-6); padding: 0 0 var(--s-10); }
+.fg-door { display: flex; flex-direction: column; gap: var(--s-3); padding: var(--s-8); }
+.fg-door p.muted { font-size: var(--fs-small); }
+.fg-door .btn { align-self: flex-start; min-height: 44px; }
+.fg-sent { font-size: var(--fs-small); font-weight: 500; color: var(--accent-deep); }
+.fg-direct {
+  margin-top: auto; padding-top: var(--s-5);
+  border-top: 1px solid var(--border-soft);
+  font-size: 13px; color: var(--text-muted); line-height: 1.8;
+}
+.fg-direct a { border-bottom: 1px solid var(--accent); }
+.fg-inline-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.fg-inline-form .input { flex: 1; min-width: 180px; }
+.fg-inline-form .btn { min-height: 44px; }
+.fg-err { font-size: 12px; color: var(--bronze-deep); }
+.fg-fineprint { font-size: 12px; }
+
+/* ---------- SHARE ---------- */
+.fg-share { padding: 0 0 var(--s-10); max-width: 720px; }
+.fg-share p { font-size: var(--fs-small); margin-top: 8px; }
+.fg-share-row { display: flex; gap: 8px; margin-top: var(--s-5); flex-wrap: wrap; }
+.fg-share-row .input { flex: 1; min-width: 240px; font-size: 12px; }
+.fg-share-row .btn { min-height: 44px; }
+.fg-share-note { font-size: 12px; margin-top: 8px; }
+.fg-full { padding: 0 0 var(--s-16); }
+.fg-full .card { max-width: 640px; padding: var(--s-8); display: flex; flex-direction: column; gap: var(--s-4); }
+.fg-full .card p { font-size: var(--fs-small); }
+.fg-full .btn { align-self: flex-start; min-height: 44px; }
+
+@media (max-width: 860px) {
+  .fg-hero-ring, .fg-doors { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+}
+
+
+/* =============================================================
+   THE TEN POINT MAP
+   The ten points as navigation. It sits on the cover, so somebody
+   sees what the assessment covers before answering anything, and on
+   the carry-forward screen, where it shows what the Quick Scan has
+   already filled in.
+
+   State is carried by the written label AND by a top rule, never by
+   colour alone, and every tile states its own score.
+   ============================================================= */
+.fg-point-map { padding: var(--s-16) 0 var(--s-10); }
+.fg-point-map-head {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: var(--s-6); flex-wrap: wrap; margin-bottom: var(--s-8);
+}
+.fg-point-map-head h2 { margin-top: var(--s-3); font-size: var(--fs-h3); }
+.fg-point-map-score { font-size: 15px; color: var(--text-strong); }
+
+.fg-point-map-grid {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-top: var(--hairline); border-left: var(--hairline);
+}
+.fg-point-tile {
+  min-height: 156px;
+  display: grid; grid-template-rows: auto 1fr auto auto;
+  gap: var(--s-2);
+  padding: var(--s-5);
+  text-align: left; cursor: pointer;
+  background: var(--paper); border: 0;
+  border-right: var(--hairline); border-bottom: var(--hairline);
+  transition: background .15s;
+}
+.fg-point-tile:hover { background: var(--surface); }
+.fg-point-tile:focus-visible {
+  outline: 0; background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.fg-point-number { font-size: 11px; letter-spacing: 0.1em; color: var(--text-faint); }
+.fg-point-title {
+  font-family: var(--font-display); font-size: var(--fs-h5);
+  line-height: 1.2; color: var(--text-strong);
+}
+.fg-point-state {
+  font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-faint);
+}
+.fg-point-score { font-size: 12px; color: var(--text-muted); }
+
+.fg-point-tile.is-complete { box-shadow: inset 0 3px 0 var(--accent); }
+.fg-point-tile.is-complete .fg-point-state { color: var(--accent-deep); }
+.fg-point-tile.is-attention { box-shadow: inset 0 3px 0 var(--bronze); }
+.fg-point-tile.is-attention .fg-point-state { color: var(--bronze-deep); font-weight: 500; }
+.fg-point-tile.is-active { box-shadow: inset 0 3px 0 var(--stone-300); }
+
+@media (max-width: 900px) {
+  .fg-point-map-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .fg-point-map-grid { grid-template-columns: 1fr; }
+  .fg-point-tile { min-height: 0; grid-template-rows: auto auto auto auto; }
+}
+
+
+/* =============================================================
+   THE BOARD IS THE PAGE
+   On the card board there is no rail and no measure: the cards get
+   the full width, which is what makes them read as cards rather than
+   as four columns of clipped text.
+   ============================================================= */
+body[data-step="1"] .fg-rail { display: none; }
+/* The horizontal 01..10 / LEDGER strip is the rail's narrow-width
+   twin. It is chrome above the cards, so it goes with the rail. */
+body[data-step="1"] .fg-step-nav { display: none; }
+body[data-step="1"] .fg-main { max-width: none; }
+body[data-step="1"] .fg-body { display: block; }
+
+/* While a card is open the page behind it must not scroll. */
+body.board-card-open { overflow: hidden; }

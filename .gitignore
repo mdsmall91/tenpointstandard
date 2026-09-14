@@ -1,0 +1,26 @@
+# The Worker's dependencies. Installed with `npm install` in worker/,
+# 41 packages, none of them ours.
+worker/node_modules/
+node_modules/
+
+# LOCAL SECRETS. NEVER COMMIT.
+# wrangler reads .dev.vars when running the Worker locally, and the
+# Anthropic API key goes in it. The deployed Worker gets the key as a
+# Cloudflare secret instead (`npx wrangler secret put ANTHROPIC_API_KEY`),
+# which is stored encrypted and never appears in this repository or in
+# the deployed bundle. The key itself lives in ~/.secrets.
+.dev.vars
+.dev.vars.*
+*.env
+.env
+.env.*
+
+# wrangler's local state and build output.
+.wrangler/
+worker/.wrangler/
+dist/
+
+# Editor and OS noise.
+.DS_Store
+Thumbs.db
+*.swp

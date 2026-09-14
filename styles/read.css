@@ -1,0 +1,218 @@
+/* =============================================================
+   THE QUICK SCAN — six cards
+   =============================================================
+   Rebuilt September 2026 alongside read.js. The previous stylesheet
+   dressed nine screens of photo grids, a drag slider and a scored
+   result; none of that markup exists now.
+
+   WRITTEN PHONE FIRST. This runs at a trade show, on a phone, held
+   in one hand. So the base rules here are the phone rules and the
+   media queries add width rather than take it away — the other way
+   round always ends up with a desktop layout crushed into 375px.
+
+   Targets are 56px minimum, which is above the 44px floor because
+   somebody standing at a booth is not looking closely. Nothing
+   depends on hover. Nothing is dragged.
+   ============================================================= */
+
+.rd-main { padding: 0 0 64px; }
+
+.qs-screen {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px var(--page-pad) 0;
+}
+
+/* ---------- progress ---------- */
+.qs-dots { display: flex; gap: 6px; margin: 0 0 20px; }
+.qs-dots i {
+  height: 4px; flex: 1; border-radius: 4px;
+  background: var(--surface-2, #e3e6dd);
+}
+.qs-dots i.done { background: #a9ba97; }
+.qs-dots i.on { background: #3f5a41; }
+
+/* ---------- the opener ---------- */
+.qs-opener h1 {
+  font-family: var(--font-display, 'Source Serif 4', Georgia, serif);
+  font-size: clamp(2rem, 8vw, 3rem); font-weight: 400;
+  line-height: 1.08; letter-spacing: -1px; margin: 14px 0 0;
+}
+.qs-opener .lede { margin-top: 20px; max-width: 46ch; }
+.qs-meta {
+  margin: 24px 0 28px; font-size: 11px; letter-spacing: .1em;
+  color: var(--text-faint); text-transform: uppercase;
+}
+.qs-opener .btn { width: 100%; }
+.qs-alt {
+  margin-top: 28px; font-size: 14px; line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* ---------- a card ----------
+   The photograph carries the question, the way the Experience
+   Builder cards do. On a phone it is a band rather than a full card:
+   a tall photo would push the four answers below the fold, and an
+   answer somebody has to scroll to find is an answer they do not
+   give. */
+/* Sized off the viewport, not a fixed height. On a 667px phone a
+   276px photograph pushed the fourth answer to within 4px of the fold
+   and the Next button below it. `dvh` so the iOS address bar
+   collapsing does not change the answer, with `vh` behind it for
+   browsers that do not have it. */
+.qs-photo {
+  position: relative; margin: 0 0 14px;
+  border-radius: 16px; overflow: hidden;
+  height: 22vh; height: 22dvh; min-height: 128px; max-height: 260px;
+}
+.qs-photo img { width: 100%; height: 100%; object-fit: cover; }
+.qs-photo::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, #13201600, transparent 30%, #131f15d9 100%);
+}
+.qs-photo figcaption {
+  position: absolute; left: 20px; right: 18px; bottom: 18px; z-index: 1; color: #fff;
+}
+.qs-photo .eyebrow { color: #cfdcc4; font-size: 11px; letter-spacing: .12em; }
+.qs-photo h2 {
+  font-family: var(--font-display, 'Source Serif 4', Georgia, serif);
+  font-size: clamp(1.45rem, 6vw, 2rem); font-weight: 400;
+  line-height: 1.12; letter-spacing: -.5px; margin: 8px 0 0; color: #fff;
+  overflow-wrap: break-word;
+}
+
+/* ---------- the four answers ---------- */
+.qs-options { display: grid; gap: 10px; }
+.qs-option {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 56px; padding: 14px 16px; width: 100%;
+  text-align: left; font-size: 16px; line-height: 1.35;
+  background: var(--surface, #fbfbf8); color: var(--text-strong);
+  border: 1px solid #d9e1d2; border-radius: 12px;
+  transition: background .12s, border-color .12s;
+}
+.qs-option i {
+  flex: none; width: 22px; height: 22px; border-radius: 50%;
+  border: 1px solid #c2ceb6; display: grid; place-items: center;
+  font-size: 13px; color: #fff;
+}
+.qs-option.picked { background: #e9f0df; border-color: #6f8b57; }
+.qs-option.picked i { background: #4d6b40; border-color: #4d6b40; }
+/* "I do not know yet" is a real answer, not a failure. It reads as
+   quieter than the other three, never as disabled. */
+.qs-unknown { color: var(--text-muted); font-style: italic; }
+.qs-unknown.picked { font-style: normal; }
+
+/* ---------- moving between cards ---------- */
+/* Sticky to the bottom of the phone. Standing at a booth, the Next
+   button has to be under the thumb and it has to be there without
+   scrolling for it — on a 667px screen it was 74px below the fold.
+   The negative inline margins let the bar's background run to the
+   edges while its contents stay on the page's own gutter. */
+.qs-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; min-height: 56px;
+  position: sticky; bottom: 0; z-index: 5;
+  margin: 18px calc(var(--page-pad) * -1) 0;
+  padding: 10px var(--page-pad) calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--paper, #fbfbf8);
+  border-top: 1px solid var(--border-soft, #e4e7de);
+}
+.qs-back {
+  background: none; border: 0; padding: 12px 4px;
+  font-size: 15px; color: var(--text-muted); min-height: 48px;
+}
+.qs-nav .btn { min-height: 52px; padding-inline: 26px; }
+.qs-hint { font-size: 14px; color: var(--text-faint); }
+
+/* ---------- the reflection ---------- */
+.qs-result h1 {
+  font-family: var(--font-display, 'Source Serif 4', Georgia, serif);
+  font-size: clamp(1.9rem, 7.5vw, 2.75rem); font-weight: 400;
+  line-height: 1.08; letter-spacing: -1px; margin: 14px 0 0;
+}
+.qs-read { margin-top: 24px; }
+.qs-read p {
+  font-size: 17px; line-height: 1.62; margin: 0 0 16px; max-width: 46ch;
+}
+.qs-provenance {
+  margin: 4px 0 0; padding: 13px 15px;
+  background: var(--surface-2, #f2f4ef); border-left: 2px solid #93a189;
+  font-size: 13px; line-height: 1.55; color: var(--text-muted);
+}
+.qs-h2 {
+  font-family: var(--font-display, 'Source Serif 4', Georgia, serif);
+  font-size: 1.4rem; font-weight: 400; margin: 40px 0 14px;
+}
+.qs-rows { list-style: none; margin: 0; padding: 0; }
+.qs-rows li {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 12px;
+  align-items: center; padding: 14px 0;
+  border-bottom: 1px solid var(--border-soft, #e4e7de);
+}
+.qs-row-q {
+  grid-column: 1; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--text-faint);
+}
+.qs-row-a { grid-column: 1; font-size: 15px; line-height: 1.4; }
+.qs-change {
+  grid-column: 2; grid-row: 1 / 3; align-self: center;
+  background: none; border: 0; padding: 12px 2px 12px 12px;
+  min-height: 48px; font-size: 14px; color: var(--accent);
+  border-bottom: 1px solid transparent;
+}
+.qs-change:hover { border-bottom-color: var(--accent); }
+.qs-rows li.qs-open .qs-row-a { color: var(--text-muted); font-style: italic; }
+
+.qs-note-block { margin-top: 34px; }
+.qs-note-block label { display: block; font-size: 14px; margin-bottom: 8px; }
+.qs-note-block textarea {
+  width: 100%; padding: 13px 14px; font: inherit; font-size: 16px;
+  background: var(--surface, #fbfbf8); border: 1px solid #d9e1d2;
+  border-radius: 12px; resize: vertical;
+}
+.qs-note-help { margin-top: 8px; font-size: 12px; color: var(--text-faint); }
+
+.qs-doors { display: grid; gap: 10px; margin-top: 36px; }
+.qs-doors .btn { width: 100%; min-height: 56px; }
+.qs-restart {
+  margin-top: 30px; background: none; border: 0; padding: 12px 0;
+  min-height: 48px; font-size: 14px; color: var(--text-muted);
+  border-bottom: 1px solid var(--border-soft, #e4e7de);
+}
+
+/* ---------- the masthead, on a card ----------
+   The banner is company context for somebody landing cold. Once the
+   six are underway it is 90px of the phone's screen spent on
+   something already read, so it collapses. */
+body[data-rd-step]:not([data-rd-step="0"]):not([data-rd-step="7"]) .tp-masthead {
+  display: none;
+}
+
+/* =============================================================
+   WIDER THAN A PHONE
+   Everything above is the phone. These add room; none of them take
+   it away, and none of them change the order of anything.
+   ============================================================= */
+@media (min-width: 600px) {
+  .qs-screen { padding-top: 40px; }
+  .qs-photo { height: 300px; max-height: 340px; }
+  /* Above phone width there is room for it in the flow. */
+  .qs-nav {
+    position: static; margin: 24px 0 0; padding: 0;
+    background: none; border-top: 0;
+  }
+  .qs-opener .btn { width: auto; min-width: 220px; }
+  .qs-doors { grid-auto-flow: column; justify-content: start; }
+  .qs-doors .btn { width: auto; min-width: 230px; }
+}
+
+@media (min-width: 900px) {
+  .qs-screen { max-width: 720px; padding-top: 56px; }
+  .qs-photo { height: 340px; max-height: 380px; }
+  .qs-option { font-size: 17px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qs-option { transition: none; }
+}

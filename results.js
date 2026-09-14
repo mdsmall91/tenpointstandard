@@ -201,12 +201,21 @@ var TPResults = (function () {
 
   function evaluate(answers) {
     var q = function (pi, qi) { return answers[pi + '-' + qi]; };
-    var y = [], score = 0, answered = 0, i, j;
+    var y = [], score = 0, answered = 0, notSure = 0, i, j;
     for (i = 0; i < 10; i++) {
       var c = 0;
       for (j = 0; j < 4; j++) {
-        if (q(i, j) !== undefined) answered++;
-        if (q(i, j) === true) c++;
+        var v = q(i, j);
+        /* "Not sure" scores exactly as no, everywhere: gates, seam
+           triggers, and the point total. It is tracked separately
+           because it is the most useful answer in the product. A
+           person with nine of them is early, not unqualified, and
+           they need a conversation more than a score. It is NOT
+           counted as answered: "I answered it" and "I do not know"
+           are different facts about the same project. */
+        if (v === true || v === false) answered++;
+        else if (v === 'unsure') notSure++;
+        if (v === true) c++;
       }
       y.push(c);
       score += c * PTS[i];
@@ -357,7 +366,7 @@ var TPResults = (function () {
     actions = actions.slice(0, 3);
 
     return {
-      score: score, answeredCount: answered, yes: y,
+      score: score, answeredCount: answered, notSureCount: notSure, yes: y,
       band: band, bandName: STAGE_NAMES[band],
       openGates: openGates.map(function (g) { return { id: g.id, name: g.name }; }),
       verdict: {

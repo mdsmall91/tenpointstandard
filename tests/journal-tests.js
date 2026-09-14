@@ -28,8 +28,14 @@
      comparison against a single-line string in posts.js. */
   function norm(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
 
+  /* Every page this suite reads is fetched fresh. The browser's HTTP
+     cache once served a stale mix of pages here and the suite reported
+     121 of 122 passing while real drift sat on disk unnoticed. A drift
+     test whose answer depends on the cache is worse than no test. */
+  var NOCACHE = { cache: 'no-store' };
+
   function get(url) {
-    return fetch(url).then(function (r) {
+    return fetch(url, NOCACHE).then(function (r) {
       if (!r.ok) throw new Error(url + ' -> HTTP ' + r.status);
       return r.text();
     }).then(function (t) {
@@ -179,9 +185,18 @@
        beside the CTA. No Field Guide link, no Ten Point Services
        link. */
     var navLinks = [].slice.call(doc.querySelectorAll('.tp-nav a')).map(function (a) { return norm(a.textContent); });
-    eq('index: nav is Field Journal only', JSON.stringify(navLinks), JSON.stringify(['Field Journal']));
-    check('index: nav sits with the CTA',
-      !!doc.querySelector('.jr-header-right .tp-nav') && !!doc.querySelector('.jr-header-right .jr-header-cta'));
+    /* v3: the Journal is the site root, so its nav carries the whole
+       site. Asserted as an exact list: a link quietly dropped from the
+       header is exactly the kind of drift this file exists to catch. */
+    eq('index: nav is the full site', JSON.stringify(navLinks),
+      JSON.stringify(['Field Journal', 'Quick Scan', 'Full Assessment', 'About']));
+    /* The header used to carry a "See where you are" button beside the
+       nav. It went to /read/, which the "Quick Scan" link next to it
+       already did, so two controls competed to say the same thing and
+       the button's label named neither. The header is nav only now,
+       and this asserts the button stays gone. */
+    check('index: the header is nav only, no second CTA',
+      !!doc.querySelector('.jr-header-right .tp-nav') && !doc.querySelector('.jr-header-cta'));
   }
 
   /* ---------- feed ----------
@@ -261,14 +276,21 @@
     check(s + 'readTime rendered', meta.indexOf(p.readTime) !== -1, meta);
 
     /* The lead-gen surface is on every article, no exceptions. */
-    check(s + 'assessment CTA present', !!doc.querySelector('.jr-cta a.btn'));
-    eq(s + 'CTA points at the assessment',
-      doc.querySelector('.jr-cta a.btn').getAttribute('href'), '/');
+    check(s + 'assessment CTA present', !!doc.querySelector('.tp-cta a.btn'));
+    eq(s + 'CTA points at Quick Scan',
+      doc.querySelector('.tp-cta a.btn').getAttribute('href'), '/read/');
+    /* Same words in the same block on every article and on the index.
+       Repetition is the whole point, so drift in the wording fails. */
+    eq(s + 'CTA wording', norm(text(doc, '.tp-cta h3')),
+      'Where does your project actually stand?');
+    /* The masthead is static HTML on every page, because a crawler that
+       runs no JavaScript still has to learn whose site this is. */
+    check(s + 'masthead present', !!doc.querySelector('.tp-masthead p strong'));
     check(s + 'share row present', doc.querySelectorAll('[data-share]').length === 3);
     check(s + 'copy-link present', !!doc.getElementById('jr-copy'));
     check(s + 'newsletter present', !!doc.getElementById('jr-article-form'));
     check(s + 'back link present',
-      doc.querySelector('.jr-back').getAttribute('href') === '../journal.html');
+      doc.querySelector('.jr-back').getAttribute('href') === '/');
 
     /* Only published entries have pages at all, so every page that
        exists must be indexable and carry its copy. */
@@ -326,9 +348,9 @@
   checkModel();
 
   Promise.all([
-    get('../journal.html').then(checkIndex),
+    get('../index.html').then(checkIndex),   // the Journal is the site root now
 
-    fetch('../feed.xml').then(function (r) { return r.text(); }).then(function (t) {
+    fetch('../feed.xml', NOCACHE).then(function (r) { return r.text(); }).then(function (t) {
       checkFeed(new DOMParser().parseFromString(t, 'text/xml'));
     }),
 
@@ -342,7 +364,7 @@
        orphaned — reachable by URL, absent from the index, and
        invisible to anyone reviewing the site. */
     Promise.all(POSTS.filter(function (p) { return p.draft; }).map(function (p) {
-      return fetch('../journal/' + p.slug + '.html').then(function (r) {
+      return fetch('../journal/' + p.slug + '.html', NOCACHE).then(function (r) {
         check('draft ' + p.slug + ': has no page', r.status === 404, 'HTTP ' + r.status);
       });
     }))

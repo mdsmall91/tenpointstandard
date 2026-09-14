@@ -5,61 +5,53 @@
    values exist in exactly one place. */
 
 /* =============================================================
-   DATA — canonical, copy verbatim from the design handoff.
+   DATA
    ============================================================= */
-/* Order, titles, and question sequence per Field Guide v2 (July 2026). */
-var POINTS = [
-  { n: '01', title: 'Property Details', pts: 3, max: 12, docs: 'Survey & Basemap · Site Constraints Documented · Infrastructure Master Plan · Site Analysis Plan',
-    qs: ['Do you have a legal boundary and a plan of current site conditions?',
-         'Do you know the challenges: wetlands, easements, soils, access?',
-         'Is there a plan for water, sanitary, power, and stormwater?',
-         'Do you know what makes the site special, and how weather, seasons, and access shape it?'] },
-  { n: '02', title: 'Capital Strategy', pts: 4, max: 16, docs: 'Funding Strategy · Land Strategy · Cash Flow Model · Financial Partner Review',
-    qs: ['Do you know whether you need outside investment, and do you have the required equity?',
-         'Do you control the land, and do you know what is time-critical about your position?',
-         'Have you modeled cash flow for every phase, and stress-tested the variables?',
-         'Have lending partners or outside financial representatives reviewed the plan?'] },
-  { n: '03', title: 'Regulatory Approvals', pts: 3, max: 12, docs: 'Zoning Review · Entitlement Strategy · Development Approval Matrix · Permit Checklist',
-    qs: ['Do you know the zoning, and do you have use-by-right?',
-         'If the use is non-conforming, do you know what compliance requires, and how long?',
-         'Do you know what approvals govern site development and construction on the property?',
-         'Do you know which permits you anticipate, and the process to obtain them?'] },
-  { n: '04', title: 'Guest Experience', pts: 3, max: 12, docs: 'Target Market Analysis · Competition Analysis · Experience Framework Plan · Guest Experience Framework Plan',
-    qs: ['Do you know your target guest, and do they already come to the area?',
-         'Do you know why they will choose you over options they already have?',
-         'Do you know which experiences are must-haves for your guests?',
-         'Do you know how your planned amenities map to the guest experience?'] },
-  { n: '05', title: 'Design', pts: 2, max: 8, docs: 'Subconsultant Alignment · Brand Strategy · Construction Documents & Specifications · Safety, Code Compliance & Constructability Review',
-    qs: ['Do you know which design professionals you need for regulatory compliance?',
-         'Does the design champion the brand and the guest experience?',
-         'Are the drawings detailed enough to build from, and to hold construction to?',
-         'Is the design constructable, safe, cost-effective, and code-compliant?'] },
-  { n: '06', title: 'Procurement', pts: 2, max: 8, docs: 'Long-lead Procurement Plan · Vendor Prequalification · Site Logistics Matrix · Responsibility Matrix',
-    qs: ['Is every long-lead item identified, and locked in with deposits?',
-         'Are vendors vetted for capacity, financial stability, and track record on resorts like yours?',
-         'Do you know where materials are staged, and how delivery is sequenced against installation?',
-         'Do you know what you buy direct versus through the contractor, with handoffs documented?'] },
-  { n: '07', title: 'Schedule', pts: 2, max: 8, docs: 'CMP Baseline Schedule · Schedule Risk Analysis · Integrated Procurement Schedule · Float Analysis & Schedule Compression',
-    qs: ['Do you have milestones, and are they tied to funding or closing?',
-         'Do you know what else sits on the critical path: approvals, construction, commissioning?',
-         'Do you know which materials, supplies, and units carry long lead times?',
-         'Does the build duration reconcile with lead times, weather windows, and opening day?'] },
-  { n: '08', title: 'Cost Certainty', pts: 2, max: 8, docs: 'Budget Analysis · Independent Cost Validation · Contingency & Risk Allocation · Cost Reporting & Variance Tracking',
-    qs: ['Is the budget a detailed breakdown of hard and soft costs, including regulatory fees?',
-         'Has a third party validated how the budget was built and its assumptions?',
-         'Are you carrying a contingency, and do you know your biggest risks in the model?',
-         'Is the budget updated regularly, tracking projected against actual?'] },
-  { n: '09', title: 'Quality Assurance', pts: 1, max: 4, docs: 'Dedicated Project Management · Site Walk & Verification · Quality Assurance Standard-of-Care · Quality Guarantee',
-    qs: ['Is someone on site every day, walking the work and holding the contract?',
-         'Are punch items tracked, with a named owner who closes them?',
-         'Is the quality standard written down, and is it owner-written rather than contractor-written?',
-         'Do you have written assurance from the contractor and their subcontractors that problems will be made right?'] },
-  { n: '10', title: 'Opening Readiness', pts: 3, max: 12, docs: 'Management Structure · Staffing & Service Model · Revenue Center P&L · Lifecycle Maintenance Plan',
-    qs: ['Do you know who runs the resort day one: your team, a third party, or a flag not yet signed?',
-         'Does the space plan support the staffing model, back of house included?',
-         'Do you know which revenue centers carry the P&L, and is the design costed to their margin?',
-         'Do you know what year-three maintenance looks like, and who signs off on that cost?'] }
+/* POINTS — the forty questions — lives in questions.js, which every
+   page loads before this file. It is shared with the card board at
+   /standard/play/, so a question edited here reaches both. */
+
+/* =============================================================
+   FIELD NOTES — one line per point, from real project experience.
+   These are what make the assessment feel like a person rather than
+   a form, so they are written the way somebody would say them on a
+   site walk, not the way a form would ask.
+
+   DRAFT. Kenny has not passed on these yet. They are here so he
+   edits rather than writes from a blank page.
+   ============================================================= */
+var FIELD_NOTES = [
+  'The survey tells you where the lines are. The site walk tells you what the lines are hiding.',
+  'Money that is close is not money that is committed. A lender can tell the difference on the first read.',
+  'Most projects we see do not lose time at the permit counter. They lose it waiting on a study nobody scheduled.',
+  'Every design argument we have ever sat through was really an argument about who the guest is.',
+  'A drawing set is not done when it looks finished. It is done when a builder can price it without calling you.',
+  'Knowing the lead time does not reserve the slot. A deposit reserves the slot.',
+  'A schedule built backward from opening day is a wish. Build it forward from the approvals.',
+  'The budget nobody outside the project has checked is the budget that moves after the money commits.',
+  'Quality is decided by whoever walks the site on a Tuesday, not by what the contract says.',
+  'The building is the easy half. The first ninety days of operating it is the half that gets skipped.'
 ];
+
+/* Full-width opener photographs, one per point. Every one is a real
+   Ten Point project; tools/build-images.py holds the provenance and
+   is the only place the crops are made. */
+var POINT_IMG = ['01-property', '02-capital', '03-regulatory', '04-guests', '05-design',
+  '06-procurement', '07-schedule', '08-cost', '09-qa', '10-opening'];
+/* The width baked into each filename, which is whatever the source
+   could give without being upscaled. Run tools/build-images.py and
+   copy what it prints; a number that does not match is a 404 and a
+   card with no photograph on it. */
+var POINT_IMG_W = [1400, 660, 1400, 760, 760, 760, 760, 760, 760, 760];
+/* Provenance is part of the data, not decoration. "Ten Point Services"
+   on a photograph means Ten Point built it, and a credit that implies
+   otherwise is a licensing problem for a licensed general contractor.
+   Shown on the photo pane of an open card. */
+var POINT_IMG_CAP = ['Outdoorsy Hill Country, Texas', 'Austin Moto Adventures, Texas',
+  'KOA Fredericksburg, Texas', 'Outdoorsy Hill Country, Texas',
+  'Lagom Retreat, Dripping Springs, Texas', 'Lagom Retreat, Dripping Springs, Texas',
+  'Outdoorsy Hill Country, Texas', 'Lagom Retreat, Dripping Springs, Texas',
+  'KOA Fredericksburg, Texas', 'Lagom Retreat, Dripping Springs, Texas'];
 
 var BANDS = [
   { range: '0 – 39', title: 'Answer the fundamentals.', service: 'Ten Point Align',
@@ -78,7 +70,16 @@ var STORE_KEY = 'tp-fieldguide-v2';
    STATE
    ============================================================= */
 var state = { answers: {}, revealed: false, sentTo: '', email: '', emailError: false, step: 0,
-  phone: '', fullReq: false, ctaMode: '', ctaError: false };
+  phone: '', fullReq: false, ctaMode: '', ctaError: false,
+  /* Carried in from Quick Scan. `carried` is the list of questions lane
+     one answered, kept so the confirmation screen can show them back
+     with an edit link and so `questions_skipped_by_carry` is a real
+     number rather than an estimate. `readCtx` is the lane one context
+     used to describe the project back to the person. */
+  carried: [], readCtx: null, carryConfirmed: false,
+  /* Set only if the model layer answered in time. The template read is
+     what renders until then, and what keeps rendering if it does not. */
+  modelLines: null, modelAsked: false };
 
 function load() {
   try {
@@ -90,13 +91,49 @@ function load() {
       state.sentTo = d.e || '';
       state.step = d.s || 0;
       state.fullReq = !!d.f;
+      state.carryConfirmed = !!d.cc;
     }
   } catch (e) {}
 }
 function save() {
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify({ a: state.answers, r: state.revealed, e: state.sentTo, s: state.step, f: state.fullReq }));
+    localStorage.setItem(STORE_KEY, JSON.stringify({ a: state.answers, r: state.revealed, e: state.sentTo, s: state.step, f: state.fullReq, cc: state.carryConfirmed }));
   } catch (e) {}
+}
+
+/* -------------------------------------------------------------
+   CARRY FORWARD FROM QUICK SCAN
+   Anything lane one already established is filled in and marked
+   answered, and the count is said out loud on the first screen,
+   because skipping a quarter of the questions is a real reward for
+   having done the first lane.
+
+   Nothing is assumed silently. Every carried answer is listed back
+   with an edit link, and readmodel.js only carries equivalences that
+   hold on their own: a tap on a photograph is not the same claim as
+   a yes to a written question.
+   ------------------------------------------------------------- */
+function loadCarry() {
+  if (typeof TPReadModel === 'undefined') return;
+  var raw;
+  try { raw = localStorage.getItem('tp-read-v1'); } catch (e) { return; }
+  if (!raw) return;
+  var r;
+  try { r = JSON.parse(raw); } catch (e) { return; }
+  if (!r || !r.done) return;
+
+  state.readCtx = r;
+  var rows = TPReadModel.carry(r);
+  var fresh = [];
+  for (var i = 0; i < rows.length; i++) {
+    // A person who already answered a question here outranks the
+    // carry: their own later answer is the better evidence.
+    if (state.answers[rows[i].key] === undefined) {
+      state.answers[rows[i].key] = rows[i].value;
+      fresh.push(rows[i]);
+    }
+  }
+  state.carried = fresh;
 }
 
 /* =============================================================
@@ -114,7 +151,19 @@ function totalScore() {
   for (var i = 0; i < POINTS.length; i++) t += pointScore(i);
   return t;
 }
-function answeredCount() { return Object.keys(state.answers).length; }
+/* "Not sure" is deliberately NOT answered. It scores as no, and it
+   is counted on its own, because "I answered it" and "I do not know"
+   are different facts about the same project. */
+function answeredCount() {
+  var n = 0;
+  for (var k in state.answers) if (state.answers[k] === true || state.answers[k] === false) n++;
+  return n;
+}
+function notSureCount() {
+  var n = 0;
+  for (var k in state.answers) if (state.answers[k] === 'unsure') n++;
+  return n;
+}
 function bandIdx(total) { return total <= 39 ? 0 : total <= 69 ? 1 : 2; }
 function pointDone(pi) {
   for (var qi = 0; qi < POINTS[pi].qs.length; qi++) {
@@ -122,24 +171,47 @@ function pointDone(pi) {
   }
   return true;
 }
+function pointYes(pi) {
+  var n = 0;
+  for (var qi = 0; qi < POINTS[pi].qs.length; qi++) {
+    if (state.answers[pi + '-' + qi] === true) n++;
+  }
+  return n;
+}
+
+/* The ring, in both lanes' shared shape. Points that are finished
+   are scored; points not started yet stay grey and say so, which is
+   the same grammar Quick Scan uses. */
+function ringSegments() {
+  var R = TPResults.evaluate(state.answers);
+  var segs = [];
+  for (var i = 0; i < 10; i++) {
+    var started = false;
+    for (var q = 0; q < 4; q++) if (state.answers[i + '-' + q] !== undefined) started = true;
+    segs.push({
+      n: POINTS[i].n,
+      label: POINTS[i].title,
+      state: started ? 'scored' : 'unscored',
+      fill: pointYes(i) / 4,
+      score: pointScore(i),
+      max: POINTS[i].max,
+      gateOpen: R.ledger[i].gateOpen
+    });
+  }
+  return segs;
+}
 
 /* =============================================================
    ANALYTICS (GA4, optional)
    ============================================================= */
-function initGA() {
-  if (!CONFIG.GA_MEASUREMENT_ID) return;
-  var s = document.createElement('script');
-  s.async = true;
-  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + CONFIG.GA_MEASUREMENT_ID;
-  document.head.appendChild(s);
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = function () { window.dataLayer.push(arguments); };
-  window.gtag('js', new Date());
-  window.gtag('config', CONFIG.GA_MEASUREMENT_ID);
-}
-function track(name, params) {
-  if (window.gtag) window.gtag('event', name, params || {});
-}
+/* One GA wiring for the whole site now lives in analytics.js, and
+   milestones go through TPA.once() so a re-render, a back button, or
+   a reload cannot re-send them. The live property shows nine
+   fg_email_captured events from three users; that is the bug these
+   two wrappers close. */
+function initGA() { TPA.init(); }
+function track(name, params) { TPA.track(name, params); }
+function trackOnce(name, params, key) { return TPA.once(name, params, key); }
 
 /* Slugs for the GA4 score_band param. Index matches R.verdict.stage, which is
    the stage the user is actually shown: gates can pull it below the raw band. */
@@ -149,11 +221,18 @@ var BAND_SLUGS = ['align', 'design', 'build'];
    not on later re-renders or on reloads of a saved result. */
 function trackComplete() {
   var R = TPResults.evaluate(state.answers);
-  track('assessment_complete', {
+  var params = {
     method: 'ten_point_standard',
     score_band: BAND_SLUGS[R.verdict.stage],
     score: R.score,
     gated: R.verdict.gated ? 'yes' : 'no'
+  };
+  trackOnce('assessment_complete', params);
+  trackOnce('standard_complete', {
+    score: R.score,
+    band: BAND_SLUGS[R.verdict.stage],
+    not_sure_count: R.notSureCount,
+    questions_skipped_by_carry: state.carried.length
   });
 }
 
@@ -180,6 +259,19 @@ function submitToMailchimp(email, extra) {
     params.push('P' + POINTS[i].n + '=' + encodeURIComponent(
       row.score + ' / ' + row.max + ' · ' + row.label + (row.gateOpen ? ' · gate open' : '')));
   }
+  /* The link to the forwardable scorecard. Everything the person saw
+     is encoded in it, so the email does not have to carry forty
+     answers and a written read through merge fields that truncate at
+     255 characters.
+
+     MAILCHIMP: SCORECARD is a live text field, created 2026-09-09 in
+     the slot freed by deleting Birthday, and the scorecard email's
+     button href is the bare merge tag. The audience sits at the 30
+     merge-field cap, so there is no room for another one: FINDINGS is
+     still accepted and silently dropped, which is why the findings
+     ride in F1, F2 and F3 instead. */
+  params.push('SCORECARD=' + encodeURIComponent(TPScoreCode.url(state.answers)));
+
   if (extra) {
     for (var k in extra) {
       if (extra[k]) params.push(k + '=' + encodeURIComponent(extra[k]));
@@ -221,9 +313,13 @@ function esc(s) {
 function goTop() { document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }
 function goStep(i) { state.step = i; save(); render(); goTop(); }
 
-// Cover = 0, each point advances a tenth, ledger = complete.
+/* Cover = 0, ledger = 100, and in between the rail tracks answers.
+   The board has no sequence to measure, so counting screens would
+   leave the rail frozen at ten percent through all forty questions. */
 function progressPct() {
-  return state.step === 0 ? 0 : Math.min(100, Math.round((state.step / 10) * 100));
+  if (state.step === 0) return 0;
+  if (state.step === 11) return 100;
+  return Math.min(100, Math.round((answeredCount() / 40) * 100));
 }
 
 function renderRail() {
@@ -262,7 +358,88 @@ function renderHeader() {
   nav.innerHTML = html;
 }
 
+/* The first screen for somebody who came from The Quick Scan is not a
+   question. It is a confirmation of what lane one already captured,
+   each row with a way to change it. Saying the skipped count out
+   loud matters: it is the reward for having done the first lane. */
+
+/* =============================================================
+   THE TEN POINT MAP
+   The ten points as the primary navigation, not a progress bar. It
+   answers "what is this going to ask me" before the first question
+   and "where am I" during, and it is the same ten points in the same
+   order as the ring, so the two read as one system.
+
+   NOTE ON "NEEDS ATTENTION". It means a defined critical gate inside
+   that point is open. It does NOT mean the point simply scored below
+   its maximum. Those are different facts, and conflating them would
+   turn a normal early-stage answer into an alarm.
+   ============================================================= */
+function pointStatus(pi, R) {
+  var answered = 0;
+  for (var qi = 0; qi < POINTS[pi].qs.length; qi++) {
+    if (state.answers[pi + '-' + qi] !== undefined) answered++;
+  }
+  if (!answered) return { id: 'empty', label: 'Not started' };
+  if (answered < POINTS[pi].qs.length) return { id: 'active', label: 'In progress' };
+  /* The gate comes from the results engine, which is the only thing
+     that knows which of the forty questions are gates. */
+  if (R && R.ledger[pi].gateOpen) return { id: 'attention', label: 'Needs attention' };
+  return { id: 'complete', label: 'Complete' };
+}
+
+function renderPointMap(showScore) {
+  var R = TPResults.evaluate(state.answers);
+  var html = '<section class="fg-point-map" aria-labelledby="fg-map-h">' +
+    '<div class="fg-point-map-head">' +
+      '<div>' +
+        '<div class="eyebrow dotted">Your field map</div>' +
+        '<h2 id="fg-map-h">Ten points. One project.</h2>' +
+      '</div>' +
+      (showScore ? '<span class="mono fg-point-map-score">' + totalScore() + ' / 100</span>' : '') +
+    '</div>' +
+    '<div class="fg-point-map-grid">';
+  for (var pi = 0; pi < POINTS.length; pi++) {
+    var st = pointStatus(pi, R);
+    html += '<button type="button" class="fg-point-tile is-' + st.id + '" data-go="' + (pi + 1) + '">' +
+      '<span class="fg-point-number mono">' + POINTS[pi].n + '</span>' +
+      '<span class="fg-point-title">' + esc(POINTS[pi].title) + '</span>' +
+      '<span class="fg-point-state">' + st.label + '</span>' +
+      '<span class="fg-point-score mono">' + pointScore(pi) + ' / ' + POINTS[pi].max + '</span>' +
+    '</button>';
+  }
+  return html + '</div></section>';
+}
+
+function renderCarryConfirm() {
+  var n = state.carried.length;
+  var left = 40 - n;
+  var html = '<section class="fg-cover">' +
+    '<div class="eyebrow dotted">Full Assessment</div>' +
+    '<h1 style="margin-top: 16px;">Here is what we already know.</h1>' +
+    '<p class="lede" style="margin-top: 20px; max-width: 54ch;">You answered these in Quick Scan, so they are filled in already. That leaves ' +
+      left + ' questions instead of forty.</p>' +
+    '<ul class="fg-carry">';
+  for (var i = 0; i < n; i++) {
+    var c = state.carried[i];
+    var pi = parseInt(c.key.split('-')[0], 10);
+    html += '<li>' +
+      '<span class="fg-carry-label">' + esc(c.label) + '</span>' +
+      '<span class="fg-carry-q muted">' + esc(c.question) + '</span>' +
+      '<button class="fg-link-btn" data-go="' + (pi + 1) + '">Change this</button>' +
+    '</li>';
+  }
+  html += '</ul>' +
+    '<div style="display: flex; gap: 16px; align-items: center; margin-top: 36px; flex-wrap: wrap;">' +
+      '<button class="btn lg accent" data-action="confirm-carry">Looks right, keep going</button>' +
+      '<span class="mono" style="font-size: 11px; color: var(--text-faint);">' + left + ' QUESTIONS LEFT</span>' +
+    '</div>' +
+  '</section>' + renderPointMap(true);
+  return html;
+}
+
 function renderCover() {
+  if (state.carried.length && !state.carryConfirmed) return renderCarryConfirm();
   return '' +
     '<section class="fg-cover">' +
       '<div class="eyebrow dotted">The Ten Point Standard</div>' +
@@ -272,38 +449,41 @@ function renderCover() {
         '<button class="btn lg" data-action="begin">Begin the assessment</button>' +
         '<span class="mono" style="font-size: 11px; color: var(--text-faint);">~5 MIN</span>' +
       '</div>' +
-    '</section>';
+      /* A cold visitor should be offered the ninety second version
+         first. Forty questions of homework before anything comes back
+         is the reason the old front door leaked. */
+      '<div class="fg-lane-one">' +
+        '<h4>Short on time?</h4>' +
+        '<p class="muted">Quick Scan takes about ninety seconds. Six questions about who the project is for and what it is meant to do, and no email. Nothing is scored.</p>' +
+        '<a class="btn ghost" href="/read/">Start the Quick Scan instead</a>' +
+      '</div>' +
+    '</section>' + renderPointMap(false);
 }
 
-function renderPoint(step) {
-  var pi = step - 1, p = POINTS[pi], score = pointScore(pi);
-  var html = '' +
-    '<section class="fg-pstep">' +
-      '<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap;">' +
-        '<div class="eyebrow dotted">Point ' + p.n + ' / 10</div>' +
-        '<div class="mono" style="font-size: 11px; color: var(--text-faint);">EACH YES = ' + p.pts + ' PTS · ' + score + ' / ' + p.max + '</div>' +
-      '</div>' +
-      '<h2 style="margin-top: 28px;">' + p.title + '.</h2>' +
-      '<div style="margin-top: 24px;">';
-  for (var qi = 0; qi < p.qs.length; qi++) {
-    var key = pi + '-' + qi, ans = state.answers[key];
-    html += '' +
-      '<div class="fg-q">' +
-        '<div style="display: flex; gap: 14px; align-items: baseline;"><span class="mono" style="font-size: 11px; color: var(--text-faint); flex: none;">Q' + (qi + 1) + '</span><span style="font-size: 16px; color: var(--text); max-width: 58ch;">' + p.qs[qi] + '</span></div>' +
-        '<div class="fg-seg" style="display: flex; gap: 6px;">' +
-          '<button class="fg-yn yes' + (ans === true ? ' on' : '') + '" data-key="' + key + '" data-val="1">Yes</button>' +
-          '<button class="fg-yn no' + (ans === false ? ' on' : '') + '" data-key="' + key + '" data-val="0">No</button>' +
-        '</div>' +
-      '</div>';
+/* One line of result the moment a point's fourth question lands.
+   The old assessment paid out once, at the very end. This one pays
+   out ten times, so a person who stops at point six still leaves
+   with six points of value and a reason to come back. */
+/* What the fourth answer on a card is worth saying out loud. This is
+   the one place the assessment tells somebody something true about a
+   point while they are still answering, so it has to be honest in
+   both directions: four yeses is not praise, and an open gate is not
+   a failing. It says what is open, and that being early is fine.
+
+   A card is complete when four questions are answered, whatever the
+   answers were. Nothing on the board may read as readiness, so the
+   verdict this pays out is a sentence about the point, never a grade. */
+function payoutLine(pi) {
+  var R = TPResults.evaluate(state.answers);
+  var yes = pointYes(pi);
+  if (R.ledger[pi].gateOpen) {
+    return 'One of the six critical gates sits in this point, and it is still open. That is normal at your stage, and it is worth handling before the work downstream of it.';
   }
-  html += '</div>' +
-    '</section>' +
-    '<div style="display: flex; justify-content: space-between; padding: 24px 0 64px;">' +
-      '<button class="btn ghost" data-action="prev">Back</button>' +
-      '<button class="btn" data-action="next">' + (step === 10 ? 'See the ledger' : 'Next point') + '</button>' +
-    '</div>';
-  return html;
+  if (yes === 4) return 'Nothing open here. This is the part of the project you can build on.';
+  if (yes >= 2) return 'Most of this is settled. The rest is worth closing while it is still cheap to change.';
+  return 'This one is mostly open. It is early work rather than late work, which is the good news.';
 }
+
 
 function renderLedger() {
   var total = totalScore();
@@ -313,6 +493,23 @@ function renderLedger() {
     if (state.sentTo) {
       html += '<p class="muted" style="font-size: 13px; margin-bottom: 24px;">A copy of your scorecard is on its way to <span class="mono">' + esc(state.sentTo) + '</span>.</p>';
     }
+    /* The full ring is the hero of the whole product, and it is built
+       to be screenshotted: all ten filled, the score in the middle,
+       the legend underneath so it still reads in grayscale. */
+    html += '<div class="fg-hero-ring">' +
+        '<div>' + TPRing.svg({
+          segments: ringSegments(), size: 300,
+          center: { top: R.verdict.gated ? 'GATED' : '', main: String(R.score), sub: 'of 100 · ' + R.verdict.label }
+        }) + '</div>' +
+        '<div class="fg-hero-read">' +
+          '<div class="eyebrow dotted">Your Project Scan</div>' +
+          '<div class="fg-read-lines">' +
+            (state.modelLines || TPStandardRead.compose(R, state.readCtx)).map(function (l) {
+              return '<p>' + esc(l) + '</p>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+      '</div>';
     html += renderVerdict(R);
   }
   html += '<div class="eyebrow dotted">The ledger</div>' +
@@ -406,35 +603,72 @@ function renderActions(R) {
 }
 
 function renderCTA() {
-  var html = '<section style="padding: 0 0 40px;"><div class="card" style="max-width: 640px; padding: var(--s-8);">' +
-    '<h4>Was this useful?</h4>' +
-    '<p class="muted" style="font-size: 14px; margin-top: 8px;">These findings came from forty yes/no answers. A full assessment reviews the evidence behind every answer: your documents, your site, your numbers. If you want that second set of eyes, tell us and Kenny will reach out.</p>';
+  var html = '';
+
+  /* Two doors of equal weight, same as Quick Scan. A funded developer
+     will not fill in another form; a first-time landowner will not
+     book a call. And a phone number and an email address are visible
+     either way, because making somebody fill in a form to reach a
+     contractor is the wrong move. */
+  html += '<section class="fg-doors">' +
+    '<div class="card fg-door">' +
+      '<h4>Send me the full scorecard</h4>' +
+      '<p class="muted">The complete ledger, all forty answers, and your three priority actions. A page you can forward to your engineer, your lender, or your partner.</p>' +
+      (state.sentTo
+        ? '<p class="fg-sent">On its way to <span class="mono">' + esc(state.sentTo) + '</span>.</p>'
+        : state.ctaMode === 'email'
+          ? '<div class="fg-inline-form">' +
+              '<input class="input" type="email" id="cta-email-input" placeholder="you@yourproject.com" value="' + esc(state.email) + '">' +
+              '<button class="btn accent" data-action="submit-results">Send it</button>' +
+            '</div>' +
+            (state.ctaError ? '<p class="fg-err">Enter a valid email address.</p>' : '') +
+            '<p class="fg-fineprint muted">No spam. Unsubscribe any time.</p>'
+          : '<button class="btn accent" data-action="cta-email">Email my scorecard</button>') +
+    '</div>' +
+    '<div class="card fg-door">' +
+      '<h4>Talk it through with us</h4>' +
+      '<p class="muted">Twenty minutes with the team that builds these. No form needed if you would rather just call.</p>' +
+      '<a class="btn" href="/consultation/" data-cta="consultation">Set up a conversation</a>' +
+      '<p class="fg-direct">' + esc(CONFIG.CONTACT_NAME) + ', ' + esc(CONFIG.CONTACT_TITLE) + '<br>' +
+        '<a href="tel:' + esc(CONFIG.CONTACT_PHONE_HREF) + '">' + esc(CONFIG.CONTACT_PHONE) + '</a><br>' +
+        '<a href="mailto:' + esc(CONFIG.CONTACT_EMAIL) + '">' + esc(CONFIG.CONTACT_EMAIL) + '</a></p>' +
+    '</div>' +
+  '</section>';
+
+  /* The scorecard link. This is the artifact that turns one lead into
+     three, so it is offered on screen and not only by email. */
+  html += '<section class="fg-share">' +
+    '<h4>Your scorecard has its own page.</h4>' +
+    '<p class="muted">Everything on this screen lives at one link. Forward it to your engineer, your lender, or your partner. It is meant to be shared.</p>' +
+    '<div class="fg-share-row">' +
+      '<input class="input mono" id="sc-link" readonly value="' + esc(TPScoreCode.url(state.answers)) + '">' +
+      '<button class="btn ghost" data-action="copy-link">Copy link</button>' +
+      '<a class="btn ghost" href="' + esc(TPScoreCode.url(state.answers)) + '" target="_blank" rel="noopener">Open it</a>' +
+    '</div>' +
+    '<p class="fg-share-note muted" id="sc-copied" hidden>Copied.</p>' +
+  '</section>';
+
+  /* The paid offer, kept distinct from the two free doors above. This
+     is the one that converts a reader into an engagement, so it does
+     not get folded into the email card. */
+  html += '<section class="fg-full"><div class="card">' +
+    '<h4>Want a second set of eyes?</h4>' +
+    '<p class="muted">These findings came from forty yes and no answers. A full assessment goes to the evidence behind every one of them: your documents, your site, and your numbers. Tell us and ' +
+      esc(CONFIG.CONTACT_NAME.split(' ')[0]) + ' will reach out.</p>';
   if (state.fullReq) {
-    html += '<p style="font-size: 14px; margin-top: 16px; font-weight: 500;">Thank you. Kenny will reach out.</p>';
-  }
-  if (state.ctaMode === 'full') {
-    html += '<div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;">' +
-      '<input class="input" type="email" id="cta-email-input" placeholder="you@yourproject.com" value="' + esc(state.email || state.sentTo) + '" style="flex: 1; min-width: 200px;">' +
-      '<input class="input" type="tel" id="cta-phone-input" placeholder="Phone (optional)" value="' + esc(state.phone) + '" style="flex: 1; min-width: 160px;">' +
-      '<button class="btn accent" data-action="submit-full">Request the full assessment</button>' +
-    '</div>' +
-    (state.ctaError ? '<div style="font-size: 12px; color: var(--bronze-deep); margin-top: 8px;">Enter a valid email address.</div>' : '');
-  } else if (state.ctaMode === 'email') {
-    html += '<div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;">' +
-      '<input class="input" type="email" id="cta-email-input" placeholder="you@yourproject.com" value="' + esc(state.email || state.sentTo) + '" style="flex: 1; min-width: 220px;">' +
-      '<button class="btn accent" data-action="submit-results">Email my results</button>' +
-    '</div>' +
-    (state.ctaError ? '<div style="font-size: 12px; color: var(--bronze-deep); margin-top: 8px;">Enter a valid email address.</div>' : '');
+    html += '<p class="fg-sent">Thank you. ' + esc(CONFIG.CONTACT_NAME.split(' ')[0]) + ' will reach out.</p>';
+  } else if (state.ctaMode === 'full') {
+    html += '<div class="fg-inline-form">' +
+        '<input class="input" type="email" id="cta-email-input" placeholder="you@yourproject.com" value="' + esc(state.email || state.sentTo) + '">' +
+        '<input class="input" type="tel" id="cta-phone-input" placeholder="Phone (optional)" value="' + esc(state.phone) + '">' +
+        '<button class="btn accent" data-action="submit-full">Request it</button>' +
+      '</div>' +
+      (state.ctaError ? '<p class="fg-err">Enter a valid email address.</p>' : '');
   } else {
-    html += '<div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">' +
-      (state.fullReq ? '' : '<button class="btn accent" data-action="cta-full">I want the full assessment</button>') +
-      (state.sentTo ? '' : '<button class="btn ghost" data-action="cta-email">Email me these results</button>') +
-    '</div>';
-    if (state.sentTo) {
-      html += '<p class="muted" style="font-size: 13px; margin-top: 12px;">A copy of your scorecard is on its way to <span class="mono">' + esc(state.sentTo) + '</span>.</p>';
-    }
+    html += '<button class="btn" data-action="cta-full">Request the full assessment</button>';
   }
   html += '</div></section>';
+
   return html;
 }
 
@@ -445,6 +679,86 @@ function renderFooterNote(R) {
   '</section>';
 }
 
+/* The template read is already rendered before this runs. A success
+   swaps in warmer wording; a failure, a timeout, or a proxy that was
+   never deployed all leave the page exactly as it is. Fires once. */
+function requestModelRead() {
+  if (state.modelAsked || !state.revealed) return;
+  if (typeof TPModel === 'undefined' || !TPModel.enabled()) return;
+  state.modelAsked = true;
+  var R = TPResults.evaluate(state.answers);
+  TPModel.ask('standard_read', {
+    template: TPStandardRead.compose(R, state.readCtx),
+    score: R.score,
+    band: R.verdict.label,
+    open_gates: R.openGates.map(function (g) { return g.name; }),
+    not_sure_count: R.notSureCount,
+    project: state.readCtx ? {
+      type: state.readCtx.type, land: state.readCtx.land,
+      size: state.readCtx.size, stage: state.readCtx.stage
+    } : null
+  }, function (out) {
+    var clean = TPModel.cleanLines(out, 5);
+    if (!clean) return;
+    state.modelLines = clean;
+    if (state.step === 11 && state.revealed) render();
+  });
+}
+
+/* The board owns its own DOM once mounted. Rebuilding #app from a
+   string on every answer is how the rest of this file works, and it
+   is exactly what the board cannot survive: it would throw away the
+   flip mid-animation and slam the open card shut under somebody's
+   hand. So the board is mounted once and then repaints only the card
+   that changed, and render() must not touch #app while it is up. */
+function boardApi() {
+  return {
+    points: POINTS,
+    get: function (key) { return state.answers[key]; },
+    set: function (key, value, pi) {
+      state.answers[key] = value;
+      save();
+      trackOnce('assessment_start', { method: 'ten_point_standard' });
+      trackOnce('standard_start', { carried_from_read: state.carried.length ? 'yes' : 'no' });
+      if (pointDone(pi)) {
+        trackOnce('standard_point_complete', {
+          point_number: pi + 1,
+          point_name: POINTS[pi].title,
+          point_score: pointScore(pi)
+        }, 'point-' + (pi + 1));
+      }
+    },
+    /* A carried answer is one the Quick Scan gave us, not one they
+       typed. The board says so on the question so it can be changed. */
+    isCarried: function (key) {
+      for (var i = 0; i < state.carried.length; i++) if (state.carried[i].key === key) return true;
+      return false;
+    },
+    note: function (pi) { return FIELD_NOTES[pi]; },
+    /* The ledger card on the board carries the running score. */
+    score: function () { return totalScore(); },
+    /* Paid out the moment the fourth answer lands, not at the end. */
+    payout: function (pi) { return payoutLine(pi); },
+    image: function (pi) {
+      return '/assets/points/' + POINT_IMG[pi] + '-' + POINT_IMG_W[pi] + '.webp';
+    },
+    credit: function (pi) { return POINT_IMG_CAP[pi]; },
+    cardOpened: function (pi) {
+      TPA.once('full_assessment_point_opened', { point: POINTS[pi].n }, 'open-' + (pi + 1));
+    },
+    cardCompleted: function () {
+      if (answeredCount() === 40) trackOnce('standard_all_answered', { score: totalScore() });
+    },
+    /* The header score and the rail live outside the board, so the
+       board tells us when a number it does not own has changed. */
+    chromeChanged: function () { renderHeader(); renderRail(); },
+    goLedger: function () {
+      track('fg_view_ledger', { score: totalScore() });
+      goStep(11);
+    }
+  };
+}
+
 function render() {
   /* Drives the static #fg-about block, which is crawlable copy that belongs
      with the cover and would be noise once the assessment is underway. */
@@ -452,27 +766,63 @@ function render() {
   renderHeader();
   renderRail();
   var app = document.getElementById('app');
+  if (state.step === 1) {
+    if (!TPBoard.isMounted(app)) TPBoard.mount(app, boardApi());
+    else TPBoard.repaint();
+    return;
+  }
   if (state.step === 0) app.innerHTML = renderCover();
-  else if (state.step >= 1 && state.step <= 10) app.innerHTML = renderPoint(state.step);
-  else app.innerHTML = renderLedger();
+  else { app.innerHTML = renderLedger(); requestModelRead(); }
 }
 
 /* =============================================================
    EVENTS (delegated)
    ============================================================= */
 document.addEventListener('click', function (e) {
-  var el = e.target.closest('[data-go], [data-action], [data-key]');
+  var el = e.target.closest('[data-go], [data-action], [data-key], [data-cta]');
   if (!el) return;
 
-  if (el.dataset.go !== undefined) { goStep(parseInt(el.dataset.go, 10)); return; }
+  if (el.dataset.cta === 'consultation') {
+    track('consultation_cta_clicked', { placement: 'standard_result' });
+    return;                                   // let the link navigate
+  }
+
+  if (el.dataset.go !== undefined) {
+    var target = parseInt(el.dataset.go, 10);
+    /* 1 through 10 used to be ten screens. They are now ten cards on
+       one screen, so the rail goes to the board and opens the card. */
+    if (target >= 1 && target <= 10) {
+      var wasBoard = state.step === 1;
+      if (!wasBoard) goStep(1);
+      TPBoard.open(target - 1);
+      if (wasBoard) {
+        var card = document.getElementById('card-' + (target - 1));
+        if (card && card.scrollIntoView) card.scrollIntoView({ block: 'nearest' });
+      }
+      return;
+    }
+    goStep(target);
+    return;
+  }
 
   if (el.dataset.key !== undefined) {
-    /* The saved answers are the "have they started" flag: a returning visitor
-       with answers on file does not re-fire the event. */
-    var isFirstAnswer = answeredCount() === 0;
-    state.answers[el.dataset.key] = el.dataset.val === '1';
+    var v = el.dataset.val === '1' ? true : el.dataset.val === '0' ? false : 'unsure';
+    var pi = parseInt(el.dataset.key.split('-')[0], 10);
+    state.answers[el.dataset.key] = v;
     save();
-    if (isFirstAnswer) track('assessment_start', { method: 'ten_point_standard' });
+
+    /* Milestones go through once(): a re-answer, a back button, or a
+       reload cannot re-send them. */
+    trackOnce('assessment_start', { method: 'ten_point_standard' });
+    trackOnce('standard_start', { carried_from_read: state.carried.length ? 'yes' : 'no' });
+
+    if (pointDone(pi)) {
+      trackOnce('standard_point_complete', {
+        point_number: pi + 1,
+        point_name: POINTS[pi].title,
+        point_score: pointScore(pi)
+      }, 'point-' + (pi + 1));
+    }
     render();
     return;
   }
@@ -482,12 +832,34 @@ document.addEventListener('click', function (e) {
       track('fg_begin');
       goStep(1);
       break;
+    case 'confirm-carry':
+      state.carryConfirmed = true;
+      track('fg_begin');
+      trackOnce('standard_start', { carried_from_read: 'yes' });
+      goStep(1);
+      break;
+    case 'copy-link': {
+      var input = document.getElementById('sc-link');
+      if (!input) break;
+      input.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (err) {}
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(input.value)['catch'](function () {});
+        ok = true;
+      }
+      var note = document.getElementById('sc-copied');
+      if (note && ok) note.hidden = false;
+      track('scorecard_forwarded', { method: 'copy_link' });
+      break;
+    }
     case 'next':
-      if (state.step === 10) track('fg_view_ledger', { score: totalScore() });
-      goStep(Math.min(11, state.step + 1));
+      /* Cover to board, board to ledger. */
+      if (state.step === 1) track('fg_view_ledger', { score: totalScore() });
+      goStep(state.step === 0 ? 1 : 11);
       break;
     case 'prev':
-      goStep(Math.max(0, state.step - 1));
+      goStep(1);
       break;
     case 'submit-email': {
       var em = (document.getElementById('gate-email').value || '').trim();
@@ -503,7 +875,8 @@ document.addEventListener('click', function (e) {
       state.sentTo = em;
       save();
       submitToMailchimp(em, TPResults.evaluate(state.answers).payload);
-      track('fg_email_captured', { score: totalScore() });
+      trackOnce('fg_email_captured', { score: totalScore() });
+      trackOnce('scorecard_email_submitted', { placement: 'gate' });
       trackComplete();
       render();
       break;
@@ -534,7 +907,8 @@ document.addEventListener('click', function (e) {
       state.ctaMode = '';
       save();
       submitToMailchimp(rem, TPResults.evaluate(state.answers).payload);
-      track('fg_email_captured', { score: totalScore() });
+      trackOnce('fg_email_captured', { score: totalScore() });
+      trackOnce('scorecard_email_submitted', { placement: 'result' });
       render();
       break;
     }
@@ -573,18 +947,42 @@ document.addEventListener('click', function (e) {
       state.sentTo = '';
       state.email = '';
       state.emailError = false;
-      state.step = 0;
+      state.step = 1;
       state.phone = '';
       state.fullReq = false;
       state.ctaMode = '';
       state.ctaError = false;
+      state.carried = [];
+      state.carryConfirmed = false;
+      state.modelLines = null;
+      state.modelAsked = false;
       save();
+      /* Starting over has to let the milestones fire again, or the
+         second run through is invisible in the funnel. */
+      TPA.reset('standard_');
+      TPA.reset('assessment_');
       track('fg_reset');
       render();
       goTop();
       break;
   }
 });
+
+/* Where people stop is the number that says whether forty questions
+   is the barrier everyone assumes it is, so it fires on the way out
+   rather than on a button nobody presses. */
+(function armAbandon() {
+  var sent = false;
+  function fire() {
+    if (sent || state.revealed || state.step < 1 || state.step > 10) return;
+    sent = true;
+    TPA.once('standard_abandon', { last_point: state.step });
+  }
+  window.addEventListener('pagehide', fire);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') fire();
+  });
+})();
 
 document.addEventListener('input', function (e) {
   if (e.target.id === 'gate-email' || e.target.id === 'cta-email-input') state.email = e.target.value;
@@ -598,6 +996,18 @@ document.addEventListener('input', function (e) {
    data without a DOM to render into. */
 if (document.getElementById('app')) {
   load();
+  loadCarry();
+  /* THE LANDING IS THE CARDS. The Full Assessment used to open on a
+     cover with a heading and a Begin button; the board is the page
+     now, and the cards say what the cover was saying.
+
+     The one exception is somebody arriving from the Quick Scan with
+     answers we filled in for them. Those get confirmed on their own
+     screen first, because an answer put in on somebody's behalf has
+     to be seen before it counts. */
+  if (state.step === 0) {
+    state.step = (state.carried.length && !state.carryConfirmed) ? 0 : 1;
+  }
   initGA();
   render();
 }

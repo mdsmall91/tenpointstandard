@@ -1,0 +1,95 @@
+/* =============================================================
+   TEN POINT — THE RING
+   Shared by The Read, The Full Standard, and the forwardable
+   scorecard. tokens.css and base.css stay untouched.
+
+   Colour never carries meaning on its own here. A filled segment is
+   also a longer arc, an empty one is also a hollow outline, and the
+   legend beneath states every value in words. Print and grayscale
+   both survive.
+   ============================================================= */
+
+.tpr { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+
+.tpr-track { fill: var(--surface-2); }
+.tpr-track-empty {
+  fill: transparent;
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+.tpr-fill { fill: var(--accent); }
+/* An open gate reads as unfinished no matter how much of it is filled. */
+.tpr-gate { fill: var(--bronze); }
+.tpr-dir  { fill: var(--stone-300); }
+
+.tpr-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-anchor: middle;
+  /* A segment number sits over the fill on one point and over the bare
+     track on the next, so a single fill colour is legible on one and
+     invisible on the other. Ink with a paper-coloured halo reads on
+     both, and it survives the print rules where the fills go grey. */
+  fill: var(--ink-strong);
+  stroke: var(--paper);
+  stroke-width: 2.5px;
+  paint-order: stroke fill;
+  stroke-linejoin: round;
+}
+.tpr-num-empty { fill: var(--stone-400); }
+
+.tpr-c-top {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.18em; fill: var(--text-faint);
+  text-anchor: middle; text-transform: uppercase;
+}
+.tpr-c-main {
+  font-family: var(--font-display); font-size: 30px; font-weight: 400;
+  fill: var(--text-strong); text-anchor: middle;
+}
+.tpr-c-sub {
+  font-family: var(--font-body); font-size: 11px;
+  fill: var(--text-muted); text-anchor: middle;
+}
+
+/* ---------- LEGEND ----------
+   Not decoration. This is where the per-point numbers are readable
+   and where the ring's meaning survives without colour. Always
+   rendered alongside the ring. */
+.tpr-legend { list-style: none; margin: 0; padding: 0; max-width: 560px; }
+.tpr-legend-row {
+  display: flex; align-items: baseline; gap: var(--s-3);
+  padding: 9px 0;
+  border-top: 1px solid var(--border-soft);
+  font-size: var(--fs-small);
+}
+.tpr-legend-row:first-child { border-top: 0; }
+.tpr-legend-row.is-empty { color: var(--text-faint); }
+.tpr-legend-n {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--text-faint); flex: none; width: 20px;
+}
+.tpr-legend-label { flex: 1; min-width: 0; }
+.tpr-legend-score {
+  font-family: var(--font-mono); font-size: 13px;
+  color: var(--text-strong); flex: none;
+}
+.tpr-legend-state {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-muted); flex: none;
+}
+.tpr-legend-empty { color: var(--text-faint); }
+.tpr-legend-gate {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+  color: var(--bronze-deep); background: var(--bronze-soft);
+  border: 1px solid color-mix(in oklab, var(--bronze) 30%, var(--border));
+  padding: 1px 6px; border-radius: 1px; flex: none;
+}
+
+@media (max-width: 520px) {
+  .tpr-legend-row { flex-wrap: wrap; }
+  .tpr-legend-label { flex: 1 1 60%; }
+}
