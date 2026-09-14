@@ -38,12 +38,20 @@ var FIELD_NOTES = [
    is the only place the crops are made. */
 var POINT_IMG = ['01-property', '02-capital', '03-regulatory', '04-guests', '05-design',
   '06-procurement', '07-schedule', '08-cost', '09-qa', '10-opening'];
-var POINT_IMG_W = [1400, 1400, 1400, 1400, 1365, 1400, 1400, 1207, 1210, 1365];
-var POINT_IMG_CAP = ['Outdoorsy Hill Country, Texas', 'Outdoorsy Hill Country, Texas',
-  'KOA Fredericksburg, Texas', 'Lagom Retreat, Dripping Springs, Texas',
-  'Lagom Retreat, Dripping Springs, Texas', 'Lagom Retreat under construction',
-  'Lagom Retreat under construction', 'Lagom Retreat under construction',
-  'Lagom Retreat under construction', 'Lagom Retreat, Dripping Springs, Texas'];
+/* The width baked into each filename, which is whatever the source
+   could give without being upscaled. Run tools/build-images.py and
+   copy what it prints; a number that does not match is a 404 and a
+   card with no photograph on it. */
+var POINT_IMG_W = [1400, 660, 1400, 760, 760, 760, 760, 760, 760, 760];
+/* Provenance is part of the data, not decoration. "Ten Point Services"
+   on a photograph means Ten Point built it, and a credit that implies
+   otherwise is a licensing problem for a licensed general contractor.
+   Shown on the photo pane of an open card. */
+var POINT_IMG_CAP = ['Outdoorsy Hill Country, Texas', 'Austin Moto Adventures, Texas',
+  'KOA Fredericksburg, Texas', 'Outdoorsy Hill Country, Texas',
+  'Lagom Retreat, Dripping Springs, Texas', 'Lagom Retreat, Dripping Springs, Texas',
+  'Outdoorsy Hill Country, Texas', 'Lagom Retreat, Dripping Springs, Texas',
+  'KOA Fredericksburg, Texas', 'Lagom Retreat, Dripping Springs, Texas'];
 
 var BANDS = [
   { range: '0 – 39', title: 'Answer the fundamentals.', service: 'Ten Point Align',
@@ -734,6 +742,7 @@ function boardApi() {
     image: function (pi) {
       return '/assets/points/' + POINT_IMG[pi] + '-' + POINT_IMG_W[pi] + '.webp';
     },
+    credit: function (pi) { return POINT_IMG_CAP[pi]; },
     cardOpened: function (pi) {
       TPA.once('full_assessment_point_opened', { point: POINTS[pi].n }, 'open-' + (pi + 1));
     },

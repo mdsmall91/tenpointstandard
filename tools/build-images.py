@@ -46,6 +46,9 @@ T = "10PS Images/"           # the original Ten Point drop
 
 CARD_W = [800, 1400]
 OPENER_W = [1400, 2000]
+# The board's cards are portrait, and so is the photo pane on an open
+# card. The booth set is 2:3 already, so these crop to nothing.
+BOARD_W = [760, 1200]
 
 # ---------------------------------------------------------------------------
 # The picks. Matt's calls, September 9 2026:
@@ -89,23 +92,23 @@ PICKS = [
     # ---- Lane two: the ten point openers --------------------------------
     ("points/01-property", U + "Outdoorsy Hill Country/356-web-or-mls-33-3777.jpg", "16/9", OPENER_W,
      "Outdoorsy Hill Country, Texas", "Ten Point Services"),
-    ("points/02-capital", U + "Outdoorsy Hill Country/Stonewall.jpg", "16/9", OPENER_W,
-     "Outdoorsy Hill Country, Texas", "Ten Point Services"),
+    ("points/02-capital", U + "Booth Images/Backup/Moto.jpg", "2/3", BOARD_W,
+     "Austin Moto Adventures, Texas", "Ten Point Services"),
     ("points/03-regulatory", U + "KOA-Fredricksburg.jpg", "16/9", OPENER_W,
      "KOA Fredericksburg, Texas", "Ten Point Services"),
-    ("points/04-guests", U + "Lagom Ranch/ac359e6cd1d0ef0c96d4c332224e6abb.jpg", "16/9", OPENER_W,
+    ("points/04-guests", U + "Booth Images/Backup/Hill Country Night.jpg", "2/3", BOARD_W,
+     "Outdoorsy Hill Country, Texas", "Ten Point Services"),
+    ("points/05-design", U + "Booth Images/Lagom3.jpg", "2/3", BOARD_W,
      "Lagom Retreat, Dripping Springs, Texas", "Ten Point Services"),
-    ("points/05-design", T + "Copy of DSC00097.jpg", "16/9", OPENER_W,
+    ("points/06-procurement", U + "Booth Images/Backup/Lagom5.jpg", "2/3", BOARD_W,
      "Lagom Retreat, Dripping Springs, Texas", "Ten Point Services"),
-    ("points/06-procurement", U + "Tubbo-ATX2.jpg", "16/9", OPENER_W,
-     "Lagom Retreat under construction", "Ten Point Services"),
-    ("points/07-schedule", U + "Tubbo-ATX.jpg", "16/9", OPENER_W,
-     "Lagom Retreat under construction", "Ten Point Services"),
-    ("points/08-cost", U + "Lagom.jpg", "16/9", OPENER_W,
-     "Lagom Retreat under construction", "Ten Point Services"),
-    ("points/09-qa", U + "Strohboid ATX4.jpg", "16/9", OPENER_W,
-     "Lagom Retreat under construction", "Ten Point Services"),
-    ("points/10-opening", T + "Copy of DSC01085.jpg", "16/9", OPENER_W,
+    ("points/07-schedule", U + "Booth Images/Backup/Hill Country2.jpg", "2/3", BOARD_W,
+     "Outdoorsy Hill Country, Texas", "Ten Point Services"),
+    ("points/08-cost", U + "Booth Images/Backup/Lagom3.jpg", "2/3", BOARD_W,
+     "Lagom Retreat, Dripping Springs, Texas", "Ten Point Services"),
+    ("points/09-qa", U + "Booth Images/Backup/Fredericksburg.jpg", "2/3", BOARD_W,
+     "KOA Fredericksburg, Texas", "Ten Point Services"),
+    ("points/10-opening", U + "Booth Images/Backup/Lagom4.jpg", "2/3", BOARD_W,
      "Lagom Retreat, Dripping Springs, Texas", "Ten Point Services"),
 
     # ---- About: four projects -------------------------------------------

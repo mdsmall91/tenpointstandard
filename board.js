@@ -130,6 +130,10 @@ var TPBoard = (function () {
       '<div class="back-photo" aria-hidden="true">' +
         '<img src="' + api.image(pi) + '" alt="" decoding="async">' +
         '<span class="back-photo-title">' + esc(p.n) + '<em>' + esc(p.title) + '</em></span>' +
+        /* Who built what is in the photograph. It is a credit, not a
+           caption: a licensed general contractor cannot show somebody
+           else's work without saying so. */
+        '<span class="back-photo-credit">' + esc(api.credit(pi)) + ' &middot; Ten Point Services</span>' +
       '</div>' +
       '<div class="back-body">' +
       '<div class="back-top"><span class="eyebrow">' + esc(p.n) + ' / ' + esc(p.title) + '</span>' +

@@ -162,6 +162,13 @@
   position: absolute; left: 30px; right: 26px; bottom: 26px; z-index: 1;
   color: #fff; font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em;
 }
+.card.open .back-photo-credit {
+  position: absolute; left: 30px; right: 26px; bottom: 10px; z-index: 1;
+  color: #ffffffb8; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: .08em; text-transform: uppercase;
+}
+.card .back-photo-credit { display: none; }
+.card.open .back-photo-credit { display: block; }
 .card.open .back-photo-title em {
   display: block; margin-top: 8px; font-style: normal; letter-spacing: -.5px;
   font-family: var(--font-display, 'Source Serif 4', Georgia, serif); font-size: 34px;
