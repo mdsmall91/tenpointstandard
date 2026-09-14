@@ -166,13 +166,31 @@ key uploaded to Atwell's tenant. `tools/worker-dev.py` writes it from
 way. The deployed Worker never uses that path — there the key is a
 Cloudflare secret, set once with `npx wrangler secret put ANTHROPIC_API_KEY`.
 
-To deploy, from `worker/`:
+DEPLOY FROM A COPY OUTSIDE ONEDRIVE. Atwell's Cloud Email and
+Collaboration Protection quarantines executables inside the synced
+folder: it replaced wrangler's 98 MB `workerd.exe` with a 171-byte text
+file reading "This file is quarantined all because it triggered File
+Blocking", and every wrangler command then died on a confusing
+"you installed workerd on another platform" error. The deploy copy lives
+at `%LOCALAPPDATA%	enpoint-worker`; `worker/` here stays the source of
+truth and is copied over before each deploy.
 
 ```
-npx wrangler login                       # opens a browser, Matt authorises
-npx wrangler secret put ANTHROPIC_API_KEY
+robocopy worker %LOCALAPPDATA%	enpoint-worker /E /XD node_modules .wrangler
+cd %LOCALAPPDATA%	enpoint-worker
+npm install
 npx wrangler deploy
 ```
+
+Setting the secret: **do not pipe it through `npx` on Windows.** Both
+PowerShell's pipe and bash's produced a mangled value that Anthropic
+rejected with `invalid x-api-key`, while the same key returned 200 called
+directly. Use the bulk file, and delete it immediately:
+
+```
+npx wrangler secret bulk .secrets.json
+```
+
 
 Then put the deployed URL in `CONFIG.MODEL_PROXY_URL` in `config.js`.
 
@@ -184,12 +202,9 @@ Then put the deployed URL in `CONFIG.MODEL_PROXY_URL` in `config.js`.
   live as they are.
 - **Four scope sentences** on `/about/`, one per project. The cards say less
   rather than inventing a condition that was solved.
-- **`CONFIG.MODEL_PROXY_URL`** is empty, so production reads come from the
-  template. It needs the Worker deployed, and deploying needs a Cloudflare
-  account and `npx wrangler login`, which only Matt can complete. Everything
-  up to that point is done: Node is installed (user profile, no admin), the
-  dependencies are in, and the Worker itself has been run and exercised — see
-  below.
+- **The AI layer is ON in production** as of 2026-09-14.
+  `CONFIG.MODEL_PROXY_URL` points at
+  `https://tenpoint-model-proxy.coloradojeeper-small.workers.dev`.
 - **`CONFIG.MAILCHIMP_GROUP_CONSULT`** is empty, so the consultation form opens
   a mail client instead of posting to Mailchimp. See the comment in `config.js`.
 - **The scorecard link has not been clicked from a real send yet.** The merge

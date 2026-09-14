@@ -48,7 +48,7 @@ var CONFIG = {
      changes; read.js and app.js already call it behind a timeout and
      drop back to the template on any failure.
      --------------------------------------------------------------- */
-  MODEL_PROXY_URL: '',
+  MODEL_PROXY_URL: 'https://tenpoint-model-proxy.coloradojeeper-small.workers.dev',
   /* The local proxy, tools/dev-proxy.py. modelproxy.js picks this one
      automatically when the page is served from localhost and the
      production URL everywhere else, so testing the AI layer needs no
