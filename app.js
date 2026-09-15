@@ -763,7 +763,13 @@ function renderPoint(step) {
        over it. Every one is a real Ten Point project and the caption
        says which. */
     '<figure class="fg-opener">' +
-      '<img src="' + img + '" alt="" loading="lazy" decoding="async" width="' + POINT_IMG_WIDE_W[pi] + '" height="' + Math.round(POINT_IMG_WIDE_W[pi] * 2 / 3) + '">' +
+      /* NOT lazy. This is the hero of the screen, always above the fold,
+         and renderPoint writes it in through innerHTML on every step
+         change: Chrome repeatedly declined to fetch it at all, leaving
+         half the visitors in the list arm looking at an empty frame
+         with a caption on it. The board does the same thing for its
+         first four cards. */
+      '<img src="' + img + '" alt="" decoding="async" width="' + POINT_IMG_WIDE_W[pi] + '" height="' + Math.round(POINT_IMG_WIDE_W[pi] * 2 / 3) + '">' +
       /* The credit sits inside the caption rather than under the frame.
          Below the image it has to clear an absolutely positioned
          overlay to avoid colliding with the title, and that is a
