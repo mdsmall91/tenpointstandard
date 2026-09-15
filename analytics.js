@@ -72,13 +72,28 @@ var TPA = (function () {
     window.gtag('config', CONFIG.GA_MEASUREMENT_ID);
   }
 
+  /* While the interface A/B test is running, every event carries the
+     arm the visitor was assigned. Stamping it here rather than at
+     each call site means no event can be added later that reports
+     without it, which is how an A/B test ends up with a metric it
+     cannot split. */
+  function withArm(params) {
+    var out = params || {};
+    if (typeof TPAB === 'undefined' || !TPAB.running()) return out;
+    var merged = {};
+    for (var k in out) if (Object.prototype.hasOwnProperty.call(out, k)) merged[k] = out[k];
+    merged.ab_arm = TPAB.arm();
+    return merged;
+  }
+
   /* Repeatable. Every call sends. */
   function track(name, params) {
+    var p = withArm(params);
     if (isLocal()) {
-      if (window.console) console.info('[TPA] ' + name, params || {});
+      if (window.console) console.info('[TPA] ' + name, p);
       return;
     }
-    if (window.gtag) window.gtag('event', name, params || {});
+    if (window.gtag) window.gtag('event', name, p);
   }
 
   /* Milestone. Sends at most once per browser session.
