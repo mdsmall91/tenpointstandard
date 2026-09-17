@@ -53,6 +53,23 @@ var TPA = (function () {
       h === '' || /\.local$/.test(h) || /^192\.168\./.test(h);
   }
 
+  /* INTERNAL TRAFFIC. Our own visits were most of the Glamping Show
+     page's traffic in September 2026, and they arrive from home, the
+     office, a phone and a VPN, so an IP rule alone cannot catch them.
+     Open any page once with ?internal=1 and that browser is marked
+     for good; ?internal=0 clears it. Marked hits carry
+     traffic_type=internal, which the GA4 "Internal Traffic" data
+     filter drops from the reports. */
+  var INTERNAL_KEY = 'tp-internal-v1';
+  function isInternal() {
+    try {
+      var m = /[?&]internal=([01])(?:&|$)/.exec(location.search);
+      if (m && m[1] === '1') localStorage.setItem(INTERNAL_KEY, '1');
+      if (m && m[1] === '0') localStorage.removeItem(INTERNAL_KEY);
+      return localStorage.getItem(INTERNAL_KEY) === '1';
+    } catch (e) { return false; }
+  }
+
   function init() {
     if (booted) return;
     booted = true;
@@ -69,7 +86,8 @@ var TPA = (function () {
     window.dataLayer = window.dataLayer || [];
     window.gtag = function () { window.dataLayer.push(arguments); };
     window.gtag('js', new Date());
-    window.gtag('config', CONFIG.GA_MEASUREMENT_ID);
+    window.gtag('config', CONFIG.GA_MEASUREMENT_ID,
+      isInternal() ? { traffic_type: 'internal' } : {});
   }
 
   /* While the interface A/B test is running, every event carries the
