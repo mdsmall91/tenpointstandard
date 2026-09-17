@@ -189,7 +189,7 @@
        site. Asserted as an exact list: a link quietly dropped from the
        header is exactly the kind of drift this file exists to catch. */
     eq('index: nav is the full site', JSON.stringify(navLinks),
-      JSON.stringify(['Field Journal', 'Quick Scan', 'Full Assessment', 'About']));
+      JSON.stringify(['Glamping Show', 'Field Journal', 'Quick Scan', 'Full Assessment', 'About']));
     /* The header used to carry a "See where you are" button beside the
        nav. It went to /read/, which the "Quick Scan" link next to it
        already did, so two controls competed to say the same thing and

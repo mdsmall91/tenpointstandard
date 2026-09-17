@@ -6,8 +6,7 @@
                           asks Google to index a page that does not exist
        /scorecard/        noindex, and every one of them is somebody's own
                           project rather than a page
-       /glamping-show/    unlisted, the way /aga.html was
-       /aga.html          unlisted, redirects to the show page
+       /aga.html         unlisted, redirects to the show page
        /tests/            disallowed in robots.txt
 
      The four Journal entries whose copy is not written yet carry noindex
@@ -43,6 +42,12 @@
     <lastmod>2026-09-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tenpointstandard.com/glamping-show/</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://tenpointstandard.com/journal/nature-first.html</loc>
