@@ -39,9 +39,15 @@ const MODEL = 'claude-sonnet-5';
    comes with switching reasoning off. */
 const EFFORT = 'low';
 
-/* Generous enough that adaptive thinking has room, tight enough that
-   a pathological input cannot run up a bill. */
-const MAX_TOKENS = 4000;
+/* Room for low-effort thinking plus at most eight lines of under 400
+   characters, which is all the page will ever show; tight enough that a
+   pathological input cannot run up a bill. */
+const MAX_TOKENS = 2000;
+
+/* Only the task the site actually calls. intake and read stay in
+   prompts.json for reference but are not served: an open task the site
+   does not use is free model access for anyone who finds the URL. */
+const LIVE_TASKS = ['standard_read'];
 
 /* The two real origins, plus local preview. The preview port has moved
    once already, and a stale entry here fails as a bare CORS error in
@@ -101,7 +107,10 @@ export default {
     if (request.method !== 'POST') {
       return json({ error: 'method_not_allowed' }, 405, origin);
     }
-    if (origin && !originAllowed(origin)) {
+    /* A browser always sends Origin on a cross-site POST, so a request
+       without one is a script, not the site. It can forge the header, so
+       this stops casual use only; the Anthropic spend limit is the cap. */
+    if (!originAllowed(origin)) {
       return json({ error: 'origin_not_allowed' }, 403, origin);
     }
 
@@ -113,7 +122,7 @@ export default {
     }
 
     const task = body && body.task;
-    if (!task || !Object.prototype.hasOwnProperty.call(prompts.tasks, task)) {
+    if (!LIVE_TASKS.includes(task) || !Object.prototype.hasOwnProperty.call(prompts.tasks, task)) {
       return json({ error: 'unknown_task' }, 400, origin);
     }
 
