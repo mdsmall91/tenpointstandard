@@ -50,6 +50,11 @@ page cannot pass its signals to the canonical target.
     python tools/set-masthead.py         # the masthead sentence, in one place
     python tools/rename-lanes.py         # the Quick Scan / Full Assessment label map
     python tools/update-journal-pages.py # bring the articles onto the current chrome
+    python tools/set-csp.py              # the Content-Security-Policy on every page
+
+Run `tools/set-csp.py` after adding a page, a new outside host, or editing any
+inline `<script>`: inline scripts are allowed by hash, so a changed one stops
+running until the policy is regenerated.
 
 `tools/build-images.py` is the only place photographs are cropped, and it carries
 the provenance for every one. Re-picking a photo is a one-line edit and one command.

@@ -14,6 +14,9 @@ node_modules/
 *.env
 .env
 .env.*
+# The file `wrangler secret bulk` reads (see README). It holds the key.
+.secrets.json
+*.secrets.json
 
 # wrangler's local state and build output.
 .wrangler/
